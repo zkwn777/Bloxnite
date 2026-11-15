@@ -183,7 +183,7 @@ h1 span{color:var(--acc)}
 <div class="tb" id="bFire">Fire</div><div class="tb" id="bAds">ADS</div><div class="tb" id="bJump">Jump</div><div class="tb" id="bCrouch">Crouch</div>
 <div class="tb" id="bReload">Reload</div><div class="tb" id="bSwap">Swap</div><div class="tb" id="bFrag">Frag</div><div class="tb" id="bTac">Flash</div>
 <div class="tb" id="bUse">Use</div><div class="tb" id="bPlate">Shield</div><div class="tb" id="bStreak"></div>
-<div id="vTag">v4 · 16 Nov 2026</div>
+<div id="vTag">v5 · 16 Nov 2026</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* ===== WARFRONT: core (utils, audio, save, renderer, input) ===== */
@@ -795,10 +795,10 @@ function buildNav() {
   var nx = Math.ceil((world.x1 - world.x0) / NC), nz = Math.ceil((world.z1 - world.z0) / NC);
   var blocked = new Uint8Array(nx * nz);
   for (var iz = 0; iz < nz; iz++) for (var ix = 0; ix < nx; ix++) {
-    var cx = world.x0 + (ix + 0.5) * NC, cz = world.z0 + (iz + 0.5) * NC, L = near(cx - 0.8, cx + 0.8, cz - 0.8, cz + 0.8);
+    var cx = world.x0 + (ix + 0.5) * NC, cz = world.z0 + (iz + 0.5) * NC, L = near(cx - 0.45, cx + 0.45, cz - 0.45, cz + 0.45);
     for (var i = 0; i < L.length; i++) {
       var c = L[i];
-      if (c.maxY > 0.85 && c.minY < 1.7 && cx + 0.8 > c.minX && cx - 0.8 < c.maxX && cz + 0.8 > c.minZ && cz - 0.8 < c.maxZ) { blocked[iz * nx + ix] = 1; break; }
+      if (c.maxY > 0.85 && c.minY < 1.7 && cx + 0.45 > c.minX && cx - 0.45 < c.maxX && cz + 0.45 > c.minZ && cz - 0.45 < c.maxZ) { blocked[iz * nx + ix] = 1; break; }
     }
   }
   world.nav = { nx: nx, nz: nz, blocked: blocked, g: new Float32Array(nx * nz), par: new Int32Array(nx * nz), seen: new Uint32Array(nx * nz), closed: new Uint32Array(nx * nz), tick: 0 };
@@ -840,7 +840,7 @@ W.findPath = function (sx, sz, tx, tz, maxIter) {
   }
   n.g[s] = 0; n.seen[s] = tick; n.par[s] = -1; push(s, h(s));
   var D = [[1, 0, 1], [-1, 0, 1], [0, 1, 1], [0, -1, 1], [1, 1, 1.414], [1, -1, 1.414], [-1, 1, 1.414], [-1, -1, 1.414]];
-  maxIter = maxIter || 3500;
+  maxIter = maxIter || 7000;
   while (heap.length && iter++ < maxIter) {
     var cur = pop(); if (n.closed[cur] === tick) continue; n.closed[cur] = tick;
     if (cur === t) { found = true; break; }
@@ -1361,7 +1361,7 @@ function updateBot(a, dt) {
     if (goal) {
       b.repath -= dt;
       var needs = b.repath <= 0 || !b.pathGoal || Math.hypot(b.pathGoal[0] - goal[0], b.pathGoal[1] - goal[1]) > 6;
-      if (needs) { b.path = W.findPath(a.x, a.z, goal[0], goal[1]); b.pi = 0; b.repath = 1.2 + Math.random(); b.pathGoal = goal; }
+      if (needs && A.pathBudget > 0) { A.pathBudget--; b.path = W.findPath(a.x, a.z, goal[0], goal[1], 6000); b.pi = 0; b.repath = 1.2 + Math.random(); b.pathGoal = goal; }
       var wp = b.path[b.pi];
       if (wp) {
         var ddx = wp[0] - a.x, ddz = wp[1] - a.z, dl2 = Math.sqrt(ddx * ddx + ddz * ddz);
@@ -1409,77 +1409,226 @@ function updateActors(dt) {
   }
 }
 A.update = function (dt) {
-  A.T += dt;
+  A.T += dt; A.pathBudget = 1;
   var P = A.P;
   if (P) { updatePlayer(P, dt); if (P.alive) updateViewmodel(P, dt); else vm.visible = false; applyCamera(P, dt); W.sunFollow(P.x, P.z); }
   updateActors(dt); updateProj(dt); updateFx(dt);
 };
 A.visibleEnemiesCount = function () { return A.list.filter(function (a) { return a.alive && a.team !== 'a'; }).length; };
 })();
+/* ===== WARFRONT: the island map (300 x 300) ===== */
+(function () {
+'use strict';
+var W = window.WF, PR = W.props, rr = W.rr, ri = W.ri, pick = W.pick;
+var HALF = 150, solid = W.solid, deco = W.deco, ctx;
+function lp(x, z, y, w) { ctx.pts.push({ x: x, z: z, y: y || 0, w: w || 1 }); }
+function poi(x, z, r, name) { ctx.pois.push([x, z, r, name]); }
+
+/* ---------- small props ---------- */
+function road(x0, z0, x1, z1, w) {
+  var hz = Math.abs(z1 - z0) < 0.1, len = hz ? Math.abs(x1 - x0) : Math.abs(z1 - z0), cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  deco(cx, 0, cz, hz ? len : w, 0.06, hz ? w : len, 0x3b3d40);
+  for (var s = -len / 2 + 3; s < len / 2 - 3; s += 8) deco(hz ? cx + s : cx, 0.06, hz ? cz : cz + s, hz ? 3 : 0.2, 0.02, hz ? 0.2 : 3, 0xd8c24a);
+}
+function pad(x, z, w, d, col) { deco(x, 0, z, w, 0.05, d, col || 0x6e6e6a); }
+function patch(x, z, w, d, col) { deco(x, 0, z, w, 0.035, d, col); }
+function lamp(x, z) { solid(x, 0, z, 0.18, 4.5, 0.18, 0x2a2c2e); deco(x, 4.5, z, 0.7, 0.14, 0.3, 0xe8d890); }
+function bush(x, z) { var s = rr(0.9, 1.6); deco(x, 0, z, s, s * 0.7, s, pick([0x3d6a34, 0x34602e, 0x486f36])); }
+function log(x, z, ax) { solid(x, 0, z, ax ? 3.2 : 0.6, 0.6, ax ? 0.6 : 3.2, 0x5a4330); }
+function rock(x, z, s) { s = s || rr(1.5, 3); solid(x, 0, z, s, s * 0.7, s * 0.8, pick([0x77776f, 0x6b6b65, 0x827f74])); solid(x + s * 0.2, s * 0.7, z, s * 0.55, s * 0.4, s * 0.5, 0x77776f); }
+function pine(x, z) {
+  var h = ri(5, 8); solid(x, 0, z, 0.5, h, 0.5, 0x4a3828);
+  for (var i = 0; i < 4; i++) { var s = 3.4 - i * 0.7; deco(x, 1.6 + i * 1.3, z, s, 1.4, s, i % 2 ? 0x25472c : 0x2d5532); }
+  deco(x, 1.6 + 4 * 1.3, z, 0.6, 1.2, 0.6, 0x2d5532);
+}
+function fence(x0, z0, x1, z1) {
+  var hz = Math.abs(z1 - z0) < 0.1, len = hz ? Math.abs(x1 - x0) : Math.abs(z1 - z0), cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+  solid(cx, 0.5, cz, hz ? len : 0.1, 0.12, hz ? 0.1 : len, 0x8a6f4a); deco(cx, 0.9, cz, hz ? len : 0.1, 0.1, hz ? 0.1 : len, 0x8a6f4a);
+  for (var s = -len / 2; s <= len / 2; s += 2.5) solid(hz ? cx + s : cx, 0, hz ? cz : cz + s, 0.14, 1.1, 0.14, 0x6e5636);
+}
+function hill(x, z, r, lv, col) { for (var i = 0; i < lv; i++) { var s = r * 2 * (1 - i / (lv + 0.5)); solid(x, 0, z, s, (i + 1) * 0.45, s * 0.9, i % 2 ? col : col + 0x080804); } }
+function table(x, z) { solid(x, 0, z, 1.4, 0.8, 0.8, 0x7a5a38); }
+function dumpster(x, z, ax) { solid(x, 0, z, ax ? 2.2 : 1.2, 1.2, ax ? 1.2 : 2.2, 0x2f5a3a); }
+function bus(x, z, ax) { var w = ax ? 11 : 2.6, d = ax ? 2.6 : 11; solid(x, 0.3, z, w, 2.6, d, 0xd8b030); deco(x, 1.6, z, ax ? w * 0.9 : 2.7, 0.7, ax ? 2.7 : d * 0.9, 0x1c2024); }
+function silo(x, z) { solid(x, 0, z, 4.4, 12, 4.4, 0xb9b9b0); deco(x, 12, z, 3.6, 1.2, 3.6, 0x8a8a84); }
+function windmill(x, z) { solid(x, 0, z, 3, 9, 3, 0x9a8a70); deco(x, 9, z, 3.6, 0.6, 3.6, 0x6a4a30); deco(x, 9.3, z + 1.6, 0.3, 7, 0.2, 0xdddddd); deco(x, 9.3, z + 1.6, 7, 0.3, 0.2, 0xdddddd); }
+function haystack(x, z) { solid(x, 0, z, 2.4, 1.6, 2, 0xc9b25a); deco(x, 1.6, z, 1.8, 0.5, 1.4, 0xb9a24a); }
+function tent(x, z, ax) { var w = ax ? 3.2 : 2.4, d = ax ? 2.4 : 3.2, c = pick([0x4a6a3a, 0x6a5a3a, 0x3a5a6a]); solid(x, 0, z, w, 1.0, d, c); deco(x, 1.0, z, w * 0.55, 0.7, d * 0.7, c); }
+function fire(x, z) { for (var i = 0; i < 4; i++) { var a = i * 1.57; deco(x + Math.cos(a) * 0.5, 0, z + Math.sin(a) * 0.5, 0.35, 0.25, 0.35, 0x6a6a66); } deco(x, 0, z, 0.5, 0.35, 0.5, 0xff8a20); }
+function plane(x, z, ax, col) {
+  var L = ax ? 12 : 1.8, D = ax ? 1.8 : 12; solid(x, 0.9, z, L, 1.8, D, col || 0xcfd2d6);
+  deco(x, 1.15, z, ax ? 2.2 : 14, 0.22, ax ? 14 : 2.2, 0xaab0b8); deco(x + (ax ? -5.4 : 0), 1.9, z + (ax ? 0 : -5.4), ax ? 1.2 : 5, 0.2, ax ? 5 : 1.2, 0xaab0b8); deco(x + (ax ? -5.6 : 0), 1.9, z + (ax ? 0 : -5.6), ax ? 0.3 : 0.25, 2.2, ax ? 0.25 : 0.3, 0xaa3030);
+  solid(x + (ax ? -4 : 0) * 0, 0, z, ax ? 1.0 : 1, 0.9, ax ? 1 : 1, 0x333333);
+}
+function crane(x, z, h) {
+  h = h || 16; solid(x - 3, 0, z, 0.8, h, 0.8, 0xd9a020); solid(x + 3, 0, z, 0.8, h, 0.8, 0xd9a020); solid(x, h - 0.8, z, 7, 0.8, 1.2, 0xd9a020); deco(x + 7, h - 0.8, z, 12, 0.6, 0.8, 0xd9a020); deco(x, h + 0.6, z, 8, 0.3, 1.4, 0x8a6a10);
+}
+function ship(x, z, len) {
+  solid(x, 0, z, len, 2.2, 9, 0x3a4658); deco(x, 2.2, z, len * 0.98, 0.3, 8.6, 0x8a2a2a); solid(x - len * 0.28, 2.5, z, 9, 5, 7, 0xdedede); deco(x - len * 0.28, 7.5, z, 7, 2.5, 5, 0xcccccc);
+  for (var i = 0; i < 6; i++) solid(x + len * 0.05 + (i % 3) * 6.2, 2.5 + Math.floor(i / 3) * 2.6, z + (i % 2 ? 2.2 : -2.2), 5.8, 2.6, 2.4, pick([0x7a3a2a, 0x2f4a6b, 0x4f6b3a, 0xb08a2a]));
+}
+function pier(x0, z0, x1, z1) { var hz = Math.abs(z1 - z0) < 0.1; solid((x0 + x1) / 2, 0, (z0 + z1) / 2, hz ? Math.abs(x1 - x0) : 3.2, 0.45, hz ? 3.2 : Math.abs(z1 - z0), 0x8a6a44); }
+function water(x, z, w, d) { solid(x, 0, z, w, 0.22, d, 0x2f6a9a); deco(x, 0.22, z, w * 0.98, 0.02, d * 0.98, 0x3f86b8); }
+function field(x, z, w, d, ax) { patch(x, z, w, d, 0x6a5a30); for (var i = -w / 2 + 2; i < w / 2; i += 3) deco(ax ? x : x + i, 0.035, ax ? z + i * d / w : z, ax ? w : 1.2, 0.3, ax ? 1.2 : d, pick([0x6f8a3a, 0x7f9a3a, 0xa89a3a])); }
+function tractor(x, z, ax) { solid(x, 0.3, z, ax ? 3.6 : 1.8, 1.4, ax ? 1.8 : 3.6, 0xb03a2a); solid(x + (ax ? 1.5 : 0), 0, z + (ax ? 0 : 1.5), 1.2, 1.2, 1.2, 0x222222); }
+function pump(x, z) { solid(x, 0, z, 0.6, 1.4, 0.4, 0xdddddd); deco(x, 1.4, z, 0.7, 0.2, 0.5, 0xaa2020); }
+function canopy(x, z, w, d) { [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(function (o) { solid(x + o[0] * (w / 2 - 0.4), 0, z + o[1] * (d / 2 - 0.4), 0.4, 4.4, 0.4, 0xb8b8b0); }); solid(x, 4.4, z, w, 0.4, d, 0xc83a2a); }
+function stack(x, z) { solid(x, 0, z, 2.6, 15, 2.6, 0x8a5a44); deco(x, 15, z, 3, 0.4, 3, 0x333333); }
+function pipe(x0, z0, x1, z1) { var hz = Math.abs(z1 - z0) < 0.1; solid((x0 + x1) / 2, 1.6, (z0 + z1) / 2, hz ? Math.abs(x1 - x0) : 0.5, 0.5, hz ? 0.5 : Math.abs(z1 - z0), 0x5a5a5e); }
+function tank(x, z) { solid(x, 0, z, 5, 5, 5, 0xc8c8c0); deco(x, 5, z, 4.2, 0.5, 4.2, 0xa8a8a0); }
+function stone(x, z) { solid(x, 0, z, 0.55, 1.1, 0.22, 0x8a8a84); deco(x, 1.1, z, 0.4, 0.15, 0.2, 0x8a8a84); }
+
+/* ---------- buildings ---------- */
+function furnish(cx, cz, w, d, fl, ds) {
+  var tries = [[-1, 1], [1, 1], [1, -1], [-1, -1]], n = 0;
+  tries.forEach(function (o) {
+    if (n >= 3 || Math.random() < 0.25) return;
+    if (fl > 1 && o[0] < 0 && o[1] < 0) return;
+    var x = cx + o[0] * (w / 2 - 1.3), z = cz + o[1] * (d / 2 - 1.1), side = (o[1] < 0 ? 'n' : 's'); if (side === ds) { if (Math.abs(o[0]) > 0) { /* corners are away from door */ } }
+    var t = Math.random();
+    if (t < 0.35) solid(x, 0, z, 1.7, 0.55, 0.9, pick([0x6a4a3a, 0x4a5a6a])), deco(x, 0.55, z - 0.45 * o[1], 1.7, 0.7, 0.12, 0x5a3a2a);
+    else if (t < 0.65) solid(x, 0, z, 1.6, 1.9, 0.45, 0x6a5238);
+    else if (t < 0.85) { solid(x, 0, z, 1.3, 0.8, 0.8, 0x7a5a38); deco(x + 1, 0, z, 0.5, 0.45, 0.5, 0x6a4a30); }
+    else solid(x, 0, z, 0.9, 0.9, 0.9, 0x6b5a3a);
+    n++;
+  });
+}
+function bld(cx, cz, w, d, o) {
+  o = o || {}; var sides = ['n', 's', 'e', 'w'], ds = o.door || pick(sides), doors = [{ side: ds, off: rr(-1, 1), w: 2.8 }];
+  var oth = sides.filter(function (s) { return s !== ds; });
+  var o2 = (ds === 'n' || ds === 's') ? (ds === 'n' ? 's' : 'n') : (ds === 'e' ? 'w' : 'e');
+  if (o.twoDoors) doors.push({ side: o2, off: rr(-1.5, 1.5), w: 2.8 });
+  var wins = []; oth.forEach(function (s) { if (s !== o2 || !o.twoDoors) { var len = (s === 'n' || s === 's') ? w : d, k = len > 12 ? 2 : 1; for (var i = 0; i < k; i++) if (Math.random() < 0.85) wins.push({ side: s, off: (i - (k - 1) / 2) * 6 + rr(-1, 1), w: 1.5 }); } });
+  var fl = o.floors || (Math.random() < 0.4 && w >= 8 && d >= 10 ? 2 : 1), col = o.col || pick([0x8c8a7e, 0x9a8f7a, 0x7d8088, 0xa29a86, 0x8a7a6a, 0x7a8a82]);
+  W.building(cx, cz, w, d, { doors: doors, windows: wins, floors: fl, col: col, roofCol: pick([0x55524c, 0x5a3a30, 0x3e4a54, 0x4a4a46]) });
+  var x0 = cx - w / 2, x1 = cx + w / 2, z0 = cz - d / 2, z1 = cz + d / 2;
+  deco(cx, 0, z0 - 0.3, w + 0.8, 0.2, 0.4, 0x55554f); deco(cx, 0, z1 + 0.3, w + 0.8, 0.2, 0.4, 0x55554f); deco(x0 - 0.3, 0, cz, 0.4, 0.2, d + 0.8, 0x55554f); deco(x1 + 0.3, 0, cz, 0.4, 0.2, d + 0.8, 0x55554f);
+  var rh = fl * 3.2 + 0.3; deco(cx + rr(-w / 4, w / 4), rh, cz + rr(-d / 4, d / 4), 1.6, 0.9, 1.2, 0x8a8e92); if (Math.random() < 0.5) deco(cx + w / 4, rh, cz - d / 4, 0.7, 1.8, 0.7, 0x6a4a40);
+  var dx = ds === 'e' ? x1 + 0.3 : ds === 'w' ? x0 - 0.3 : cx, dz = ds === 'n' ? z0 - 0.3 : ds === 's' ? z1 + 0.3 : cz;
+  deco(dx, 2.5, dz, ds === 'e' || ds === 'w' ? 1.6 : 3.2, 0.12, ds === 'e' || ds === 'w' ? 3.2 : 1.6, 0x4a4a46);
+  furnish(cx, cz, w, d, fl, ds);
+  var n = w * d > 120 ? 3 : 2; for (var i = 0; i < n; i++) lp(cx + rr(-w / 2 + 1.5, w / 2 - 1.5), cz + rr(-d / 2 + 1.5, d / 2 - 1.5), 0, 2);
+  if (fl > 1) { lp(cx + w / 4, cz + d / 5, 3.2, 2); lp(cx + w / 4, cz - d / 6, 3.2, 1); }
+}
+
+/* ---------- the map ---------- */
+W.mapBuild = function (c) {
+  ctx = c; ctx.pts = []; ctx.pois = [];
+  W.beginWorld();
+  W.setEnv({ sky: 0x8fbfe8, fog: 0xb9cfe0, near: 80, far: 340, hemi: 0.85, sunI: 0.95, sunDir: [45, 75, 25] });
+  PR.border(-HALF, HALF, -HALF, HALF, 10, 0x5a5b54);
+  var i, j, k;
+  /* ground tints and roads first */
+  patch(0, 0, 300, 300, 0x58693f);
+  patch(-60, -60, 110, 70, 0x4d5e38); patch(-10, 40, 90, 60, 0x62753f); patch(90, 0, 60, 80, 0xb8a878); patch(-110, 95, 70, 60, 0x7a6a3c); patch(30, -75, 80, 50, 0x3f5632);
+  road(-142, -30, 142, -30, 6); road(-142, 48, 142, 48, 6); road(-45, -142, -45, 142, 6); road(52, -142, 52, 142, 6);
+  road(-105, -75, -105, -30, 5); road(100, -75, 100, -30, 5); road(-110, 48, -110, 75, 5); road(100, 48, 100, 80, 5); road(0, -30, 0, -8, 5); road(-30, 48, -30, 58, 5);
+  /* ---- Ashford town ---- */
+  var tx = -105, tz = -100; poi(tx, tz, 34, 'Ashford'); pad(tx, tz, 52, 52, 0x5c5c58);
+  for (i = 0; i < 3; i++) for (j = 0; j < 3; j++) {
+    var bx = tx - 20 + i * 20, bz = tz - 20 + j * 20;
+    if (i === 1 && j === 1) { solid(bx, 0, bz, 3.2, 0.5, 3.2, 0x8a8a84); solid(bx, 0.5, bz, 1.2, 3.2, 1.2, 0x9a9a92); deco(bx, 3.7, bz, 1.8, 0.3, 1.8, 0x8a8a84); lp(bx + 3, bz + 3, 0, 2); lp(bx - 3, bz - 2, 0, 1); continue; }
+    if (i === 0 && j === 0) { bld(bx, bz, 8, 14, { floors: 1, col: 0xb9b2a0, door: 's' }); solid(bx, 0, bz - 9, 5, 11, 5, 0xa9a290); deco(bx, 11, bz - 9, 4.2, 1.2, 4.2, 0x6a3a30); continue; }
+    bld(bx, bz, ri(8, 12), ri(9, 13), { door: pick(['n', 's', 'e', 'w']) });
+    if (Math.random() < 0.6) PR.car(bx + 10, bz + rr(-4, 4), false, pick([0x7a3030, 0x30507a, 0x6a6a6a, 0x3a6a3a]));
+    if (Math.random() < 0.5) dumpster(bx - 7, bz + 7, true);
+  }
+  for (i = -3; i <= 3; i++) { lamp(tx + i * 8.5, tz - 9.5); lamp(tx + i * 8.5, tz + 10.5); }
+  PR.barrier(tx - 30, tz, false); PR.barrier(tx + 30, tz + 8, false); bus(tx, tz - 30, true); PR.crater(tx + 8, tz + 33, 4); PR.rubble(tx - 33, tz + 25);
+  /* ---- Foundry ---- */
+  var fx = 100, fz = -100; poi(fx, fz, 36, 'Foundry'); pad(fx, fz, 64, 60, 0x66665f);
+  bld(fx - 12, fz - 8, 16, 28, { floors: 1, twoDoors: true, col: 0x707680 }); bld(fx + 16, fz - 10, 14, 22, { floors: 1, twoDoors: true, col: 0x6a7078 }); bld(fx + 4, fz + 22, 12, 9, { floors: 2, col: 0x8a8a84 });
+  stack(fx - 26, fz + 4); stack(fx - 22, fz + 12); tank(fx + 28, fz + 10); tank(fx + 28, fz + 18); pipe(fx - 26, fz + 20, fx + 28, fz + 20); crane(fx, fz - 30, 14);
+  for (k = 0; k < 9; k++) PR.container(fx - 24 + (k % 3) * 8 + rr(-1, 1), fz + 26 + Math.floor(k / 3) * 5, k % 2 === 0, pick([0x7a3a2a, 0x2f4a6b, 0x4f6b3a, 0xb08a2a]));
+  PR.wreckTank(fx + 36, fz - 22, true); PR.barrier(fx, fz + 8, true); PR.barrier(fx + 5, fz + 8, true); for (k = 0; k < 6; k++) PR.crate(fx - 6 + rr(-8, 8), fz + 6 + rr(-2, 2), rr(1, 1.8), 0x6b5a3a);
+  /* ---- Airfield ---- */
+  var ax = 0, az = -128; poi(ax, az, 46, 'Airfield'); deco(ax, 0, az + 9, 140, 0.06, 15, 0x2e3033); for (k = -64; k < 64; k += 9) deco(ax + k, 0.06, az + 9, 4, 0.02, 0.5, 0xf0f0f0);
+  bld(ax - 36, az - 6, 24, 18, { floors: 1, twoDoors: true, col: 0x7a8088, door: 's' }); bld(ax + 8, az - 6, 24, 18, { floors: 1, twoDoors: true, col: 0x7a8088, door: 's' });
+  bld(ax + 44, az - 4, 9, 10, { floors: 2, col: 0xb9b9b0 }); deco(ax + 44, 6.6, az - 4, 11, 0.4, 12, 0x333a40); PR.tower(ax + 56, az - 2);
+  plane(ax - 20, az + 26, true, 0xcfd2d6); plane(ax + 20, az + 28, true, 0x9aa6b4); plane(ax - 50, az + 24, false, 0xd8d8d0); tank(ax + 60, az + 20); tank(ax + 60, az + 28);
+  for (k = 0; k < 5; k++) PR.container(ax - 44 + k * 4, az - 26, false, pick([0x4a5a4a, 0x5a4a3a])); PR.barrier(ax + 30, az + 18, true); lp(ax - 20, az + 22, 0, 2); lp(ax + 22, az + 22, 0, 2);
+  /* ---- Port Calder (harbor, east) ---- */
+  var hx = 128, hz = 6; poi(hx, hz, 40, 'Port Calder'); patch(hx - 5, hz, 40, 80, 0xb8a878); water(hx + 14, hz, 28, 84);
+  pier(hx - 8, hz - 22, hx + 20, hz - 22); pier(hx - 8, hz + 6, hx + 20, hz + 6); pier(hx - 8, hz + 30, hx + 18, hz + 30);
+  ship(hx + 6, hz - 12, 36); ship(hx + 8, hz + 18, 30); crane(hx - 12, hz - 2, 18);
+  for (k = 0; k < 10; k++) PR.container(hx - 26 + (k % 5) * 6.2, hz - 36 + Math.floor(k / 5) * 3.2, false, pick([0x7a3a2a, 0x2f4a6b, 0x4f6b3a, 0xb08a2a, 0x6a2a6a]));
+  bld(hx - 26, hz + 14, 12, 14, { floors: 2, twoDoors: true, col: 0x8a8e94 }); bld(hx - 24, hz + 36, 10, 10, { floors: 1 }); lp(hx - 14, hz + 40, 0, 1);
+  /* ---- Harlan Farm ---- */
+  var fmx = -110, fmz = 96; poi(fmx, fmz, 38, 'Harlan Farm'); pad(fmx, fmz, 34, 30, 0x7a6a50);
+  bld(fmx, fmz, 11, 18, { floors: 1, twoDoors: true, col: 0x8a4a3a }); bld(fmx + 20, fmz - 8, 9, 11, { floors: 1, col: 0xd8d0c0 }); bld(fmx - 18, fmz + 8, 7, 9, { floors: 1, col: 0x9a8a70 });
+  silo(fmx + 18, fmz + 12); silo(fmx + 24, fmz + 12); windmill(fmx - 26, fmz - 14); field(fmx - 10, fmz + 36, 30, 16, true); field(fmx + 24, fmz + 36, 26, 16, false); field(fmx - 36, fmz + 20, 14, 26, false);
+  for (k = 0; k < 5; k++) haystack(fmx + rr(-30, 8), fmz - 22 + rr(-3, 3)); tractor(fmx + 10, fmz + 18, true); PR.car(fmx - 8, fmz - 18, true, 0x5a6a3a); fence(fmx - 40, fmz - 30, fmx + 40, fmz - 30); fence(fmx - 40, fmz - 30, fmx - 40, fmz + 10);
+  lp(fmx + 6, fmz + 24, 0, 2); lp(fmx - 12, fmz - 20, 0, 1);
+  /* ---- Fort Brandt ---- */
+  var kx = 100, kz = 96; poi(kx, kz, 38, 'Fort Brandt'); pad(kx, kz, 44, 44, 0x70706a);
+  W.wall(kx - 20, kz - 20, kx + 20, kz - 20, 0.8, 5, [[16, 24, 'door']], 0x7a766a); W.wall(kx - 20, kz + 20, kx + 20, kz + 20, 0.8, 5, [[10, 17, 'door']], 0x7a766a);
+  W.wall(kx - 20, kz - 20, kx - 20, kz + 20, 0.8, 5, [[14, 22, 'door']], 0x7a766a); W.wall(kx + 20, kz - 20, kx + 20, kz + 20, 0.8, 5, [], 0x7a766a);
+  PR.tower(kx - 23, kz - 23); PR.tower(kx + 23, kz + 23); PR.tower(kx + 23, kz - 23); PR.tower(kx - 23, kz + 23);
+  bld(kx + 8, kz + 8, 12, 14, { floors: 2, col: 0x8a8678, door: 'w' }); bld(kx - 10, kz - 10, 14, 9, { floors: 1, col: 0x7a7a6e, twoDoors: true }); bld(kx - 8, kz + 12, 8, 7, { floors: 1, col: 0x7a7a6e });
+  PR.sandbags(kx - 4, kz - 2, kx + 2, kz - 2); PR.sandbags(kx - 16, kz + 2, kx - 16, kz + 8); PR.sandbags(kx + 14, kz - 6, kx + 14, kz - 12); for (k = 0; k < 7; k++) PR.crate(kx + rr(-16, 16), kz + rr(-16, 16), rr(1.1, 1.9), pick([0x6b5a3a, 0x4a5a3a]));
+  PR.wreckTank(kx - 12, kz + 4, false); PR.hedgehog(kx - 30, kz + 6); PR.hedgehog(kx - 30, kz - 6); PR.wire(kx - 34, kz - 14, kx - 34, kz + 14); lp(kx + 2, kz - 6, 0, 2); lp(kx - 14, kz + 14, 0, 2);
+  /* ---- Relay (center) ---- */
+  poi(0, 4, 26, 'Relay'); pad(0, 0, 36, 30, 0x66666a);
+  bld(0, 0, 14, 12, { floors: 1, twoDoors: true, col: 0x6f736f }); PR.tower(15, 12); solid(-14, 0, -6, 0.7, 32, 0.7, 0x8a2a2a); solid(-14, 0, -6, 2.4, 0.6, 2.4, 0x555555);
+  [[-10, -10], [10, -10], [-10, 10], [10, 12]].forEach(function (o) { PR.hedgehog(o[0], o[1]); }); PR.sandbags(-6, 12, 2, 12); PR.sandbags(6, -12, 14, -12); PR.car(-18, 8, true, 0x4a5a3a); tank(18, -6); lp(14, 8, 0, 1); lp(-12, 6, 0, 2);
+  /* ---- Lakeside Camp ---- */
+  var cx = -118, cz = -8; poi(cx, cz, 34, 'Lakeside'); water(cx - 6, cz + 8, 36, 28); pier(cx + 6, cz + 8, cx + 24, cz + 8); rock(cx + 20, cz + 26, 2.6); rock(cx - 30, cz - 10, 3);
+  bld(cx + 14, cz - 14, 7, 8, { floors: 1, col: 0x7a5a3a }); bld(cx + 26, cz - 6, 7, 8, { floors: 1, col: 0x7a5a3a }); bld(cx + 28, cz + 12, 7, 8, { floors: 1, col: 0x7a5a3a }); bld(cx - 24, cz - 24, 10, 8, { floors: 1, col: 0x8a7a5a });
+  for (k = 0; k < 5; k++) tent(cx - 22 + k * 5.5, cz + 30, k % 2 === 0); fire(cx - 10, cz + 24); for (k = 0; k < 3; k++) table(cx - 16 + k * 4, cz + 20); lp(cx - 8, cz + 26, 0, 2); lp(cx + 8, cz - 22, 0, 1);
+  /* ---- Highpoint (terraced hill) ---- */
+  var hx2 = -82, hz2 = 36; poi(hx2, hz2, 24, 'Highpoint'); hill(hx2, hz2, 20, 5, 0x5e6e40);
+  PR.sandbags(hx2 - 3, hz2 - 2, hx2 + 3, hz2 - 2, 0.9); PR.crate(hx2 + 2, hz2 + 2, 1.2); W.solid(hx2, 2.25, hz2 - 5, 3.2, 1.2, 0.3, 0x7a766a); lp(hx2, hz2, 2.25, 2);
+  for (k = 0; k < 7; k++) rock(hx2 + rr(-24, 24), hz2 + rr(-22, 22), rr(1.4, 2.6));
+  /* ---- Stonepit (quarry) ---- */
+  var qx = 100, qz = -52; poi(qx, qz, 30, 'Stonepit'); patch(qx, qz, 50, 40, 0x8a8478); hill(qx - 8, qz - 6, 14, 4, 0x8a8478); hill(qx + 16, qz + 8, 10, 3, 0x7a756a);
+  bld(qx - 20, qz + 14, 9, 8, { floors: 1, col: 0xa89c80 }); for (k = 0; k < 6; k++) rock(qx + rr(-24, 24), qz + rr(-18, 20), rr(2, 4)); tractor(qx + 2, qz + 18, true); tractor(qx - 6, qz + 22, false); PR.container(qx + 20, qz - 16, true, 0xb08a2a); lp(qx + 6, qz + 14, 0, 2); lp(qx - 14, qz + 8, 0, 1);
+  /* ---- Crossroads station ---- */
+  var gx = -30, gz = 66; poi(gx, gz, 28, 'Crossroads'); pad(gx, gz, 40, 26, 0x5a5a5e);
+  canopy(gx - 4, gz + 2, 14, 8); pump(gx - 8, gz + 2); pump(gx - 2, gz + 2); bld(gx + 16, gz + 2, 12, 8, { floors: 1, twoDoors: true, col: 0xc8c0a8 }); bld(gx - 18, gz + 14, 16, 9, { floors: 1, twoDoors: true, col: 0x9a8f7a });
+  PR.car(gx - 6, gz + 10, true, 0xaa3030); PR.car(gx + 8, gz + 14, true, 0x3060aa); dumpster(gx + 24, gz + 10, true); lamp(gx + 4, gz - 8); lamp(gx - 14, gz - 8); lp(gx - 4, gz + 8, 0, 2);
+  /* ---- Old Chapel (south) ---- */
+  var ox = -8, oz = 118; poi(ox, oz, 28, 'Old Chapel'); pad(ox, oz, 30, 36, 0x6a6a62);
+  bld(ox, oz, 9, 15, { floors: 1, col: 0xb2aa98, door: 'n' }); solid(ox, 0, oz + 10, 5, 12, 5, 0xa8a090); deco(ox, 12, oz + 10, 4.2, 1.6, 4.2, 0x6a3a30);
+  for (i = 0; i < 4; i++) for (j = 0; j < 3; j++) stone(ox - 18 + i * 3.5, oz + 8 + j * 3.2); fence(ox - 22, oz + 2, ox - 22, oz + 24); fence(ox - 22, oz + 24, ox - 2, oz + 24);
+  PR.rubble(ox + 16, oz - 4); PR.rubble(ox + 18, oz + 10); W.wall(ox + 12, oz - 12, ox + 24, oz - 12, 0.5, 2.8, [[3, 5, 'win']], 0x8a8478); W.wall(ox + 12, oz - 12, ox + 12, oz - 2, 0.5, 2.4, [], 0x8a8478); lp(ox + 18, oz - 8, 0, 2); lp(ox - 12, oz + 14, 0, 1);
+  /* ---- Pinewood ---- */
+  poi(10, -64, 28, 'Pinewood'); bld(14, -70, 8, 8, { floors: 1, col: 0x6a4a30 }); for (k = 0; k < 8; k++) log(rr(-14, 36), rr(-86, -42), Math.random() < 0.5);
+  for (k = 0; k < 90; k++) { var px = rr(-16, 42), pz = rr(-90, -40); if (Math.hypot(px - 14, pz + 70) > 7 && Math.abs(pz + 30) > 6) pine(px, pz); }
+  /* ---- scattered ruins, camps, rest stops ---- */
+  [[-70, -40], [70, -30], [40, 20], [-30, 10], [70, 60], [-60, 128], [58, 128], [128, 100], [-135, 40], [20, 85], [135, -70], [-135, -60]].forEach(function (p) {
+    var t = Math.random();
+    if (t < 0.4) { PR.rubble(p[0], p[1]); PR.rubble(p[0] + 5, p[1] + 3); W.wall(p[0] - 4, p[1] - 4, p[0] + 3, p[1] - 4, 0.5, 2.6, [[2, 4, 'win']], 0x8a8478); PR.crate(p[0] + 2, p[1] + 2, 1.4); }
+    else if (t < 0.7) { PR.sandbags(p[0] - 3, p[1], p[0] + 3, p[1]); PR.sandbags(p[0] - 3, p[1], p[0] - 3, p[1] + 5); PR.crate(p[0], p[1] + 3, 1.3); tent(p[0] + 5, p[1] + 3, true); }
+    else { bld(p[0], p[1], 8, 9, { floors: 1 }); PR.car(p[0] + 8, p[1] + 2, false, pick([0x6a3030, 0x30506a])); }
+    lp(p[0] + 1, p[1] + 1, 0, 1);
+  });
+  /* ---- trees, rocks, bushes ---- */
+  function free(x, z, pad2) {
+    for (var q = 0; q < ctx.pois.length; q++) { var P = ctx.pois[q]; if (Math.hypot(x - P[0], z - P[1]) < P[2] + (pad2 || 0)) return false; }
+    if (Math.abs(z + 30) < 6 || Math.abs(z - 48) < 6 || Math.abs(x + 45) < 6 || Math.abs(x - 52) < 6) return false;
+    return true;
+  }
+  for (i = 0; i < 150; i++) { var x = rr(-HALF + 6, HALF - 6), z = rr(-HALF + 6, HALF - 6); if (free(x, z, 2)) { if (Math.random() < 0.45) pine(x, z); else PR.tree(x, z); } }
+  for (i = 0; i < 70; i++) { var rx = rr(-HALF + 6, HALF - 6), rz = rr(-HALF + 6, HALF - 6); if (!free(rx, rz, 0)) continue; var pk = Math.random(); if (pk < 0.4) rock(rx, rz); else if (pk < 0.55) PR.sandbags(rx - 2, rz, rx + 2, rz); else if (pk < 0.7) PR.car(rx, rz, Math.random() < 0.5, pick([0x6a3030, 0x30506a, 0x555555, 0x3a6a3a])); else if (pk < 0.8) PR.crater(rx, rz, rr(2, 4)); else if (pk < 0.9) log(rx, rz, Math.random() < 0.5); else haystack(rx, rz); if (Math.random() < 0.3) lp(rx + 1, rz + 1, 0, 1); }
+  for (i = 0; i < 160; i++) { var bx2 = rr(-HALF + 4, HALF - 4), bz2 = rr(-HALF + 4, HALF - 4); if (free(bx2, bz2, 0)) bush(bx2, bz2); }
+  for (i = -135; i <= 135; i += 15) { if (Math.abs(i + 45) > 5 && Math.abs(i - 52) > 5) { lamp(i, -26.5); lamp(i + 7, 51.5); } }
+  /* fallen-loot spots along roads */
+  for (i = 0; i < 14; i++) { var rl = Math.random() < 0.5 ? [rr(-130, 130), -30 + rr(-2, 2)] : [-45 + rr(-2, 2), rr(-130, 130)]; lp(rl[0], rl[1], 0, 1); }
+  W.endWorld(0x56693f, -HALF, HALF, -HALF, HALF);
+};
+W.MAP_HALF = HALF;
+})();
 /* ===== WARFRONT: battle royale mode — map, loot, gas, bots, match flow ===== */
 (function () {
 'use strict';
 var W = window.WF, A = W.A, world = W.world, PR = W.props, scene = W.scene, rr = W.rr, ri = W.ri, clamp = W.clamp, pick = W.pick, inp = W.inp, G = W.GUNS;
-var HALF = 100;
+var HALF = W.MAP_HALF || 150;
 var BR = W.BR = { active: false, loot: [], pts: [], gas: null, t: 0, plates: 0, kills: 0, total: 24, near: null, over: false, lastUse: false, drops: 0, cash: 0 };
 var RAR = [{ n: 'Common', c: 0xbfc5c9 }, { n: 'Rare', c: 0x4aa3ff }, { n: 'Epic', c: 0xc16bff }];
 
 /* ---------- map ---------- */
 var pois = [];
-function lp(x, z, y, w) { BR.pts.push({ x: x, z: z, y: y || 0, w: w || 1 }); }
-function bld(cx, cz, w, d, o) {
-  o = o || {}; var sides = ['n', 's', 'e', 'w'], ds = o.door || pick(sides), doors = [{ side: ds, off: rr(-1, 1), w: 1.7 }];
-  var oth = sides.filter(function (s) { return s !== ds; });
-  var o2 = (ds === 'n' || ds === 's') ? (ds === 'n' ? 's' : 'n') : (ds === 'e' ? 'w' : 'e');
-  if (o.twoDoors) doors.push({ side: o2, off: rr(-1.5, 1.5), w: 1.7 });
-  var wins = []; oth.forEach(function (s) { if (Math.random() < 0.8) wins.push({ side: s, off: rr(-1.5, 1.5), w: 1.5 }); });
-  var fl = o.floors || (Math.random() < 0.4 && w >= 8 && d >= 10 ? 2 : 1);
-  W.building(cx, cz, w, d, { doors: doors, windows: wins, floors: fl, col: o.col || pick([0x8c8a7e, 0x9a8f7a, 0x7d8088, 0xa29a86]), roofCol: 0x55524c });
-  lp(cx + rr(-w / 4, w / 4), cz + rr(-d / 4, d / 4), 0, 2); lp(cx + rr(-w / 4, w / 4), cz + rr(-d / 4, d / 4), 0, 1);
-  if (fl > 1) { lp(cx + w / 4, cz, 3.2, 2); lp(cx + w / 4, cz + d / 5, 3.2, 1); }
-}
-function buildMap() {
-  W.beginWorld(); pois = []; BR.pts = [];
-  W.setEnv({ sky: 0x9ec3e6, fog: 0xbcd0e0, near: 70, far: 300, hemi: 0.85, sunI: 0.95, sunDir: [40, 70, 25] });
-  PR.border(-HALF, HALF, -HALF, HALF, 10, 0x5a5b54);
-  /* town */
-  var tx = -58, tz = -52; pois.push([tx, tz, 26, 'Ashford']);
-  for (var i = 0; i < 3; i++) for (var j = 0; j < 3; j++) { if (i === 1 && j === 1) { PR.crater(tx + 20, tz + 20, 5); lp(tx + 20, tz + 20, 0, 2); continue; } bld(tx + i * 20, tz + j * 20, ri(8, 12), ri(9, 13)); if (Math.random() < 0.5) PR.car(tx + i * 20 + 10, tz + j * 20 + rr(-3, 3), false, pick([0x7a3030, 0x30507a, 0x6a6a6a])); }
-  /* industrial */
-  var ix = 52, iz = -56; pois.push([ix, iz, 26, 'Foundry']);
-  bld(ix - 8, iz - 6, 14, 24, { floors: 1, twoDoors: true, col: 0x707680 }); bld(ix + 12, iz + 4, 12, 20, { floors: 1, twoDoors: true, col: 0x707680 });
-  for (var k = 0; k < 9; k++) { var cx = ix - 12 + (k % 3) * 11 + rr(-1, 1), cz = iz + 14 + Math.floor(k / 3) * 7; PR.container(cx, cz, k % 2 === 0, pick([0x7a3a2a, 0x2f4a6b, 0x4f6b3a, 0x8a6a2a])); if (k % 2) lp(cx, cz + 3, 0, 1); }
-  PR.wreckTank(ix + 22, iz - 14, true); PR.barrier(ix, iz + 8, true); PR.barrier(ix + 5, iz + 8, true);
-  /* farm */
-  var fx = -60, fz = 52; pois.push([fx, fz, 24, 'Harlan Farm']);
-  bld(fx, fz, 10, 18, { floors: 1, twoDoors: true, col: 0x8a4a3a }); bld(fx + 18, fz - 8, 8, 10, { floors: 1 }); bld(fx - 16, fz + 10, 7, 9, { floors: 1 });
-  for (k = 0; k < 6; k++) PR.crate(fx + rr(-18, 22), fz + rr(14, 24), rr(1.2, 2.4), 0xb8a050);
-  PR.car(fx + 8, fz + 16, true, 0x5a6a3a); lp(fx + 6, fz + 20, 0, 1);
-  /* compound */
-  var kx = 56, kz = 52; pois.push([kx, kz, 26, 'Fort Brandt']);
-  var gate1 = [[12, 18, 'door']], gate2 = [[11, 17, 'door']];
-  W.wall(kx - 15, kz - 15, kx + 15, kz - 15, 0.6, 4, gate1, 0x7a766a); W.wall(kx - 15, kz + 15, kx + 15, kz + 15, 0.6, 4, [], 0x7a766a);
-  W.wall(kx - 15, kz - 15, kx - 15, kz + 15, 0.6, 4, gate2, 0x7a766a); W.wall(kx + 15, kz - 15, kx + 15, kz + 15, 0.6, 4, [], 0x7a766a);
-  [[-15, -15], [15, -15], [-15, 15], [15, 15]].forEach(function (o, n) { if (n === 3) PR.tower(kx + o[0] - 3, kz + o[1] - 3); });
-  bld(kx + 3, kz + 3, 10, 12, { floors: 2, col: 0x8a8678 }); PR.sandbags(kx - 9, kz - 5, kx - 5, kz - 5); PR.sandbags(kx - 6, kz + 7, kx - 6, kz + 11); PR.crate(kx - 8, kz + 2, 1.6); PR.crate(kx - 10, kz + 6, 1.2);
-  lp(kx - 8, kz - 2, 0, 2); lp(kx - 9, kz + 9, 0, 1); lp(kx - 4, kz - 10, 0, 2);
-  /* center bunker + tower */
-  pois.push([0, 0, 18, 'Relay']);
-  bld(0, 0, 14, 12, { floors: 1, twoDoors: true, col: 0x6f736f }); PR.tower(14, 12); lp(14, 8, 0, 1);
-  [[-9, -9], [9, -9], [-9, 9], [9, 12]].forEach(function (o) { PR.hedgehog(o[0], o[1]); PR.sandbags(o[0] - 2, o[1] + 3, o[0] + 2, o[1] + 3); });
-  /* ruins & misc */
-  [[-20, 25], [25, -20], [-30, -10], [30, 22], [0, 60], [8, -64]].forEach(function (p) { PR.rubble(p[0], p[1]); PR.crate(p[0] + 2.5, p[1] + 1, 1.3); lp(p[0] + 2, p[1], 0, 1); });
-  bld(0, 70, 9, 11, { floors: 1 }); bld(-5, -75, 9, 10, { floors: 1 }); bld(75, 0, 10, 10, { floors: 1 }); bld(-78, 5, 10, 11, { floors: 2 });
-  for (i = 0; i < 70; i++) {
-    var x = rr(-HALF + 6, HALF - 6), z = rr(-HALF + 6, HALF - 6), ok = true;
-    for (var q = 0; q < pois.length; q++) if (Math.hypot(x - pois[q][0], z - pois[q][1]) < pois[q][2] * 0.9) { ok = false; break; }
-    if (ok && Math.hypot(x, z) > 22 && Math.hypot(x, z - 70) > 9 && Math.hypot(x, z + 75) > 8 && Math.hypot(x - 75, z) > 9 && Math.hypot(x + 78, z - 5) > 9) PR.tree(x, z);
-  }
-  for (i = 0; i < 40; i++) { var rx = rr(-HALF + 6, HALF - 6), rz = rr(-HALF + 6, HALF - 6); if (Math.hypot(rx, rz) < 20) continue; var pick2 = Math.random(); if (pick2 < 0.35) W.solid(rx, 0, rz, rr(1.5, 3), rr(0.8, 1.8), rr(1.5, 3), 0x6a6a64); else if (pick2 < 0.6) PR.sandbags(rx - 2, rz, rx + 2, rz); else if (pick2 < 0.8) PR.car(rx, rz, Math.random() < 0.5, pick([0x6a3030, 0x30506a, 0x555555])); else PR.crater(rx, rz, rr(2, 4)); if (Math.random() < 0.3) lp(rx + 1, rz + 1, 0, 1); }
-  W.endWorld(0x56693f, -HALF, HALF, -HALF, HALF);
-  /* ground variety patches */
-  for (i = 0; i < 0; i++) { }
-}
+function buildMap() { pois = []; var c = { pts: [], pois: pois }; W.mapBuild(c); BR.pts = c.pts; pois = c.pois; }
 
 /* ---------- loot ---------- */
 var geoL = new THREE.BoxGeometry(1, 1, 1);
@@ -1518,7 +1667,12 @@ function scatterLoot() {
   BR.pts.forEach(function (p) {
     var n = p.w > 1 ? 3 : 2;
     for (var i = 0; i < n; i++) {
-      var r = Math.random(), x = p.x + rr(-1.2, 1.2), z = p.z + rr(-1.2, 1.2);
+      var r = Math.random(), x = p.x + rr(-1.2, 1.2), z = p.z + rr(-1.2, 1.2), ok = false;
+      for (var t = 0; t < 10 && !ok; t++) {
+        if (t > 0) { x = p.x + rr(-3, 3); z = p.z + rr(-3, 3); }
+        ok = !W.blockedAt(x, z, p.y, 1.0, 0.35) && Math.abs(W.groundY(x, z, p.y + 0.1, 0.3) - p.y) < 0.6 && Math.abs(x) < HALF - 3 && Math.abs(z) < HALF - 3;
+      }
+      if (!ok) continue;
       if (r < 0.34) addLoot('gun', x, z, p.y, randGun()); else if (r < 0.52) addLoot('plate', x, z, p.y, {}); else if (r < 0.7) addLoot('ammo', x, z, p.y, {});
       else if (r < 0.8) addLoot('frag', x, z, p.y, {}); else if (r < 0.86) addLoot('flash', x, z, p.y, {}); else addLoot('cash', x, z, p.y, { v: ri(50, 400) });
     }
@@ -1549,12 +1703,12 @@ function pickup(P, it) {
 
 /* ---------- gas ---------- */
 var PH = [
-  { wait: 40, shrink: 35, r: 92, dps: 2 }, { wait: 35, shrink: 30, r: 62, dps: 4 }, { wait: 30, shrink: 28, r: 38, dps: 7 },
-  { wait: 25, shrink: 25, r: 20, dps: 11 }, { wait: 20, shrink: 22, r: 7, dps: 16 }, { wait: 15, shrink: 20, r: 1.5, dps: 24 }
+  { wait: 45, shrink: 40, r: 135, dps: 2 }, { wait: 40, shrink: 36, r: 92, dps: 4 }, { wait: 32, shrink: 30, r: 56, dps: 7 },
+  { wait: 26, shrink: 26, r: 30, dps: 11 }, { wait: 20, shrink: 22, r: 11, dps: 16 }, { wait: 15, shrink: 20, r: 1.5, dps: 24 }
 ];
 var ring = null;
 function gasInit() {
-  var g = BR.gas = { cx: 0, cz: 0, r: 145, ph: -1, t: 0, state: 'wait', fromX: 0, fromZ: 0, fromR: 145, toX: 0, toZ: 0, toR: 145, next: 25, tick: 0, dps: 0 };
+  var g = BR.gas = { cx: 0, cz: 0, r: 215, ph: -1, t: 0, state: 'wait', fromX: 0, fromZ: 0, fromR: 215, toX: 0, toZ: 0, toR: 215, next: 25, tick: 0, dps: 0 };
   if (!ring) { ring = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 70, 64, 1, true), new THREE.MeshBasicMaterial({ color: 0x9a4bff, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false })); scene.add(ring); }
   ring.visible = true; g.toX = 0; g.toZ = 0; setRing();
 }
@@ -1588,7 +1742,7 @@ BR.inGas = function (a) { var g = BR.gas; return g && Math.hypot(a.x - g.cx, a.z
 W.dropStep = function (P, dt) {
   var d = P.drop, mv = W.moveVec(), sy = Math.sin(P.yaw), cy = Math.cos(P.yaw), fy = mv[1], fx = mv[0];
   d.t += dt;
-  var spd = d.chute ? 9 : (fy > 0.5 ? 27 : 15), desc = d.chute ? 6.5 : (fy > 0.5 ? 34 : 24);
+  var spd = d.chute ? 10 : (fy > 0.5 ? 30 : 16), desc = d.chute ? 6.5 : (fy > 0.5 ? 30 : 22);
   P.x = clamp(P.x + (-sy * fy + cy * fx) * spd * dt, -HALF + 2, HALF - 2); P.z = clamp(P.z + (-cy * fy - sy * fx) * spd * dt, -HALF + 2, HALF - 2);
   P.y -= desc * dt; P.vx = P.vz = 0; P.spd = 0;
   if (!d.chute && (inp.jump || P.y < 38)) { d.chute = true; inp.jump = false; W.sfx('whoosh', 0.8, 0.6); W.hud && W.hud.msg('GLIDER OPENED'); }
@@ -1625,10 +1779,10 @@ function spawnBots() {
     var gd = randGun(), x = 0, z = 0, tries = 0, okp = false;
     while (!okp && tries++ < 60) {
       var pts = BR.pts[ri(0, BR.pts.length - 1)]; x = pts.x + rr(-4, 4); z = pts.z + rr(-4, 4);
-      okp = W.navFree(x, z) && Math.hypot(x, z) < 92;
+      okp = W.navFree(x, z) && Math.hypot(x, z) < 135;
       for (var j = 0; okp && j < A.list.length; j++) if (Math.hypot(A.list[j].x - x, A.list[j].z - z) < 24) okp = false;
     }
-    if (!okp) { x = rr(-80, 80); z = rr(-80, 80); var t2 = 0; while (!W.navFree(x, z) && t2++ < 40) { x = rr(-80, 80); z = rr(-80, 80); } }
+    if (!okp) { x = rr(-120, 120); z = rr(-120, 120); var t2 = 0; while (!W.navFree(x, z) && t2++ < 40) { x = rr(-120, 120); z = rr(-120, 120); } }
     var b = A.make('b' + i, false, { primary: gd.gid, pAtt: gd.att, secondary: 'pistol', color: pick(BOTCOL), name: 'Rival ' + (i + 1) });
     A.place(b, x, z, rr(0, 6.28), 0); b.bot.goal = null; b.bot.role = 'hunt'; b.bot.alert = true; b.rar = gd.rar;
     b.guns.forEach(function (g) { g.nextFire = A.T + rr(9, 24); }); b.armorPlates = Math.random() < 0.5 ? 1 : 0; b.armor = b.armorPlates * 50;
@@ -1657,12 +1811,12 @@ BR.start = function () {
   buildMap(); scatterLoot(); gasInit();
   BR.active = true; BR.over = false; BR.t = 0; BR.kills = 0; BR.plates = 0; BR.cash = 0; BR.endAt = 0; BR.place = 0; BR.drops = 0; BR.loadoutAt = 70 + Math.random() * 20; BR.loadoutGiven = false;
   spawnBots();
-  var ang = Math.random() * 6.283, sx = Math.cos(ang) * 70, sz = Math.sin(ang) * 70;
+  var ang = Math.random() * 6.283, sx = Math.cos(ang) * 125, sz = Math.sin(ang) * 125;
   var dummy = { name: 'Drop', primary: 'smg', pAtt: W.defaultAtt('smg'), secondary: 'pistol', sAtt: W.defaultAtt('pistol') };
   A.P = null; var P = A.spawnPlayer(dummy, sx, sz, Math.atan2(-(-sx), -(-sz)));
   P.guns[0].empty = true; P.guns[0].ammo = 0; P.guns[0].reserve = 0;
   P.guns[1].ammo = 15; P.guns[1].reserve = 30; P.gi = 1; W.buildViewmodel(P);
-  P.y = 115; P.drop = { t: 0, chute: false }; P.pitch = -0.55; P.team = 'a';
+  P.y = 170; P.drop = { t: 0, chute: false }; P.pitch = -0.55; P.team = 'a';
   W.state.playing = true; W.state.paused = false; W.state.mode = 'br';
   A.T = 0;
 };
@@ -1674,10 +1828,11 @@ BR.update = function (dt) {
   /* loot bob + prompt */
   var near = null, nd = 2.6;
   for (var i = 0; i < BR.loot.length; i++) {
-    var it = BR.loot[i]; it.ph += dt * 2.2; it.mesh.position.y = it.y + 0.5 + Math.sin(it.ph) * 0.08; it.mesh.rotation.y += dt * 1.2;
+    var it = BR.loot[i]; it.ph += dt * 2.2; it.mesh.position.y = it.y + 0.5 + Math.sin(it.ph) * 0.08; it.mesh.rotation.y += dt * 1.2; if (P) { var vd = (it.x - P.x) * (it.x - P.x) + (it.z - P.z) * (it.z - P.z) < 5600; it.mesh.visible = vd; if (it.beam) it.beam.visible = vd; }
     if (P && P.alive && !P.drop) { var d = Math.hypot(it.x - P.x, it.z - P.z); if (d < nd && Math.abs(it.y - P.y) < 2.2) { nd = d; near = it; } }
   }
   BR.near = near;
+  if (P && P.alive && !P.drop) { var cp = null; for (var q = 0; q < pois.length; q++) if (Math.hypot(P.x - pois[q][0], P.z - pois[q][1]) < pois[q][2] * 0.7) { cp = pois[q][3]; break; } if (cp !== BR.loc) { BR.loc = cp; if (cp) W.hud && W.hud.msg(cp); } }
   var use = !!inp.use;
   if (use && !BR.lastUse && near && P.alive) pickup(P, near);
   BR.lastUse = use;
