@@ -123,28 +123,28 @@ h1 span{color:var(--acc)}
 <!-- MAIN MENU -->
 <div class="scr on" id="scrMenu">
   <div class="left">
-    <div><h1>War<span>front</span></h1><div class="tag">Battle Royale · 24 Operators · One Survivor</div></div>
-    <div class="card"><div class="nm" id="pName">Operator</div>
+    <div><h1>War<span>front</span></h1><div class="tag">Battle Royale · 24 Players · Last One Standing</div></div>
+    <div class="card"><div class="nm" id="pName">Player</div>
       <div><span class="lv" id="pLv">LV 1</span> <span style="color:var(--mut);font-size:12px;letter-spacing:.2em" id="pXp"></span></div>
       <div class="bar"><i id="pBar"></i></div>
       <div class="stats"><div><b id="sW">0</b><small>Wins</small></div><div><b id="sK">0</b><small>Kills</small></div><div><b id="sC">$0</b><small>Cash</small></div></div>
     </div>
   </div>
   <div class="right">
-    <div class="tile big" id="tDeploy"><svg viewBox="0 0 48 48"><path d="M24 4v24M14 18l10 10 10-10M8 36h32M12 44h24"/></svg><div><div class="t">Deploy</div><div class="s">Drop in · loot · outlast the gas</div>
+    <div class="tile big" id="tDeploy"><svg viewBox="0 0 48 48"><path d="M24 4v24M14 18l10 10 10-10M8 36h32M12 44h24"/></svg><div><div class="t">Play</div><div class="s">Jump in · loot · outlast the storm</div>
       <div class="seg" id="diffSeg"><button data-d="0">Recruit</button><button data-d="1">Regular</button><button data-d="2">Veteran</button></div></div></div>
-    <div class="tile" id="tClass"><svg viewBox="0 0 48 48"><path d="M4 24h30l4-6h6v10h-6l-4 4H18l-4 8h-6l2-8H4z"/></svg><div><div class="t">Loadout</div><div class="s">Gunsmith · attachments · your drop</div></div></div>
+    <div class="tile" id="tClass"><svg viewBox="0 0 48 48"><path d="M4 24h30l4-6h6v10h-6l-4 4H18l-4 8h-6l2-8H4z"/></svg><div><div class="t">Locker</div><div class="s">Pick your guns &amp; attachments</div></div></div>
     <div class="tile" id="tSet"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="7"/><path d="M24 4v7M24 37v7M4 24h7M37 24h7M10 10l5 5M33 33l5 5M38 10l-5 5M15 33l-5 5"/></svg><div><div class="t">Settings</div><div class="s">Sensitivity · aim assist · video</div></div></div>
   </div>
 </div>
 <!-- LOADOUT -->
 <div class="scr" id="scrClass">
-  <div class="top"><h2>Gunsmith</h2><div class="btns"><button class="btn sm" id="cGunny">Gunny Suggest</button><button class="btn sm pri" id="cBack">Done</button></div></div>
+  <div class="top"><h2>Locker</h2><div class="btns"><button class="btn sm" id="cGunny">Auto Build</button><button class="btn sm pri" id="cBack">Done</button></div></div>
   <div class="tabs" id="cTabs"></div>
   <div class="cols">
     <div class="pnl"><h3>Primary</h3><div id="cPri"></div><h3 style="margin-top:12px">Sidearm</h3><div id="cSec"></div></div>
     <div class="pnl"><div class="guncls" id="cCls"></div><div class="gunname" id="cName"></div><div id="cBars" style="margin-top:14px"></div>
-      <div style="margin-top:14px;color:var(--mut);font-size:12px;letter-spacing:.12em" id="cNote">Your loadout appears as a supply drop about a minute into every match. Until then, scavenge.</div></div>
+      <div style="margin-top:14px;color:var(--mut);font-size:12px;letter-spacing:.12em" id="cNote">These are the guns in your Supply Drop. It lands about a minute into every match. Until then, find weapons on the ground.</div></div>
     <div class="pnl"><h3>Attachments</h3><div id="cSlots"></div></div>
   </div>
 </div>
@@ -157,7 +157,7 @@ h1 span{color:var(--acc)}
 <div class="scr" id="scrEnd">
   <h2 id="endTitle">Eliminated</h2><div id="endPlace"></div>
   <div class="endStats"><div><b id="eK">0</b><small>Kills</small></div><div><b id="eT">0:00</b><small>Survived</small></div><div><b id="eX">+0</b><small>XP</small></div><div><b id="eC">+$0</b><small>Cash</small></div></div>
-  <div class="btns"><button class="btn pri" id="eAgain">Deploy Again</button><button class="btn" id="eMenu">Main Menu</button></div>
+  <div class="btns"><button class="btn pri" id="eAgain">Play Again</button><button class="btn" id="eMenu">Main Menu</button></div>
 </div>
 <!-- PAUSE -->
 <div class="scr" id="scrPause">
@@ -168,22 +168,22 @@ h1 span{color:var(--acc)}
 <div id="hud">
   <canvas id="mini" width="150" height="150"></canvas>
   <canvas id="compass" width="380" height="28"></canvas>
-  <div id="top2"><span>ALIVE <b id="aliveN">24</b></span><span>KILLS <b id="killN">0</b></span><span id="zoneTxt">ZONE --</span></div>
+  <div id="top2"><span>PLAYERS LEFT <b id="aliveN">24</b></span><span>KILLS <b id="killN">0</b></span><span id="zoneTxt">STORM --</span></div>
   <div id="feed"></div><div id="bPause">II</div>
   <div id="xhair"></div><div id="dotRet"></div><div id="hitm"></div>
   <div id="prompt"></div><div id="msg"></div>
-  <div id="dropHint">HOLD FORWARD TO DIVE · JUMP TO DEPLOY CHUTE<br><span id="alt" style="color:var(--acc)"></span></div>
+  <div id="dropHint">HOLD FORWARD TO DIVE · JUMP TO OPEN GLIDER<br><span id="alt" style="color:var(--acc)"></span></div>
   <div id="dmgInd"><i></i><i></i><i></i><i></i></div><div id="hurt"></div><div id="gasV"></div><div id="scope"></div><div id="flashOv"></div>
   <div id="dock">
-    <div class="vit"><small>ARMOR <span id="plates"></span></small><div class="hb ab"><i id="arFill" style="width:0"></i></div><small>HEALTH</small><div class="hb"><i id="hpFill"></i></div></div>
+    <div class="vit"><small>SHIELD <span id="plates"></span></small><div class="hb ab"><i id="arFill" style="width:0"></i></div><small>HEALTH</small><div class="hb"><i id="hpFill"></i></div></div>
     <div class="ammo"><small id="gName">—</small><b id="amC">0</b><span> / <i id="amR" style="font-style:normal">0</i></span></div>
   </div>
 </div>
 <div id="moveZone"></div><div id="lookZone"></div><div id="stickBase"><div id="stickKnob"></div></div>
-<div class="tb" id="bFire">Fire</div><div class="tb" id="bAds">ADS</div><div class="tb" id="bJump">Jump</div><div class="tb" id="bCrouch">Duck</div>
-<div class="tb" id="bReload">Rld</div><div class="tb" id="bSwap">Swap</div><div class="tb" id="bFrag">Frag</div><div class="tb" id="bTac">Flash</div>
-<div class="tb" id="bUse">Use</div><div class="tb" id="bPlate">Plate</div><div class="tb" id="bStreak"></div>
-<div id="vTag">v2 · 16 Nov 2026</div>
+<div class="tb" id="bFire">Fire</div><div class="tb" id="bAds">ADS</div><div class="tb" id="bJump">Jump</div><div class="tb" id="bCrouch">Crouch</div>
+<div class="tb" id="bReload">Reload</div><div class="tb" id="bSwap">Swap</div><div class="tb" id="bFrag">Frag</div><div class="tb" id="bTac">Flash</div>
+<div class="tb" id="bUse">Use</div><div class="tb" id="bPlate">Shield</div><div class="tb" id="bStreak"></div>
+<div id="vTag">v3 · 16 Nov 2026</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* ===== WARFRONT: core (utils, audio, save, renderer, input) ===== */
@@ -1501,12 +1501,12 @@ W.randGun = randGun;
 function addLoot(kind, x, z, y, data) {
   var col = 0xffffff, sc = [0.5, 0.18, 0.2], label = '';
   if (kind === 'gun') { col = RAR[data.rar].c; sc = [0.9, 0.12, 0.22]; label = RAR[data.rar].n + ' ' + G[data.gid].name; }
-  else if (kind === 'plate') { col = 0x4fc27a; sc = [0.4, 0.06, 0.5]; label = 'Armor Plate'; }
+  else if (kind === 'plate') { col = 0x4fc27a; sc = [0.4, 0.06, 0.5]; label = 'Shield'; }
   else if (kind === 'ammo') { col = 0xe0b84a; sc = [0.4, 0.3, 0.3]; label = 'Ammo'; }
   else if (kind === 'frag') { col = 0x6a7a4a; sc = [0.25, 0.25, 0.25]; label = 'Frag Grenade'; }
   else if (kind === 'flash') { col = 0xdddddd; sc = [0.22, 0.3, 0.22]; label = 'Flashbang'; }
   else if (kind === 'cash') { col = 0x68d391; sc = [0.4, 0.1, 0.25]; label = 'Cash $' + data.v; }
-  else if (kind === 'loadout') { col = 0xffd24a; sc = [0.9, 0.6, 0.6]; label = 'Loadout Drop'; }
+  else if (kind === 'loadout') { col = 0xffd24a; sc = [0.9, 0.6, 0.6]; label = 'Supply Drop'; }
   var m = new THREE.Mesh(geoL, lmat(col)); m.scale.set(sc[0], sc[1], sc[2]); m.position.set(x, y + 0.45, z); scene.add(m);
   var beam = null;
   if (kind === 'gun' && data.rar > 0 || kind === 'loadout') { beam = new THREE.Mesh(geoL, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.28 })); beam.scale.set(0.12, 7, 0.12); beam.position.set(x, y + 3.5, z); scene.add(beam); }
@@ -1542,7 +1542,7 @@ function pickup(P, it) {
   else if (k === 'loadout') {
     var c = W.save.classes[W.save.sel];
     P.guns = [W.makeGunState(c.primary, c.pAtt), W.makeGunState(c.secondary, c.sAtt)]; P.gi = 0; P.frags = 3; P.tacs = 2; BR.plates = Math.max(BR.plates, 3); W.buildViewmodel(P);
-    W.hud && W.hud.msg('LOADOUT EQUIPPED — ' + c.name.toUpperCase());
+    W.hud && W.hud.msg('SUPPLY DROP OPENED — ' + c.name.toUpperCase());
   }
   W.sfx('ui', 0.5); removeLoot(it); return true;
 }
@@ -1568,18 +1568,18 @@ function gasNext() {
 }
 function gasUpdate(dt) {
   var g = BR.gas; if (!g) return;
-  if (g.ph < 0) { g.next -= dt; if (g.next <= 0) { gasNext(); W.hud && W.hud.msg('SAFE ZONE MARKED — MOVE!'); } g.timer = Math.max(0, g.next); return; }
+  if (g.ph < 0) { g.next -= dt; if (g.next <= 0) { gasNext(); W.hud && W.hud.msg('STORM INCOMING — HEAD TO THE SAFE ZONE'); } g.timer = Math.max(0, g.next); return; }
   var p = PH[g.ph]; g.t += dt;
-  if (g.state === 'wait') { g.timer = Math.max(0, p.wait - g.t); if (g.t >= p.wait) { g.state = 'shrink'; g.t = 0; W.hud && W.hud.msg('ZONE CLOSING'); } }
+  if (g.state === 'wait') { g.timer = Math.max(0, p.wait - g.t); if (g.t >= p.wait) { g.state = 'shrink'; g.t = 0; W.hud && W.hud.msg('THE STORM IS CLOSING'); } }
   else if (g.state === 'shrink') {
     var u = clamp(g.t / p.shrink, 0, 1); g.cx = g.fromX + (g.toX - g.fromX) * u; g.cz = g.fromZ + (g.toZ - g.fromZ) * u; g.r = g.fromR + (g.toR - g.fromR) * u; g.timer = Math.max(0, p.shrink - g.t);
-    if (u >= 1) { gasNext(); if (g.state !== 'final') W.hud && W.hud.msg('NEW SAFE ZONE'); }
+    if (u >= 1) { gasNext(); if (g.state !== 'final') W.hud && W.hud.msg('NEW SAFE ZONE SHOWN'); }
   }
   setRing();
   g.tick += dt;
   if (g.tick >= 0.5) {
     g.tick = 0; var dps = g.dps || 1;
-    A.list.forEach(function (a) { if (a.alive && Math.hypot(a.x - g.cx, a.z - g.cz) > g.r) { A.damage(a, dps * 0.5, null, false, 'Gas'); if (a.bot) a.bot.goal = [g.cx + rr(-4, 4), g.cz + rr(-4, 4)]; } });
+    A.list.forEach(function (a) { if (a.alive && Math.hypot(a.x - g.cx, a.z - g.cz) > g.r) { A.damage(a, dps * 0.5, null, false, 'Storm'); if (a.bot) a.bot.goal = [g.cx + rr(-4, 4), g.cz + rr(-4, 4)]; } });
   }
 }
 BR.inGas = function (a) { var g = BR.gas; return g && Math.hypot(a.x - g.cx, a.z - g.cz) > g.r; };
@@ -1591,7 +1591,7 @@ W.dropStep = function (P, dt) {
   var spd = d.chute ? 9 : (fy > 0.5 ? 27 : 15), desc = d.chute ? 6.5 : (fy > 0.5 ? 34 : 24);
   P.x = clamp(P.x + (-sy * fy + cy * fx) * spd * dt, -HALF + 2, HALF - 2); P.z = clamp(P.z + (-cy * fy - sy * fx) * spd * dt, -HALF + 2, HALF - 2);
   P.y -= desc * dt; P.vx = P.vz = 0; P.spd = 0;
-  if (!d.chute && (inp.jump || P.y < 38)) { d.chute = true; inp.jump = false; W.sfx('whoosh', 0.8, 0.6); W.hud && W.hud.msg('PARACHUTE DEPLOYED'); }
+  if (!d.chute && (inp.jump || P.y < 38)) { d.chute = true; inp.jump = false; W.sfx('whoosh', 0.8, 0.6); W.hud && W.hud.msg('GLIDER OPENED'); }
   var gy = W.groundY(P.x, P.z, P.y, 0.3);
   if (P.y <= gy + 0.05) { P.y = gy; P.drop = null; P.vy = 0; P.grounded = true; P.spawnT = A.T; W.hud && W.hud.msg('LANDED — FIND A WEAPON'); W.sfx('step', 0.6); }
   P.dropChute = d.chute;
@@ -1640,8 +1640,8 @@ function spawnBots() {
 BR.alive = function () { var n = 0; A.list.forEach(function (a) { if (a.alive) n++; }); return n; };
 W.onKill = function (v, atk, head, wname) {
   if (!BR.active) return;
-  var killer = atk ? (atk.player ? 'You' : atk.name) : 'The Gas';
-  W.hud && W.hud.feed(killer, v.player ? 'You' : v.name, wname || 'Gas', head, atk && atk.player, v.player);
+  var killer = atk ? (atk.player ? 'You' : atk.name) : 'The Storm';
+  W.hud && W.hud.feed(killer, v.player ? 'You' : v.name, wname || 'Storm', head, atk && atk.player, v.player);
   if (atk && atk.player) { BR.kills++; W.hud && W.hud.msg(head ? 'HEADSHOT ELIMINATION' : 'ELIMINATED ' + v.name.toUpperCase()); }
   if (!v.player) {
     var g = v.guns[0]; if (g) addLoot('gun', v.x, v.z, v.y, { gid: g.def.gid, rar: v.rar || 0, att: g.def.att });
@@ -1681,12 +1681,12 @@ BR.update = function (dt) {
   var use = !!inp.use;
   if (use && !BR.lastUse && near && P.alive) pickup(P, near);
   BR.lastUse = use;
-  if (inp.plate) { inp.plate = false; if (P.alive && BR.plates > 0 && P.armor < 150) { BR.plates--; P.armor = Math.min(150, P.armor + 50); W.sfx('ui', 0.6); W.hud && W.hud.msg('ARMOR PLATE APPLIED'); } }
+  if (inp.plate) { inp.plate = false; if (P.alive && BR.plates > 0 && P.armor < 150) { BR.plates--; P.armor = Math.min(150, P.armor + 50); W.sfx('ui', 0.6); W.hud && W.hud.msg('SHIELD UP'); } }
   inp.streak = false;
   if (!BR.loadoutGiven && P && P.alive && !P.drop && BR.t > BR.loadoutAt) {
     BR.loadoutGiven = true; var a = P.yaw, lx = P.x - Math.sin(a) * 6, lz = P.z - Math.cos(a) * 6;
     if (!W.navFree(lx, lz)) { lx = P.x; lz = P.z + 2; }
-    addLoot('loadout', lx, lz, 0, {}); W.hud && W.hud.msg('LOADOUT DROP INBOUND — CHECK YOUR MAP'); BR.loadoutPos = [lx, lz];
+    addLoot('loadout', lx, lz, 0, {}); W.hud && W.hud.msg('SUPPLY DROP LANDED — CHECK YOUR MAP'); BR.loadoutPos = [lx, lz];
   }
   if (BR.endAt && A.T >= BR.endAt && !BR.over) { BR.over = true; BR.finish(); }
 };
@@ -1723,7 +1723,7 @@ function deploy() {
   ['dmgInd'].forEach(function () { });
   W.setShadows(!!W.save.set.shadows);
   BR.start(); W.sfx('whoosh', 0.8, 0.5);
-  W.hud.msg('DEPLOYING — 24 OPERATORS');
+  W.hud.msg('DROPPING IN — 24 PLAYERS');
 }
 $('tDeploy').addEventListener('click', deploy);
 $('tClass').addEventListener('click', function () { W.sfx('ui', 0.4); show('scrClass'); renderClass(); });
@@ -1859,8 +1859,8 @@ W.hudUpdate = function (dt) {
   set('amC', g.empty ? '--' : String(g.ammo)); set('amR', g.empty ? '--' : String(g.reserve));
   set('gName', g.empty ? 'FIND A WEAPON' : (g.reloading ? 'RELOADING' : d.name.toUpperCase() + (g.rar ? ' · ' + ['', 'RARE', 'EPIC'][g.rar] : '')));
   set('aliveN', String(BR.alive())); set('killN', String(BR.kills));
-  var gz = BR.gas, zt = 'ZONE --';
-  if (gz) { var tm = Math.ceil(gz.timer || 0); zt = gz.ph < 0 ? 'ZONE IN ' + tm + 's' : (gz.state === 'shrink' ? 'CLOSING ' + tm + 's' : gz.state === 'final' ? 'FINAL ZONE' : 'NEXT ' + tm + 's'); }
+  var gz = BR.gas, zt = 'STORM --';
+  if (gz) { var tm = Math.ceil(gz.timer || 0); zt = gz.ph < 0 ? 'STORM IN ' + tm + 's' : (gz.state === 'shrink' ? 'STORM CLOSING ' + tm + 's' : gz.state === 'final' ? 'FINAL CIRCLE' : 'NEXT SHRINK ' + tm + 's'); }
   set('zoneTxt', zt);
   var inGas = BR.inGas(P); $('zoneTxt').classList.toggle('gas', !!inGas); $('gasV').style.opacity = inGas ? 1 : 0;
   var ads = P.adsP > 0.8, ov = d.ov;
@@ -1870,7 +1870,7 @@ W.hudUpdate = function (dt) {
   var pr = $('prompt'), it = BR.near;
   if (it && P.alive) { pr.style.display = 'block'; pr.textContent = (W.isTouch ? 'USE' : '[E]') + ' · ' + it.label; $('bUse').classList.add('show'); } else { pr.style.display = 'none'; $('bUse').classList.remove('show'); }
   $('bPlate').classList.toggle('show', BR.plates > 0);
-  var dh = $('dropHint'); dh.style.display = P.drop ? 'block' : 'none'; if (P.drop) $('alt').textContent = Math.max(0, Math.round(P.y)) + ' m' + (P.drop.chute ? ' · CHUTE OPEN' : '');
+  var dh = $('dropHint'); dh.style.display = P.drop ? 'block' : 'none'; if (P.drop) $('alt').textContent = Math.max(0, Math.round(P.y)) + ' m' + (P.drop.chute ? ' · GLIDER OPEN' : '');
   hurtV = Math.max(0, hurtV - dt * 1.4); $('hurt').style.opacity = clamp(hurtV, 0, 0.95) * (P.hp < 40 ? 1 : 0.7) + (P.hp < 30 && P.alive ? 0.25 : 0);
   $('flashOv').style.opacity = clamp(P.flash / 1.6, 0, 1);
   drawCompass(P); drawMini(P);
