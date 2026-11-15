@@ -455,6 +455,29 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
 .joinTile .art { right: 16px; top: 16px; width: min(24%, 15vh); }
 .joinTile .inp { background: rgba(0,0,0,.4); border-color: #28303d; }
 .tiles.five { grid-template-columns: repeat(4, 1fr); }
+
+/* ================= v19: extra motion ================= */
+@keyframes sheetIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
+@keyframes scopeIn { from { opacity: 0; transform: scale(1.18); } to { opacity: 1; transform: none; } }
+@keyframes hitPop { 0% { scale: 1.9; } 100% { scale: 1; } }
+@keyframes dotPop { 0% { transform: scale(2.2); } 100% { transform: scale(1); } }
+@keyframes lowBlink { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+@keyframes hpBeat { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.18); } }
+.screen:not([hidden]) .sheet { animation: sheetIn .42s cubic-bezier(.2, .8, .2, 1) both; }
+.screen:not([hidden]) .scroll-ok > * { animation: rowIn .4s cubic-bezier(.2, .8, .2, 1) both; }
+.scroll-ok > *:nth-child(2) { animation-delay: .04s; } .scroll-ok > *:nth-child(3) { animation-delay: .08s; } .scroll-ok > *:nth-child(4) { animation-delay: .12s; } .scroll-ok > *:nth-child(5) { animation-delay: .16s; } .scroll-ok > *:nth-child(6) { animation-delay: .2s; } .scroll-ok > *:nth-child(7) { animation-delay: .24s; } .scroll-ok > *:nth-child(n+8) { animation-delay: .28s; }
+#scope { animation: scopeIn .22s ease-out; }
+#hitmarker.show i { animation: hitPop .16s ease-out; }
+.dot.ok { animation: dotPop .45s ease-out; }
+#bBuild.sel { animation: selPulse 1.4s ease-in-out infinite; }
+#bReload.busy svg { animation: spinCW .9s linear infinite; }
+#ammoBox.low #ammoTxt { color: var(--foe); animation: lowBlink .8s ease-in-out infinite; }
+#hpRow.low #hpTxt { color: var(--foe); animation: hpBeat .9s ease-in-out infinite; }
+#hpRow.low #hpFill { animation: lowBlink .9s ease-in-out infinite; }
+#matsTxt { transition: color .2s; }
+.slot.pop, .slot.sel em { transition: color .2s; }
+#loadDone, #lStart { animation: riseIn .4s both; }
+#lStart:not([disabled]) { animation: selPulse 1.5s ease-in-out infinite; }
 </style>
 
 <div id="app">
@@ -509,19 +532,14 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     <button id="bDrop" class="cbtn" type="button" hidden><svg viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg><span>DROP</span></button>
     <button id="bAlt" class="cbtn" type="button" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg><span id="bAltTxt">SCOPE</span></button>
     <div id="buildCol">
-      <button id="bBuild" class="cbtn" type="button"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v10l-8 4-8-4V7zM12 12l8-5M12 12v9M12 12L4 7"/></svg><span>BUILD</span></button>
-      <div id="buildPieces">
-        <button id="bpW" class="cbtn sel" type="button"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="16"/></svg><span>WALL</span></button>
-        <button id="bpF" class="cbtn" type="button"><svg viewBox="0 0 24 24"><path d="M3 14l9-5 9 5-9 5z"/></svg><span>FLOOR</span></button>
-        <button id="bpR" class="cbtn" type="button"><svg viewBox="0 0 24 24"><path d="M3 19h18L3 7z"/></svg><span>RAMP</span></button>
-      </div>
+      <button id="bBuild" class="cbtn" type="button"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v10l-8 4-8-4V7zM12 12l8-5M12 12v9M12 12L4 7"/></svg><span id="bBuildTxt">BUILD</span></button>
       <div id="matsTxt">MATS 200</div>
     </div>
   </div>
 
   <div id="banner"><div class="big" id="banBig"></div><div class="sub" id="banSub"></div></div>
   <div id="toast"></div>
-  <div id="verTag">v18 &middot; 15 Nov 2026</div>
+  <div id="verTag">v19 &middot; 15 Nov 2026</div>
 
   <!-- MAIN MENU -->
   <section id="scrMenu" class="screen stg" hidden>
@@ -741,7 +759,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     'Katana': { cat: 'Utility', body: 50, head: 50, mag: Infinity, rate: 0.5, reload: 0, mode: 'melee', range: 3.4, color: 0xe8eef8, vm: 'blade', snd: 'swing', alt: 'block', tag: 'Alt: block 0.3s' },
     'Glass Shard': { cat: 'Utility', body: 1, head: 150, mag: 1, rate: 1.0, reload: 2.0, mode: 'semi', spread: 0, range: 200, color: 0x9be9ff, vm: 'glass', snd: 'glass', tracer: 0xbff4ff, tag: '150 headshot' },
     'Medkit': { cat: 'Utility', body: 0, head: 0, mag: 1, rate: 0.5, reload: 0, mode: 'heal', heal: 50, channel: 1.6, color: 0xd94141, vm: 'medkit', snd: 'reload', tag: 'Heals 50 HP' },
-    'Grenade': { cat: 'Utility', body: 70, head: 70, mag: 2, rate: 0.9, reload: 0, mode: 'grenade', radius: 4, fuse: 1.7, color: 0x4a6b3a, vm: 'grenade', snd: 'swing', tag: 'Frag blast, 70 dmg' }
+    'Grenade': { cat: 'Utility', body: 70, head: 70, mag: 2, rate: 0.9, reload: 0, mode: 'grenade', radius: 4, fuse: 1.7, color: 0x4a6b3a, vm: 'grenade', snd: 'swing', tag: 'Frag blast. Throw at your feet to grenade jump' }
   };
 
   /* ---- per-weapon sights: kind = look of the overlay, z = zoom, c = reticle colour, mask = full scope lens (hides the gun) ---- */
@@ -775,7 +793,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
       '<g stroke="#000" stroke-width="1.4">' + [112, 126, 142, 160].map(function (y, i) { return '<line x1="' + (90 - i * 3) + '" y1="' + y + '" x2="' + (110 + i * 3) + '" y2="' + y + '"/>'; }).join('') + '<line x1="100" y1="100" x2="100" y2="165"/></g><circle cx="100" cy="100" r="1.6" fill="#000"/>',
     dot: '<circle cx="100" cy="100" r="9" fill="var(--sc)" opacity=".22"/><circle cx="100" cy="100" r="3" fill="var(--sc)"/>',
     holo: '<g fill="none" stroke="var(--sc)" stroke-width="1.6"><circle cx="100" cy="100" r="26"/><path d="M100 70v-8M100 130v8M70 100h-8M130 100h8" stroke-width="1.4"/></g><circle cx="100" cy="100" r="2.2" fill="var(--sc)"/>',
-    iron: '<g fill="#14171c" stroke="rgba(255,255,255,.55)" stroke-width="1"><rect x="52" y="116" width="26" height="30" rx="2"/><rect x="122" y="116" width="26" height="30" rx="2"/><path d="M96 100h8l1.6 40h-11.2z"/></g><circle cx="100" cy="102" r="1.3" fill="var(--sc, #fff)"/>',
+    iron: '<g fill="none"><circle cx="100" cy="100" r="21" stroke="rgba(0,0,0,.7)" stroke-width="4.5"/><circle cx="100" cy="100" r="21" stroke="var(--sc)" stroke-width="1.3"/><path d="M100 72v-9M100 128v9M72 100h-9M128 100h9" stroke="rgba(0,0,0,.7)" stroke-width="3"/><path d="M100 72v-9M100 128v9M72 100h-9M128 100h9" stroke="var(--sc)" stroke-width="1"/></g><circle cx="100" cy="100" r="1.8" fill="var(--sc)"/>',
     bead: '<rect x="99.2" y="106" width="1.6" height="94" fill="#000" opacity=".55"/><circle cx="100" cy="100" r="3.6" fill="var(--sc, #ffd36b)" stroke="#000" stroke-width="1"/>',
     launcher: '<g stroke="#000" stroke-width="1.2" fill="none"><line x1="10" y1="100" x2="90" y2="100"/><line x1="110" y1="100" x2="190" y2="100"/>' +
       [20, 40, 60, 80].map(function (x) { return '<line x1="' + x + '" y1="96" x2="' + x + '" y2="104"/><line x1="' + (200 - x) + '" y1="96" x2="' + (200 - x) + '" y2="104"/>'; }).join('') +
@@ -786,7 +804,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     var el = $('scope'), sc = w.sc;
     if (!sc) { el.className = ''; el.innerHTML = ''; return; }
     el.className = 'k-' + sc.k + (sc.mask ? ' mask' : '');
-    el.style.setProperty('--sc', sc.c || '#ff3b3b');
+    el.style.setProperty('--sc', sc.c || (sc.k === 'iron' ? '#f4f4f4' : '#ff3b3b'));
     el.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + SCOPE_SVG[sc.k] + '</svg>' + (sc.mask ? '<div class="zt" id="scopeZ"></div>' : '');
   }
   var HEAD_BONUS = 1.5;
@@ -3811,9 +3829,15 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
       }
     }
     var ddx = me.x - g.x, ddy = me.y + 0.6 - g.y, ddz = me.z - g.z, dd = Math.sqrt(ddx * ddx + ddy * ddy + ddz * ddz);
-    if (dd < R && !me.dead && losClear(g.x, g.y + 0.2, g.z, me.x, me.y + 0.6, me.z)) {
-      var hl = Math.sqrt(ddx * ddx + ddz * ddz) || 1;
-      damageMe(Math.round(W.body * 0.5 * (1 - 0.55 * dd / R)), false, g.x, g.z, [ddx / hl * 4, ddz / hl * 4, 3]);
+    // grenade jump: a blast at your feet launches you, mostly up and a little away. Self damage is light.
+    var RJ = R * 1.15;
+    if (dd < RJ && !me.dead && (dd < 1.8 || losClear(g.x, g.y + 0.2, g.z, me.x, me.y + 0.6, me.z))) {
+      var fall = 1 - dd / RJ, hl = Math.sqrt(ddx * ddx + ddz * ddz) || 1;
+      damageMe(Math.round(W.body * 0.3 * (1 - 0.5 * dd / R)), false, g.x, g.z);
+      if (!me.dead) {
+        me.kx += ddx / hl * 10 * fall; me.kz += ddz / hl * 10 * fall;
+        me.vy = Math.max(me.vy, 4.5 + 8 * fall); me.grounded = false; me.groundT = -9;
+      }
     }
   }
 
@@ -4083,19 +4107,24 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     me.build = on;
     if (on) { me.scoped = false; me.burstLeft = 0; input.fire = false; } else { removeGhost(); }
     $('bBuild').classList.toggle('sel', on);
+    updBuildTxt();
   }
-  function quickBuild(ty) {
-    selectPiece(ty);
-    if (state.zeroBuild || !inFight() || me.dead || me.drop || state.paused) return;
-    tryPlace(T());
-  }
+  var PIECE_NAME = { W: 'WALL', F: 'FLOOR', R: 'RAMP' };
+  function updBuildTxt() { setText('bBuildTxt', me.build ? (PIECE_NAME[me.piece] || 'BUILD') : 'BUILD'); }
   function selectPiece(ty) {
     me.piece = ty;
-    $('bpW').classList.toggle('sel', ty === 'W');
-    $('bpF').classList.toggle('sel', ty === 'F');
-    $('bpR').classList.toggle('sel', ty === 'R');
     ghostKey = '';
     removeGhost();
+    updBuildTxt();
+  }
+  function cycleBuild() {
+    if (!me.build) {
+      setBuild(true);
+      if (me.build && !state.buildHint) { state.buildHint = 1; toast('Tap again to switch piece', 1800); }
+      return;
+    }
+    var nx = { W: 'F', F: 'R', R: null }[me.piece];
+    if (nx) selectPiece(nx); else { setBuild(false); selectPiece('W'); }
   }
 
   /* ================================================================
@@ -5744,7 +5773,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
       ffaTags.push(el);
     }
   })();
-  var BUMP_IDS = { sMe: 1, sOpp: 1, ammoTxt: 1, sMid: 1 };
+  var BUMP_IDS = { sMe: 1, sOpp: 1, ammoTxt: 1, sMid: 1, matsTxt: 1, voteTimer: 1, loadTimer: 1 };
   function bumpEl(el) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
   function setText(id, v) { if (hudCache[id] !== v) { var first = hudCache[id] === undefined; hudCache[id] = v; var el = $(id); el.textContent = v; if (!first && BUMP_IDS[id]) bumpEl(el); } }
   function updateScoreHud() {
@@ -5775,6 +5804,10 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     var wp = me.weapon;
     setText('ammoTxt', wp.mag === Infinity ? '∞' : String(me.ammo));
     setText('ammoMax', wp.mag === Infinity ? '' : ('/ ' + wp.mag));
+    var lowA = wp.mag !== Infinity && wp.mag > 1 && me.ammo <= Math.ceil(wp.mag * 0.25), busyR = !!me.reloading, lowH = me.hp <= 30 && !me.dead;
+    if (hudCache.lowA !== lowA) { hudCache.lowA = lowA; $('ammoBox').classList.toggle('low', lowA); }
+    if (hudCache.busyR !== busyR) { hudCache.busyR = busyR; $('bReload').classList.toggle('busy', busyR); }
+    if (hudCache.lowH !== lowH) { hudCache.lowH = lowH; $('hpRow').classList.toggle('low', lowH); }
     var rb = $('reloadBar');
     if (me.healing) rb.style.width = (clamp(1 - (me.healing.end - t) / wp.channel, 0, 1) * 100) + '%';
     else if (me.reloading) rb.style.width = (clamp((t - me.reloadStart) / (me.reloadEnd - me.reloadStart), 0, 1) * 100) + '%';
@@ -6642,10 +6675,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   bindButton('bReload', function () { input.reloadReq = true; }, null, false);
   bindButton('bAlt', function () { input.altReq = true; }, null, false);
   bindButton('bDrop', function () { dropCurrent(); }, null, false);
-  bindButton('bBuild', function () { setBuild(!me.build); }, null, false);
-  bindButton('bpW', function () { quickBuild('W'); }, null, false);
-  bindButton('bpF', function () { quickBuild('F'); }, null, false);
-  bindButton('bpR', function () { quickBuild('R'); }, null, false);
+  bindButton('bBuild', cycleBuild, null, false);
 
   // keyboard + mouse fallback for desktop testing
   var keys = input.keys;
@@ -6663,9 +6693,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     if (k >= '1' && k <= '5') switchSlot(parseInt(k, 10) - 1);
     if (k === 'b') setBuild(!me.build);
     if (k === 'g') useAction();
-    if (k === 'z') quickBuild('W');
-    if (k === 'x') quickBuild('F');
-    if (k === 'v') quickBuild('R');
+    if (k === 'z' || k === 'x' || k === 'v') { setBuild(true); selectPiece(k === 'z' ? 'W' : (k === 'x' ? 'F' : 'R')); }
   });
   window.addEventListener('keyup', function (e) {
     var k = e.key.toLowerCase();
@@ -6836,7 +6864,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   window.RIVALS_DEBUG = {
     chests: chests, lootItems: lootItems, zone: zone, botPool: botPool, openChest: openChest, pickupMe: pickupMe, useAction: useAction, startMyDrop: startMyDrop, dropStep: dropStep, brAlive: brAlive, updateLoot: updateLoot, spawnItem: spawnItem, startBotDrop: startBotDrop, botDropStep: botDropStep, updateZone: updateZone, lootTargetDbg: function () { return lootTarget; },
     resolveXZ: resolveXZ, cityLayout: cityLayout, isleLayouts: isleLayouts, rayWorld: rayWorld, segRampT: segRampT, colsNear: colsNear, terrH: terrH, navPathDbg: function () { return navPath; },
-    quickBuild: quickBuild, navRefresh: navRefresh, enemiesOf: enemiesOf, dropCurrent: dropCurrent, swingMelee: swingMelee, toMenu: toMenu, orbs: orbs, updateOrbs: updateOrbs, rem: rem,
+    navRefresh: navRefresh, explodeGrenade: explodeGrenade, enemiesOf: enemiesOf, dropCurrent: dropCurrent, swingMelee: swingMelee, toMenu: toMenu, orbs: orbs, updateOrbs: updateOrbs, rem: rem,
     state: state, me: me, bot: bot, botF: botF, remF: remF, WEAPONS: WEAPONS, MAPS: MAPS, world: world, input: input,
     resolveMapVotes: resolveMapVotes, castRay: castRay, damageMe: damageMe, damageEnemy: damageEnemy, hitscanShot: hitscanShot,
     equip: equip, switchSlot: switchSlot, builds: builds, createPiece: createPiece, damageBuild: damageBuild, setBuild: setBuild, selectPiece: selectPiece, tryPlace: tryPlace, groundAt: groundAt, buildSlots: buildSlots, worldToScreen: worldToScreen, Net: Net, losClear: losClear, setMap: setMap, botTryBuild: botTryBuild, specFrom: specFrom, validSpec: validSpec, weaponIcon: weaponIcon, rockets: rockets, navPath: navPath, grenades: grenades, updateBot: function (dt, t) { updateBot(botF, dt, t); }, updateBots: updateBots, ffaBots: ffaBots, ffaKill: ffaKill, startFFA: startFFA, enemies: enemies, fighterHurt: fighterHurt, botResetRound: botResetRound, hostPhase: hostPhase, settings: settings, circleRect: circleRect
