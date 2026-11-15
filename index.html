@@ -428,6 +428,33 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
 .joinTile .inp { position: relative; font-size: 34px; padding: 2px 8px 2px 18px; background: rgba(0,0,0,.35); }
 .joinTile .btn { position: relative; }
 @media (max-width: 900px) { .tiles.five { grid-template-columns: repeat(3, 1fr); } .tiles.five .tile { height: clamp(140px, 30vh, 240px); } .tile .ts { display: none; } }
+
+/* ================= v18: calmer, more professional tiles ================= */
+.tile { --a: #e8a33d; background: linear-gradient(180deg, #181d26 0%, #0f1319 100%); border: 1px solid #28303d; border-radius: 4px; clip-path: none; height: clamp(150px, 38vh, 300px); padding: 14px 18px 16px; justify-content: flex-end; gap: 4px;
+  transition: transform .22s cubic-bezier(.2, .8, .2, 1), border-color .2s, box-shadow .25s, background .25s; }
+.tiles.four .tile, .tiles.three .tile, .tiles.five .tile { height: clamp(150px, 38vh, 300px); }
+.tile::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 85% 0%, color-mix(in srgb, var(--a) 22%, transparent), transparent 62%); opacity: 1; pointer-events: none; }
+.tile::after { content: ""; position: absolute; left: 0; top: 0; width: 100%; height: 3px; background: var(--a); transform: none; animation: none !important; opacity: .9; }
+.tile:hover { transform: translateY(-4px); filter: none; border-color: var(--a); box-shadow: 0 10px 28px rgba(0,0,0,.5), 0 0 0 1px var(--a) inset; }
+.tile:hover::after, .tile:active::after { animation: none; }
+.tile:active { transform: translateY(-1px) scale(.985); }
+.tile .art { left: auto; right: 16px; top: 18px; width: min(46%, 20vh); transform: none; color: var(--a); stroke-width: 2.2; filter: none; animation: none; opacity: .95; transition: transform .3s cubic-bezier(.2, .8, .2, 1); }
+.tile:hover .art { scale: 1; transform: translateY(-3px) scale(1.06); }
+.tile.hero .art { width: min(34%, 32vh); right: 28px; top: 24px; }
+.tile .tl { font-weight: 600; letter-spacing: .09em; font-size: clamp(22px, 2.8vw, 32px); text-shadow: none; position: relative; }
+.tile.hero .tl { font-size: clamp(36px, 5vw, 56px); }
+.tiles.four .tl, .tiles.five .tl, .tiles.three .tl { font-size: clamp(22px, 2.8vw, 32px); }
+.tile .ts { color: var(--mute); opacity: 1; font-weight: 500; letter-spacing: .05em; position: relative; }
+.t-amber { --a: #e8a33d; } .t-blue { --a: #4aa8e0; } .t-red { --a: #e5574c; } .t-green { --a: #4cc07f; } .t-purple { --a: #9a82e6; } .t-teal { --a: #35c9bb; } .t-slate { --a: #8fa0b8; }
+.screen:not([hidden]) .tiles .tile { animation: tileIn2 .42s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes tileIn2 { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+.tiles .tile:nth-child(1) { animation-delay: .05s; } .tiles .tile:nth-child(2) { animation-delay: .1s; } .tiles .tile:nth-child(3) { animation-delay: .15s; } .tiles .tile:nth-child(4) { animation-delay: .2s; }
+.stg::before { background: radial-gradient(ellipse at 50% 45%, rgba(8,10,14,.62), rgba(8,10,14,.94)) !important; }
+.stg .deco .shard { opacity: .35; }
+.stage .head .h1 { letter-spacing: .1em; }
+.joinTile .art { right: 16px; top: 16px; width: min(24%, 15vh); }
+.joinTile .inp { background: rgba(0,0,0,.4); border-color: #28303d; }
+.tiles.five { grid-template-columns: repeat(4, 1fr); }
 </style>
 
 <div id="app">
@@ -494,7 +521,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
 
   <div id="banner"><div class="big" id="banBig"></div><div class="sub" id="banSub"></div></div>
   <div id="toast"></div>
-  <div id="verTag">v17 &middot; 15 Nov 2026</div>
+  <div id="verTag">v18 &middot; 15 Nov 2026</div>
 
   <!-- MAIN MENU -->
   <section id="scrMenu" class="screen stg" hidden>
@@ -513,11 +540,10 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   <section id="scrModes" class="screen stg" hidden>
     <div class="stage">
       <div class="head"><div><div class="eyebrow">Pick a game mode</div><div class="h1">Play</div></div><button class="btn ghost" id="mdBack" type="button">&lsaquo; Back</button></div>
-      <div class="tiles five">
+      <div class="tiles four">
         <button class="tile t-green" id="mAI" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="26" y="34" width="68" height="54" rx="12"/><circle cx="46" cy="60" r="7" fill="currentColor"/><circle cx="74" cy="60" r="7" fill="currentColor"/><path d="M46 78h28M60 34V18M14 56v14M106 56v14"/><circle cx="60" cy="13" r="5"/></svg><span class="tl">Vs AI</span><span class="ts">Solo duel</span></button>
         <button class="tile t-purple" id="mFFA" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M34 28a26 18 0 0 1 52 0z"/><path d="M34 28l24 22M86 28L62 50"/><circle cx="60" cy="54" r="4" fill="currentColor"/><path d="M14 106V76h18v30M32 106V68h20v38M52 106V82h16v24M68 106V70h20v36M88 106V84h18v22M8 106h104"/></svg><span class="tl">Free for all</span><span class="ts">City skydive, 3 bots</span></button>
         <button class="tile t-red" id="mBR" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="60" cy="60" r="48" stroke-dasharray="6 6" opacity=".7"/><circle cx="60" cy="60" r="28"/><path d="M60 42l11 24-11-6-11 6z" fill="currentColor"/><path d="M60 6v8M60 106v8M6 60h8M106 60h8"/></svg><span class="tl">Battle royale</span><span class="ts">20 bots, last one standing</span></button>
-        <button class="tile t-blue" id="mTeams" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="22" cy="40" r="9"/><path d="M8 78c0-12 6-18 14-18s14 6 14 18"/><circle cx="48" cy="40" r="9"/><path d="M34 78c0-12 6-18 14-18s14 6 14 18"/><circle cx="74" cy="40" r="9" fill="currentColor" opacity=".7"/><path d="M60 78c0-12 6-18 14-18s14 6 14 18" opacity=".7"/><circle cx="98" cy="40" r="9" fill="currentColor" opacity=".7"/><path d="M84 78c0-12 6-18 14-18s14 6 14 18" opacity=".7"/><path d="M10 100h100" opacity=".5"/></svg><span class="tl">2 vs 2</span><span class="ts">You and an AI ally</span></button>
         <button class="tile t-amber" id="mArcade" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="12" y="38" width="96" height="48" rx="24"/><path d="M38 50v24M26 62h24"/><circle cx="80" cy="56" r="4.5" fill="currentColor"/><circle cx="92" cy="68" r="4.5" fill="currentColor"/></svg><span class="tl">Arcade</span><span class="ts">Wild modes and power-ups</span></button>
       </div>
     </div>
@@ -541,9 +567,9 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     <div class="stage">
       <div class="head"><div><div class="eyebrow" id="dEyebrow">Play vs AI</div><div class="h1">Difficulty</div></div><button class="btn ghost" id="dBack" type="button">&lsaquo; Back</button></div>
       <div class="tiles three">
-        <button class="tile t-green" data-diff="Easy" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M30 92l30-18 30 18"/></svg><span class="tl">Easy</span><span class="ts">Slow and misses a lot</span></button>
-        <button class="tile t-amber" data-diff="Medium" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M30 92l30-18 30 18"/><path d="M30 68l30-18 30 18"/></svg><span class="tl">Medium</span><span class="ts">Takes cover, aims fair</span></button>
-        <button class="tile t-red" data-diff="Hard" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M30 92l30-18 30 18"/><path d="M30 68l30-18 30 18"/><path d="M30 44l30-18 30 18"/></svg><span class="tl">Hard</span><span class="ts">Aims, slides and builds</span></button>
+        <button class="tile t-green" data-diff="Easy" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M30 72l30-18 30 18"/></svg><span class="tl">Easy</span><span class="ts">Slow and misses a lot</span></button>
+        <button class="tile t-amber" data-diff="Medium" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M30 82l30-18 30 18"/><path d="M30 58l30-18 30 18"/></svg><span class="tl">Medium</span><span class="ts">Takes cover, aims fair</span></button>
+        <button class="tile t-red" data-diff="Hard" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M30 94l30-18 30 18"/><path d="M30 70l30-18 30 18"/><path d="M30 46l30-18 30 18"/></svg><span class="tl">Hard</span><span class="ts">Aims, slides and builds</span></button>
       </div>
       <div class="setrow" style="border:0;padding:0;justify-content:center;gap:18px"><span>Building</span><div class="seg" id="segBuild"><button type="button" data-v="1" class="on">Build</button><button type="button" data-v="0">Zero build</button></div></div>
     </div>
@@ -6756,7 +6782,6 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   $('rBack').addEventListener('click', function () { show('scrMenu'); });
   $('mPlay').addEventListener('click', function () { initAudio(); show('scrModes'); });
   $('mdBack').addEventListener('click', function () { show('scrMenu'); });
-  $('mTeams').addEventListener('click', function () { initAudio(); state.ffa = true; state.brSel = false; state.arcSel = 'teams'; $('dEyebrow').textContent = '2 VS 2. You and an AI ally'; show('scrDiff'); });
   $('mArcade').addEventListener('click', function () { initAudio(); show('scrArcade'); });
   $('aBack').addEventListener('click', function () { show('scrModes'); });
   document.querySelectorAll('[data-arc]').forEach(function (b) {
