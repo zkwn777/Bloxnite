@@ -101,10 +101,17 @@ button { font-family: inherit; color: inherit; cursor: pointer; }
 #hitmarker i:nth-child(4) { transform: translate(13px, 13px) rotate(45deg); }
 #hitmarker.show { opacity: 1; transition: none; }
 #hitmarker.head i { background: var(--gold); height: 4px; }
-#scope { position: absolute; inset: 0; display: none; background: radial-gradient(circle at 50% 50%, transparent 0, transparent 26vmin, #000 27vmin); }
-#scope::before, #scope::after { content: ""; position: absolute; background: #000; }
-#scope::before { left: 0; right: 0; top: 50%; height: 2px; }
-#scope::after { top: 0; bottom: 0; left: 50%; width: 2px; }
+#scope { position: absolute; inset: 0; display: none; pointer-events: none; }
+#scope svg { position: absolute; left: 50%; top: 50%; width: 64vmin; height: 64vmin; transform: translate(-50%, -50%); overflow: visible; }
+#scope .zt { position: absolute; left: 50%; top: calc(50% + 23vmin); transform: translateX(-50%); font-family: var(--display); font-size: 20px; letter-spacing: .12em; color: rgba(255,255,255,.7); text-shadow: 0 1px 2px #000; }
+#scope.k-sniper { background: radial-gradient(circle at 50% 50%, transparent 0, transparent 27vmin, #000 27.5vmin); }
+#scope.k-rail { background: radial-gradient(circle at 50% 50%, rgba(40,255,210,.07) 0, rgba(40,255,210,.07) 25vmin, #021210 25.5vmin); }
+#scope.k-dmr { background: radial-gradient(circle at 50% 50%, transparent 0, transparent 21vmin, #050505 21.5vmin); }
+#scope.k-bow { background: radial-gradient(circle at 50% 50%, transparent 0, transparent 29vmin, #1a1008 29.5vmin); }
+#scope.k-dmr .zt, #scope.k-rail .zt { top: calc(50% + 17vmin); }
+#scope.k-dot::before, #scope.k-holo::before { content: ""; position: absolute; left: 50%; top: 50%; width: 52vmin; height: 36vmin; transform: translate(-50%, -50%); border-radius: 14px; border: 3px solid rgba(10,12,16,.85); box-shadow: 0 0 0 120vmax rgba(0,0,0,.22); }
+#scope.k-holo::before { border-color: rgba(10,12,16,.45); box-shadow: 0 0 0 120vmax rgba(0,0,0,.14); }
+#scope.k-iron, #scope.k-bead, #scope.k-launcher { background: radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(0,0,0,.35) 100%); }
 #vignette { position: absolute; inset: 0; opacity: 0; transition: opacity .35s ease-out; background: radial-gradient(ellipse at center, transparent 45%, rgba(255,30,50,.6) 100%); }
 #vignette.show { opacity: 1; transition: none; }
 #vignette.low { opacity: .55; animation: pulse 1s ease-in-out infinite; }
@@ -441,7 +448,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
 
   <div id="banner"><div class="big" id="banBig"></div><div class="sub" id="banSub"></div></div>
   <div id="toast"></div>
-  <div id="verTag">v15 &middot; 15 Nov 2026</div>
+  <div id="verTag">v16 &middot; 15 Nov 2026</div>
 
   <!-- MAIN MENU -->
   <section id="scrMenu" class="screen" hidden>
@@ -595,7 +602,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
         <div class="setrow"><span>Shoot button size</span><input id="setFs" type="range" min="0.8" max="1.5" step="0.05"><output id="outFs"></output></div>
         <div class="sect">View</div>
         <div class="setrow"><span>Field of view</span><input id="setFov" type="range" min="60" max="100" step="1"><output id="outFov"></output></div>
-        <div class="setrow"><span>Scope zoom</span><input id="setZoom" type="range" min="1.5" max="6" step="0.1"><output id="outZoom"></output></div>
+        <div class="setrow"><span>Scope zoom strength</span><input id="setZoom" type="range" min="1.5" max="6" step="0.1"><output id="outZoom"></output></div>
         <div class="sect">Crosshair</div>
         <div class="setrow" style="align-items:flex-start">
           <div class="xprev"><div class="c" id="xPrev"></div></div>
@@ -672,6 +679,52 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     'Medkit': { cat: 'Utility', body: 0, head: 0, mag: 1, rate: 0.5, reload: 0, mode: 'heal', heal: 50, channel: 1.6, color: 0xd94141, vm: 'medkit', snd: 'reload', tag: 'Heals 50 HP' },
     'Grenade': { cat: 'Utility', body: 70, head: 70, mag: 2, rate: 0.9, reload: 0, mode: 'grenade', radius: 4, fuse: 1.7, color: 0x4a6b3a, vm: 'grenade', snd: 'swing', tag: 'Frag blast, 70 dmg' }
   };
+
+  /* ---- per-weapon sights: kind = look of the overlay, z = zoom, c = reticle colour, mask = full scope lens (hides the gun) ---- */
+  var SCOPES = {
+    'Sniper': { k: 'sniper', z: 6, mask: true, slow: 0.55 }, 'Rail Gun': { k: 'rail', z: 8, mask: true, c: '#35ffd6', slow: 0.5 },
+    'Marksman Rifle': { k: 'dmr', z: 4, mask: true, c: '#ff3b3b', slow: 0.65 }, 'Crossbow': { k: 'bow', z: 3, mask: true, slow: 0.7 },
+    'Assault Rifle': { k: 'dot', z: 1.5, c: '#ff3b3b' }, 'LMG': { k: 'dot', z: 1.4, c: '#ffb020' }, 'SMG': { k: 'dot', z: 1.5, c: '#3bff6a' },
+    'Burst Rifle': { k: 'holo', z: 1.8, c: '#9d8cff' }, 'Plasma Rifle': { k: 'holo', z: 2, c: '#ff4dd2' }, 'Energy Rifle': { k: 'holo', z: 1.8, c: '#22c8ff' },
+    'Glass Shard': { k: 'holo', z: 2.5, c: '#bff4ff' },
+    'Heavy Rifle': { k: 'iron', z: 1.3 }, 'Pistol': { k: 'iron', z: 1.25 }, 'Revolver': { k: 'iron', z: 1.4 }, 'Hand Cannon': { k: 'iron', z: 1.4 },
+    'Silenced Pistol': { k: 'iron', z: 1.3 }, 'Exo Gun': { k: 'iron', z: 1.3, c: '#c79bff' }, 'Machine Pistol': { k: 'iron', z: 1.2 }, 'Uzi': { k: 'iron', z: 1.2 },
+    'Shotgun': { k: 'bead', z: 1.2 }, 'Pump Shotgun': { k: 'bead', z: 1.2 }, 'Double Barrel': { k: 'bead', z: 1.15 }, 'Shorty': { k: 'bead', z: 1.15 },
+    'RPG': { k: 'launcher', z: 1.6, c: '#ffb020' }
+  };
+  Object.keys(SCOPES).forEach(function (n) {
+    var w = WEAPONS[n];
+    if (!w) return;
+    w.sc = SCOPES[n]; w.scope = true;
+    if (w.scopedSpread === undefined) w.scopedSpread = (w.spread || 0) * 0.35;
+  });
+  var SCOPE_SVG = {
+    sniper: '<g fill="#000" stroke="#000"><rect x="0" y="98.6" width="64" height="2.8"/><rect x="136" y="98.6" width="64" height="2.8"/><rect x="98.6" y="0" width="2.8" height="64"/><rect x="98.6" y="136" width="2.8" height="64"/>' +
+      '<line x1="64" y1="100" x2="136" y2="100" stroke-width=".7"/><line x1="100" y1="64" x2="100" y2="136" stroke-width=".7"/>' +
+      [72, 80, 88, 112, 120, 128].map(function (v) { return '<circle cx="' + v + '" cy="100" r="1.3"/><circle cx="100" cy="' + v + '" r="1.3"/>'; }).join('') + '</g>',
+    rail: '<g fill="none" stroke="var(--sc)" stroke-width="1"><circle cx="100" cy="100" r="70" stroke-dasharray="3 5" opacity=".6"/><circle cx="100" cy="100" r="5"/><line x1="30" y1="100" x2="92" y2="100"/><line x1="108" y1="100" x2="170" y2="100"/><line x1="100" y1="30" x2="100" y2="92"/><line x1="100" y1="108" x2="100" y2="170"/>' +
+      [120, 132, 144, 156].map(function (y, i) { return '<line x1="' + (96 - i) + '" y1="' + y + '" x2="' + (104 + i) + '" y2="' + y + '"/>'; }).join('') +
+      '<path d="M44 44h12M44 44v12M156 44h-12M156 44v12M44 156h12M44 156v-12M156 156h-12M156 156v-12" stroke-width="2"/></g>',
+    dmr: '<g fill="none" stroke="#000" stroke-width="1.2"><line x1="0" y1="100" x2="62" y2="100"/><line x1="138" y1="100" x2="200" y2="100"/><line x1="100" y1="38" x2="100" y2="62"/></g>' +
+      '<g fill="none" stroke="var(--sc)" stroke-width="1.8"><path d="M100 100 L88 118 M100 100 L112 118"/><line x1="92" y1="128" x2="108" y2="128"/><line x1="94" y1="138" x2="106" y2="138"/><line x1="96" y1="148" x2="104" y2="148"/></g><circle cx="100" cy="100" r="1.6" fill="var(--sc)"/>',
+    bow: '<g stroke="#000" stroke-width="1.6" fill="none"><line x1="0" y1="100" x2="86" y2="100"/><line x1="114" y1="100" x2="200" y2="100"/><line x1="100" y1="0" x2="100" y2="88"/></g>' +
+      '<g stroke="#000" stroke-width="1.4">' + [112, 126, 142, 160].map(function (y, i) { return '<line x1="' + (90 - i * 3) + '" y1="' + y + '" x2="' + (110 + i * 3) + '" y2="' + y + '"/>'; }).join('') + '<line x1="100" y1="100" x2="100" y2="165"/></g><circle cx="100" cy="100" r="1.6" fill="#000"/>',
+    dot: '<circle cx="100" cy="100" r="9" fill="var(--sc)" opacity=".22"/><circle cx="100" cy="100" r="3" fill="var(--sc)"/>',
+    holo: '<g fill="none" stroke="var(--sc)" stroke-width="1.6"><circle cx="100" cy="100" r="26"/><path d="M100 70v-8M100 130v8M70 100h-8M130 100h8" stroke-width="1.4"/></g><circle cx="100" cy="100" r="2.2" fill="var(--sc)"/>',
+    iron: '<g fill="#14171c" stroke="rgba(255,255,255,.55)" stroke-width="1"><rect x="52" y="116" width="26" height="30" rx="2"/><rect x="122" y="116" width="26" height="30" rx="2"/><path d="M96 100h8l1.6 40h-11.2z"/></g><circle cx="100" cy="102" r="1.3" fill="var(--sc, #fff)"/>',
+    bead: '<rect x="99.2" y="106" width="1.6" height="94" fill="#000" opacity=".55"/><circle cx="100" cy="100" r="3.6" fill="var(--sc, #ffd36b)" stroke="#000" stroke-width="1"/>',
+    launcher: '<g stroke="#000" stroke-width="1.2" fill="none"><line x1="10" y1="100" x2="90" y2="100"/><line x1="110" y1="100" x2="190" y2="100"/>' +
+      [20, 40, 60, 80].map(function (x) { return '<line x1="' + x + '" y1="96" x2="' + x + '" y2="104"/><line x1="' + (200 - x) + '" y1="96" x2="' + (200 - x) + '" y2="104"/>'; }).join('') +
+      [118, 136, 154].map(function (y, i) { return '<line x1="' + (92 - i * 2) + '" y1="' + y + '" x2="' + (108 + i * 2) + '" y2="' + y + '"/>'; }).join('') + '</g><path d="M100 99 L92 84 L108 84 Z" fill="var(--sc)" stroke="#000" stroke-width=".8"/>'
+  };
+  function scopeZoom(w) { return Math.max(1.1, Math.min(12, (w.sc ? w.sc.z : 1) * settings.zoom / 2.8)); }
+  function setScopeUi(w) {
+    var el = $('scope'), sc = w.sc;
+    if (!sc) { el.className = ''; el.innerHTML = ''; return; }
+    el.className = 'k-' + sc.k + (sc.mask ? ' mask' : '');
+    el.style.setProperty('--sc', sc.c || '#ff3b3b');
+    el.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + SCOPE_SVG[sc.k] + '</svg>' + (sc.mask ? '<div class="zt" id="scopeZ"></div>' : '');
+  }
   var HEAD_BONUS = 1.5;
   Object.keys(WEAPONS).forEach(function (n) {
     var w = WEAPONS[n];
@@ -3116,7 +3169,8 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     me.nextFire = 0;
     buildViewModel(w);
     var alt = $('bAlt');
-    if (w.scope) { $('bAltTxt').textContent = 'SCOPE'; alt.hidden = false; }
+    setScopeUi(w);
+    if (w.scope) { $('bAltTxt').textContent = w.sc && w.sc.mask ? 'SCOPE' : 'AIM'; alt.hidden = false; }
     else if (w.alt === 'block') { $('bAltTxt').textContent = 'BLOCK'; alt.hidden = false; }
     else { alt.hidden = true; }
     $('wName').textContent = me.wname;
@@ -3434,7 +3488,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     if (input.altReq) {
       input.altReq = false;
       if (inFight() && !me.dead) {
-        if (w.scope && !me.reloading) { me.scoped = !me.scoped; play('blip'); }
+        if (w.scope && !me.reloading) { me.scoped = !me.scoped; play('blip'); var zt = $('scopeZ'); if (zt) zt.textContent = scopeZoom(w).toFixed(1) + 'x'; }
         else if (w.alt === 'block' && t >= me.blockReadyAt) { me.blockUntil = t + 0.3; me.blockReadyAt = t + 0.9; play('swing', 0.6); }
       }
     }
@@ -3463,13 +3517,15 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
       }
     }
     if (w.scope) {
-      var want = me.scoped ? SCOPE_FOV : BASE_FOV;
+      var want = me.scoped ? BASE_FOV / scopeZoom(w) : BASE_FOV;
       if (Math.abs(camera.fov - want) > 0.1) {
         camera.fov = lerp(camera.fov, want, 1 - Math.exp(-dt * 16));
         camera.updateProjectionMatrix();
       }
     } else if (camera.fov !== BASE_FOV) { camera.fov = BASE_FOV; camera.updateProjectionMatrix(); }
-    $('scope').style.display = (me.scoped && inFight() && !me.dead) ? 'block' : 'none';
+    var scOn = me.scoped && inFight() && !me.dead;
+    $('scope').style.display = scOn ? 'block' : 'none';
+    $('crosshair').style.visibility = scOn ? 'hidden' : '';
     me.kick = Math.max(0, me.kick - dt * 6);
     if (me.equipT > 0) me.equipT = Math.max(0, me.equipT - dt / 0.3);
     if (muzzleT > 0) { muzzleT -= dt; if (muzzleT <= 0 && muzzle) muzzle.visible = false; }
@@ -4066,7 +4122,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     me.mult = tgtMult > me.mult ? tgtMult : lerp(me.mult, tgtMult, 1 - Math.exp(-dt * ((me.sj && !me.grounded) ? 0.8 : (t < (me.sjHold || 0) ? 1.6 : 7))));
     var spd = BASE_SPEED;
     if (me.weapon.slow && input.fire && me.ammo > 0 && !me.reloading) spd *= me.weapon.slow;
-    if (me.scoped) spd *= 0.6;
+    if (me.scoped) spd *= (me.weapon && me.weapon.sc && me.weapon.sc.slow) || 0.85;
     if (me.healing) spd *= 0.55;
     if (t < (me.hasteUntil || 0)) spd *= 1.4;
     var wx = 0, wz = 0;
@@ -6334,7 +6390,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
       camY = me.yaw; camP = me.pitch + kickPitch;
       if (me.landT > 0) camera.position.y -= Math.sin(me.landT / 0.35 * Math.PI) * 0.28;
       camera.rotation.set(camP, camY, me.dead ? 0.5 : (me.sliding ? -0.05 : (me.drop && me.drop.glide ? Math.sin(t * 1.3) * 0.05 : 0)));
-      vm.visible = !me.dead && !me.scoped && !me.build && !me.drop;
+      vm.visible = !me.dead && !(me.scoped && me.weapon.sc && me.weapon.sc.mask) && !me.build && !me.drop;
       // viewmodel animation
       var dip = 0, rx = me.kick * 0.1, ry = 0, rz = 0, px = 0.26, py = -0.25, pz = -0.52 + me.kick * 0.07;
       if (me.reloading) {
@@ -6588,7 +6644,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     setR('setSens', 'outSens', settings.sens, settings.sens.toFixed(1));
     setR('setFs', 'outFs', settings.fs, Math.round(settings.fs * 100) + '%');
     setR('setFov', 'outFov', settings.fov, String(settings.fov));
-    setR('setZoom', 'outZoom', settings.zoom, settings.zoom.toFixed(1) + 'x');
+    setR('setZoom', 'outZoom', settings.zoom, Math.round(settings.zoom / 2.8 * 100) + '%');
     setR('setXs', 'outXs', xh.size, String(xh.size));
     setR('setXg', 'outXg', xh.gap, String(xh.gap));
     setR('setXt', 'outXt', xh.thick, String(xh.thick));
@@ -6616,7 +6672,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   bindRange('setSens', 'outSens', 'sens', function (v) { return v.toFixed(1); });
   bindRange('setFs', 'outFs', 'fs', function (v) { return Math.round(v * 100) + '%'; }, applyFireScale);
   bindRange('setFov', 'outFov', 'fov', function (v) { return String(v); }, applyFov);
-  bindRange('setZoom', 'outZoom', 'zoom', function (v) { return v.toFixed(1) + 'x'; }, applyFov);
+  bindRange('setZoom', 'outZoom', 'zoom', function (v) { return Math.round(v / 2.8 * 100) + '%'; }, applyFov);
   bindRange('setXs', 'outXs', 'size', function (v) { return String(v); }, applyCrosshair, true);
   bindRange('setXg', 'outXg', 'gap', function (v) { return String(v); }, applyCrosshair, true);
   bindRange('setXt', 'outXt', 'thick', function (v) { return String(v); }, applyCrosshair, true);
