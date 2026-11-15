@@ -52,7 +52,7 @@ button { font-family: inherit; color: inherit; cursor: pointer; }
 #bFire.on { background: rgba(255,90,77,.7); }
 #bSlide { width: calc(80px * var(--k)); height: calc(80px * var(--k)); right: calc(env(safe-area-inset-right, 0px) + 150px * var(--k) + 14px); bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); }
 #bReload { width: calc(72px * var(--k)); height: calc(72px * var(--k)); right: calc(env(safe-area-inset-right, 0px) + 46px); bottom: calc(env(safe-area-inset-bottom, 0px) + 150px * var(--k) + 10px); }
-#bDrop { width: calc(64px * var(--k)); height: calc(64px * var(--k)); right: calc(env(safe-area-inset-right, 0px) + 46px + 72px * var(--k) + 12px); bottom: calc(env(safe-area-inset-bottom, 0px) + 150px * var(--k) + 14px); }
+#bDrop { width: calc(58px * var(--k)); height: calc(58px * var(--k)); left: calc(env(safe-area-inset-left, 0px) + 12px); top: calc(env(safe-area-inset-top, 0px) + 66px); bottom: auto; right: auto; }
 #bAlt { width: calc(72px * var(--k)); height: calc(72px * var(--k)); right: calc(env(safe-area-inset-right, 0px) + 270px * var(--k) + 10px); bottom: calc(env(safe-area-inset-bottom, 0px) + 126px * var(--k) + 10px); }
 #buildCol { position: absolute; right: calc(env(safe-area-inset-right, 0px) + 22px); top: calc(env(safe-area-inset-top, 0px) + 16px); display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
 #buildCol .cbtn { position: relative; width: calc(70px * var(--k)); height: calc(70px * var(--k)); }
@@ -539,7 +539,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
 
   <div id="banner"><div class="big" id="banBig"></div><div class="sub" id="banSub"></div></div>
   <div id="toast"></div>
-  <div id="verTag">v19 &middot; 15 Nov 2026</div>
+  <div id="verTag">v20 &middot; 15 Nov 2026</div>
 
   <!-- MAIN MENU -->
   <section id="scrMenu" class="screen stg" hidden>
