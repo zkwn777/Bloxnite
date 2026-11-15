@@ -1,4 +1,3 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Rivals Arena</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -53,7 +52,7 @@ button { font-family: inherit; color: inherit; cursor: pointer; }
 #bFire.on { background: rgba(255,90,77,.7); }
 #bSlide { width: calc(80px * var(--k)); height: calc(80px * var(--k)); right: calc(env(safe-area-inset-right, 0px) + 150px * var(--k) + 14px); bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); }
 #bReload { width: calc(72px * var(--k)); height: calc(72px * var(--k)); right: calc(env(safe-area-inset-right, 0px) + 46px); bottom: calc(env(safe-area-inset-bottom, 0px) + 150px * var(--k) + 10px); }
-#bDrop { width: calc(64px * var(--k)); height: calc(64px * var(--k)); right: calc(env(safe-area-inset-right, 0px) + 46px); bottom: calc(env(safe-area-inset-bottom, 0px) + 150px * var(--k) + 94px * var(--k) + 20px); }
+#bDrop { width: calc(64px * var(--k)); height: calc(64px * var(--k)); right: calc(env(safe-area-inset-right, 0px) + 46px + 72px * var(--k) + 12px); bottom: calc(env(safe-area-inset-bottom, 0px) + 150px * var(--k) + 14px); }
 #bAlt { width: calc(72px * var(--k)); height: calc(72px * var(--k)); right: calc(env(safe-area-inset-right, 0px) + 270px * var(--k) + 10px); bottom: calc(env(safe-area-inset-bottom, 0px) + 126px * var(--k) + 10px); }
 #buildCol { position: absolute; right: calc(env(safe-area-inset-right, 0px) + 22px); top: calc(env(safe-area-inset-top, 0px) + 16px); display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
 #buildCol .cbtn { position: relative; width: calc(70px * var(--k)); height: calc(70px * var(--k)); }
@@ -244,6 +243,137 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
 .slot.empty span { color: var(--mute); }
 #hotbar .slot.pop { animation: slotPop .35s ease-out; }
 @keyframes slotPop { 0% { transform: scale(1.18); border-color: #fff; } 100% { transform: scale(1); } }
+
+/* ================= v15: menu polish + motion ================= */
+@keyframes scrIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes railIn { from { transform: translateX(-46px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes rowIn { from { transform: translateX(-34px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes riseIn { from { transform: translateY(26px) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes spinCW { to { transform: rotate(360deg); } }
+@keyframes spinCCW { to { transform: rotate(-360deg); } }
+@keyframes drift { 0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--r, 12deg)); } 50% { transform: translate3d(0, -26px, 0) rotate(calc(var(--r, 12deg) + 4deg)); } }
+@keyframes shine { 0% { background-position: 160% 0; } 100% { background-position: -60% 0; } }
+@keyframes sweep { 0% { transform: translateX(-120%) skewX(-20deg); } 55%, 100% { transform: translateX(260%) skewX(-20deg); } }
+@keyframes ruleGrow { from { width: 0; } to { width: 64px; } }
+@keyframes bump { 0% { transform: scale(1); } 35% { transform: scale(1.35); color: var(--gold); } 100% { transform: scale(1); } }
+@keyframes feedIn { from { transform: translateX(-30px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes banPop { 0% { transform: scale(2.1); opacity: 0; letter-spacing: .5em; } 55% { transform: scale(.94); opacity: 1; } 100% { transform: scale(1); letter-spacing: .08em; } }
+@keyframes toastUp { from { transform: translate(-50%, 18px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+@keyframes titleIn { 0% { transform: scale(1.6); opacity: 0; letter-spacing: .3em; } 60% { transform: scale(.97); opacity: 1; } 100% { transform: scale(1); letter-spacing: .02em; } }
+@keyframes selPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(242,167,59,.55); } 50% { box-shadow: 0 0 0 8px rgba(242,167,59,0); } }
+@keyframes dotBlink { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@keyframes hpFlash { 0% { filter: brightness(2.2); } 100% { filter: none; } }
+@keyframes gridPan { from { background-position: 0 0, 0 0; } to { background-position: 64px 64px, 64px 64px; } }
+
+.screen:not([hidden]) { animation: scrIn .28s ease-out both; }
+.screen:not([hidden]) .rail { animation: railIn .42s cubic-bezier(.2, .8, .2, 1) both; }
+.screen:not([hidden]) .rail > * { animation: rowIn .45s cubic-bezier(.2, .8, .2, 1) both; }
+.rail > *:nth-child(1) { animation-delay: .06s !important; }
+.rail > *:nth-child(2) { animation-delay: .12s !important; }
+.rail > *:nth-child(3) { animation-delay: .18s !important; }
+.rail > *:nth-child(4) { animation-delay: .24s !important; }
+.rail > *:nth-child(5) { animation-delay: .30s !important; }
+.screen:not([hidden]) .mlist .mrow { animation: rowIn .45s cubic-bezier(.2, .8, .2, 1) both; }
+.mlist .mrow:nth-child(1) { animation-delay: .16s; }
+.mlist .mrow:nth-child(2) { animation-delay: .22s; }
+.mlist .mrow:nth-child(3) { animation-delay: .28s; }
+.mlist .mrow:nth-child(4) { animation-delay: .34s; }
+.mlist .mrow:nth-child(5) { animation-delay: .40s; }
+.screen:not([hidden]) .rule { animation: ruleGrow .6s .2s cubic-bezier(.2, .8, .2, 1) both; }
+
+/* backdrop: slow grid + a vignette that sits over the 3D scene */
+.screen:not(.scrim):not(#scrSettings):not(#scrLoad):not(#scrPause)::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(8,10,14,.92) 0%, rgba(8,10,14,.55) 45%, rgba(8,10,14,.1) 100%),
+    radial-gradient(ellipse at 78% 50%, rgba(242,167,59,.16), transparent 60%);
+}
+.deco { position: absolute; top: 0; bottom: 0; right: 0; width: 64%; pointer-events: none; overflow: hidden; }
+.deco::before { content: ""; position: absolute; inset: -64px; opacity: .5;
+  background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size: 64px 64px, 64px 64px; animation: gridPan 6s linear infinite; transform: perspective(700px) rotateX(58deg) translateY(30%); transform-origin: 50% 100%; }
+.deco .ring { position: absolute; right: 14%; top: 50%; width: 52vmin; height: 52vmin; margin-top: -26vmin; border-radius: 9999px; border: 2px dashed rgba(242,167,59,.55); animation: spinCW 26s linear infinite; }
+.deco .ring.r2 { right: calc(14% + 8vmin); width: 36vmin; height: 36vmin; margin-top: -18vmin; border: 2px solid rgba(76,195,255,.4); border-top-color: transparent; border-bottom-color: transparent; animation: spinCCW 14s linear infinite; }
+.deco .ring.r3 { right: calc(14% + 17vmin); width: 18vmin; height: 18vmin; margin-top: -9vmin; border: 3px solid rgba(255,90,77,.5); border-left-color: transparent; animation: spinCW 7s linear infinite; }
+.deco .shard { position: absolute; width: 90px; height: 240px; --r: 12deg; background: linear-gradient(180deg, rgba(242,167,59,.28), rgba(242,167,59,0)); clip-path: polygon(50% 0, 100% 100%, 0 100%); animation: drift 7s ease-in-out infinite; }
+.deco .shard.s1 { right: 8%; top: 12%; }
+.deco .shard.s2 { right: 34%; top: 58%; --r: -18deg; width: 60px; height: 160px; animation-duration: 9s; background: linear-gradient(180deg, rgba(76,195,255,.3), rgba(76,195,255,0)); }
+.deco .shard.s3 { right: 52%; top: 18%; --r: 30deg; width: 44px; height: 120px; animation-duration: 6s; background: linear-gradient(180deg, rgba(255,90,77,.3), rgba(255,90,77,0)); }
+.deco .cross { position: absolute; right: calc(14% + 26vmin); top: 50%; width: 0; height: 0; }
+.deco .cross::before, .deco .cross::after { content: ""; position: absolute; background: rgba(255,255,255,.35); }
+.deco .cross::before { left: -34px; width: 68px; height: 2px; top: -1px; }
+.deco .cross::after { top: -34px; height: 68px; width: 2px; left: -1px; }
+
+.title { background: linear-gradient(100deg, #fff 30%, var(--acc) 48%, #fff 66%); background-size: 260% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shine 5s ease-in-out infinite; }
+#scrEnd .title { animation: titleIn .7s cubic-bezier(.2, .9, .2, 1) both; background: none; -webkit-background-clip: border-box; background-clip: border-box; }
+#scrEnd .h1 { animation: riseIn .6s .35s both; }
+
+/* rows: counter badge, slide on hover, glowing bar, arrow nudge */
+.mlist { counter-reset: row; }
+.mrow { position: relative; overflow: hidden; transition: background .18s, border-color .18s, transform .18s; gap: 14px; }
+.mrow > span:first-child { flex: 1; min-width: 0; }
+.mrow::before { counter-increment: row; content: "0" counter(row); font-family: var(--display); font-size: 18px; color: var(--mute); letter-spacing: .1em; order: -1; min-width: 26px; transition: color .18s; }
+.mrow[data-arc]::before, .mrow[data-diff]::before { content: ""; min-width: 0; }
+.mrow::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(242,167,59,.22), transparent 70%); transform: translateX(-102%); transition: transform .28s cubic-bezier(.2, .8, .2, 1); pointer-events: none; }
+.mrow:hover::after, .mrow:active::after { transform: none; }
+.mrow:hover::before, .mrow:active::before { color: var(--acc); }
+.mrow:hover { transform: translateX(6px); }
+.mrow:active { transform: translateX(10px) scale(.985); }
+.mrow .arr { transition: transform .2s, color .2s; }
+.mrow:hover .arr, .mrow:active .arr { transform: translateX(6px); color: var(--acc); }
+
+.btn { position: relative; overflow: hidden; transition: transform .15s, background .18s, border-color .18s, filter .18s; }
+.btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn:active { transform: translateY(1px) scale(.97); }
+.btn.pri::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent); animation: sweep 3.4s ease-in-out infinite; pointer-events: none; }
+.btn[disabled]::after { display: none; }
+.hint { animation: scrIn 1s .5s both; }
+.inp { transition: border-color .2s, box-shadow .2s; }
+.inp:focus { box-shadow: 0 0 0 4px rgba(242,167,59,.2); }
+.dot.wait { animation: dotBlink 1s ease-in-out infinite; }
+.panel { animation: riseIn .5s .15s both; }
+.roomCode { animation: titleIn .7s cubic-bezier(.2, .9, .2, 1) both; }
+.seg button { transition: background .18s, color .18s, transform .12s; }
+.seg button:active { transform: scale(.94); }
+
+/* map vote + loadout */
+.screen:not([hidden]) .mcard { animation: riseIn .5s cubic-bezier(.2, .8, .2, 1) both; transition: transform .2s, border-color .2s, box-shadow .2s; }
+.mcard:nth-child(1) { animation-delay: .05s; } .mcard:nth-child(2) { animation-delay: .12s; } .mcard:nth-child(3) { animation-delay: .19s; } .mcard:nth-child(4) { animation-delay: .26s; }
+.mcard:hover { transform: translateY(-6px); border-color: var(--acc); }
+.mcard:active { transform: scale(.97); }
+.mcard.sel { border-color: var(--acc); animation: selPulse 1.2s ease-in-out infinite; }
+.mcard canvas { transition: transform .4s; }
+.mcard:hover canvas { transform: scale(1.04); }
+.mcard .votes { transition: transform .2s; }
+.tbar i { transition: width .25s linear; }
+#voteTimer, #loadTimer { display: inline-block; }
+.screen:not([hidden]) .wgrid > * { animation: riseIn .4s cubic-bezier(.2, .8, .2, 1) both; }
+.wgrid > *:nth-child(2) { animation-delay: .04s; } .wgrid > *:nth-child(3) { animation-delay: .08s; } .wgrid > *:nth-child(4) { animation-delay: .12s; } .wgrid > *:nth-child(5) { animation-delay: .16s; } .wgrid > *:nth-child(6) { animation-delay: .2s; } .wgrid > *:nth-child(n+7) { animation-delay: .24s; }
+.wgrid > * { transition: transform .15s, border-color .15s; }
+.wgrid > *:active { transform: scale(.96); }
+.sect { animation: scrIn .6s both; }
+
+/* HUD motion */
+.bump { animation: bump .32s ease-out; display: inline-block; }
+#feed div { animation: feedIn .22s ease-out, feedOut 4.2s linear forwards; }
+#banner.show .big { animation: banPop .45s cubic-bezier(.2, .9, .2, 1) both; }
+#banner.show .sub { animation: rowIn .4s .12s both; }
+#toast.show { animation: toastUp .22s ease-out both; }
+.cbtn { transition: transform .1s, background .12s; }
+.cbtn:active, .cbtn.on { transform: scale(.9); }
+#buildPieces { transition: opacity .2s, transform .2s; }
+.slot { transition: transform .15s, border-color .15s, background .15s; }
+.slot.sel { transform: translateY(-4px); }
+#hpFill { transition: width .25s ease-out, background .3s; }
+#hpFill.hit { animation: hpFlash .3s ease-out; }
+.scoreRow .side b { display: inline-block; }
+#pauseBtn, #loadoutBtn { transition: transform .12s, background .15s; }
+#pauseBtn:active, #loadoutBtn:active { transform: scale(.92); }
+#ammoTxt.bump { animation-duration: .18s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .screen *, .screen, .deco *, .deco::before { animation-duration: .01s !important; animation-iteration-count: 1 !important; }
+}
+@media (max-width: 760px) { .deco { opacity: .5; } }
 </style>
 
 <div id="app">
@@ -336,6 +466,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
         <button class="mrow" id="mAI" type="button"><span><span class="mt">Play vs AI</span><small>Solo duel against a bot</small></span><span class="arr">&rsaquo;</span></button>
         <button class="mrow" id="mFFA" type="button"><span><span class="mt">Free for all</span><small>Skydive into a huge city with 3 bots. Loot chests, snipe from roofs</small></span><span class="arr">&rsaquo;</span></button>
         <button class="mrow" id="mBR" type="button"><span><span class="mt">Battle royale</span><small>You and 20 bots on a huge island. Last one standing wins</small></span><span class="arr">&rsaquo;</span></button>
+        <button class="mrow" id="mTeams" type="button"><span><span class="mt">2 vs 2</span><small>You and an AI ally against two AI. First team to 15</small></span><span class="arr">&rsaquo;</span></button>
         <button class="mrow" id="mArcade" type="button"><span><span class="mt">Arcade modes</span><small>Gun Game, Instagib, Low Gravity, Headshots Only with power-ups</small></span><span class="arr">&rsaquo;</span></button>
       </div>
       <div><button class="btn ghost" id="mdBack" type="button">Back</button></div>
@@ -455,6 +586,8 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     <div class="sheet" style="max-width:820px;margin:0 auto">
       <div class="sheetHead"><div class="h1">Settings</div><button class="btn pri" id="setBack" type="button">Done</button></div>
       <div class="scroll-ok" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding-right:6px">
+        <div class="sect">Player</div>
+        <div class="setrow"><span>Username</span><input id="setName" type="text" maxlength="12" placeholder="YOU" autocomplete="off" style="flex:1;max-width:240px;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#fff;padding:8px 12px;font-size:18px;text-transform:uppercase"></div>
         <div class="sect">Controls</div>
         <div class="setrow"><span>Look sensitivity</span><input id="setSens" type="range" min="1" max="10" step="0.5"><output id="outSens"></output></div>
         <div class="setrow"><span>Shoot button size</span><input id="setFs" type="range" min="0.8" max="1.5" step="0.05"><output id="outFs"></output></div>
@@ -622,7 +755,9 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     m.receiveShadow = true;
     world.group.add(m);
     world.solids.push(m);
-    world.colliders.push({ minX: cx - w / 2, maxX: cx + w / 2, minZ: cz - d / 2, maxZ: cz + d / 2, top: y0 + h });
+    var col = { minX: cx - w / 2, maxX: cx + w / 2, minZ: cz - d / 2, maxZ: cz + d / 2, top: y0 + h };
+    if (opts.under) col.bot = y0;
+    world.colliders.push(col);
     if (opts.edge !== undefined) {
       var e = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: opts.edge }));
       e.position.set(cx, y0 + h / 2, cz);
@@ -814,16 +949,17 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   }
 
   function buildArena(floorMat, wallMat, wallEdge) {
-    var floor = new THREE.Mesh(new THREE.PlaneGeometry(46, 46), floorMat);
+    var H = world.half, W2 = H * 2, WE = H + 0.5;
+    var floor = new THREE.Mesh(new THREE.PlaneGeometry(W2, W2), floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
     floor.userData.solid = true;
     world.group.add(floor);
     world.solids.push(floor);
-    addSolid(0, -22.5, 47, 1, 4, wallMat, { edge: wallEdge });
-    addSolid(0, 22.5, 47, 1, 4, wallMat, { edge: wallEdge });
-    addSolid(-22.5, 0, 1, 47, 4, wallMat, { edge: wallEdge });
-    addSolid(22.5, 0, 1, 47, 4, wallMat, { edge: wallEdge });
+    addSolid(0, -WE, W2 + 1, 1, 4, wallMat, { edge: wallEdge });
+    addSolid(0, WE, W2 + 1, 1, 4, wallMat, { edge: wallEdge });
+    addSolid(-WE, 0, 1, W2 + 1, 4, wallMat, { edge: wallEdge });
+    addSolid(WE, 0, 1, W2 + 1, 4, wallMat, { edge: wallEdge });
   }
 
   function lights(amb, ambI, sun, sunI, sunPos, hemiSky, hemiGround, hemiI) {
@@ -833,7 +969,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     s.castShadow = true;
     s.shadow.mapSize.set(1024, 1024);
     var sc = s.shadow.camera;
-    sc.left = -27; sc.right = 27; sc.top = 27; sc.bottom = -27; sc.near = 1; sc.far = 90;
+    var SH = world.half + 5; sc.left = -SH; sc.right = SH; sc.top = SH; sc.bottom = -SH; sc.near = 1; sc.far = 110;
     if (world.big) {
       s.shadow.mapSize.set(1024, 1024);
       sc.left = -46; sc.right = 46; sc.top = 46; sc.bottom = -46; sc.near = 10; sc.far = 330;
@@ -890,6 +1026,54 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     for (var i = 0; i < 12; i++) { g.beginPath(); g.moveTo(rand(0, s), rand(0, s)); g.lineTo(rand(0, s), rand(0, s)); g.stroke(); }
   }
 
+
+  /* Raised slab you can walk and shoot under (underside >= 2 m), with four support legs. */
+  function addPlat(cx, cz, w, d, top, th, mat, edge) {
+    addSolid(cx, cz, w, d, th, mat, { y0: top - th, under: true, edge: edge });
+    var lg = lam(0x3a424e), lx = w / 2 - 0.45, lz = d / 2 - 0.45;
+    if (Math.abs(w - d) < 2) { [[-1, -1], [1, 1], [-1, 1], [1, -1]].forEach(function (q) { addSolid(cx + q[0] * lx, cz + q[1] * lz, 0.6, 0.6, top - th, lg, {}); }); }
+    else if (d > w) { addSolid(cx, cz - lz, 0.6, 0.6, top - th, lg, {}); addSolid(cx, cz + lz, 0.6, 0.6, top - th, lg, {}); }
+    else { addSolid(cx - lx, cz, 0.6, 0.6, top - th, lg, {}); addSolid(cx + lx, cz, 0.6, 0.6, top - th, lg, {}); }
+  }
+  /* A walkable slope. dir 0: rises toward +x, 1: toward -x, 2: toward +z, 3: toward -z. Thin slab, open underneath. */
+  function addRamp(minX, maxX, minZ, maxZ, dir, base, rise, mat) {
+    var len = dir < 2 ? maxX - minX : maxZ - minZ, wid = dir < 2 ? maxZ - minZ : maxX - minX;
+    var ang = Math.atan2(rise, len), th = 0.3, hyp = Math.sqrt(len * len + rise * rise);
+    var geo = dir < 2 ? new THREE.BoxGeometry(hyp, th, wid) : new THREE.BoxGeometry(wid, th, hyp);
+    var m = new THREE.Mesh(geo, mat);
+    var cx = (minX + maxX) / 2, cz = (minZ + maxZ) / 2, cy = base + rise / 2 - th / (2 * Math.cos(ang));
+    m.position.set(cx, cy, cz);
+    if (dir === 0) m.rotation.z = ang; else if (dir === 1) m.rotation.z = -ang; else if (dir === 2) m.rotation.x = -ang; else m.rotation.x = ang;
+    m.castShadow = true; m.receiveShadow = true;
+    world.group.add(m);
+    world.colliders.push({ minX: minX, maxX: maxX, minZ: minZ, maxZ: maxZ, ramp: true, dir: dir, base: base, rise: rise, top: base + rise, bot: base });
+    var lg = lam(0x3a424e), n = Math.max(1, Math.floor(len / 3.2));
+    for (var q = 1; q <= n; q++) {
+      var f = q / (n + 1), hh = base + rise * f - th;
+      if (hh < 0.5) continue;
+      var a = dir === 0 ? minX + len * f : dir === 1 ? maxX - len * f : dir === 2 ? minZ + len * f : maxZ - len * f;
+      var px = dir < 2 ? a : cx, pz = dir < 2 ? cz : a;
+      var l1 = dir < 2 ? [px, minZ + 0.2] : [minX + 0.2, pz], l2 = dir < 2 ? [px, maxZ - 0.2] : [maxX - 0.2, pz];
+      addDecor(l1[0], hh / 2, l1[1], 0.22, hh, 0.22, lg); addDecor(l2[0], hh / 2, l2[1], 0.22, hh, 0.22, lg);
+    }
+  }
+  /* Point-symmetric copy of an ops list (p = platform, r = ramp). */
+  function mirrorOps(list) {
+    var out = [];
+    list.forEach(function (o) {
+      out.push(o);
+      if (o[0] === 'p') { if (!(o[1] === 0 && o[2] === 0)) out.push(['p', -o[1], -o[2], o[3], o[4], o[5], o[6], o[7]]); }
+      else out.push(['r', -o[2], -o[1], -o[4], -o[3], o[5] ^ 1, o[6], o[7], o[8]]);
+    });
+    return out;
+  }
+  function addOps(M, ops, edge) {
+    for (var i = 0; i < ops.length; i++) {
+      var o = ops[i];
+      if (o[0] === 'p') addPlat(o[1], o[2], o[3], o[4], o[5], o[6], M[o[7]], edge);
+      else addRamp(o[1], o[2], o[3], o[4], o[5], o[6], o[7], M[o[8]]);
+    }
+  }
   function mirror(list) {
     var out = [];
     for (var i = 0; i < list.length; i++) {
@@ -1089,8 +1273,303 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
           var c2 = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.2, 8), snowcap); c2.position.set(tp[i][0], 2.6, tp[i][1]); world.group.add(c2);
         }
       }
+    },
+    'Lava Forge': {
+      desc: 'Obsidian slabs between glowing lava channels. Hold the high rocks.',
+      tags: ['HOT', 'COVER'], c1: '#ff7a2b', c2: '#2a0d08', edge: 0xff5a14,
+      items: mirror([
+        [0, 9, 10, 1.2, 1.0, 'obs'], [-9, 3, 1.5, 6, 2.4, 'rock'], [8, -3, 3, 3, 1.0, 'obs'], [14, 12, 2, 2, 2.4, 'rock'],
+        [-14, -9, 4, 1.2, 1.0, 'obs'], [3, 17, 6, 1, 1.6, 'obs'], [0, 0, 2, 2, 3.0, 'rock']
+      ]),
+      spawnSets: stdSpawns(),
+      env: function () {
+        var hor = 0x4a1a0c;
+        scene.background = new THREE.Color(hor); scene.fog = new THREE.Fog(hor, 22, 85);
+        makeSky(0x140404, 0x8a2f12, false);
+        lights(0xff9a70, 0.5, 0xff8a4a, 0.85, [10, 22, -8], 0xff7a3a, 0x2a0a05, 0.5);
+        var floorB = function (g, s) { texBrick(g, s, '#2b1b1a', '#0e0707'); };
+        var wallB = function (g, s) { texBrick(g, s, '#4a2a22', '#1a0c08'); };
+        buildArena(texMat(canvasTex(256, floorB, 6, 6)), texMat(canvasTex(128, wallB, 10, 2)), 0xff5a14);
+        return { obs: texMat(canvasTex(128, function (g, s) { texPanel(g, s, '#1a1212', '#ff6a1a'); }, 1, 1)), rock: texMat(canvasTex(128, texStone, 1, 1), { color: 0x9a6a58 }) };
+      },
+      decor: function () {
+        var lava = bas(0xff5a14);
+        addDecor(-17, 0.03, 0, 2.2, 0.02, 42, lava); addDecor(17, 0.03, 0, 2.2, 0.02, 42, lava); addDecor(0, 0.03, -17, 40, 0.02, 1.6, lava);
+        for (var i = -3; i <= 3; i++) { addGlow(-17, 0.9, i * 6, 2.6, 0xff6a1a); addGlow(17, 0.9, i * 6, 2.6, 0xff6a1a); }
+        var spike = lam(0x3a2420);
+        for (var j = 0; j < 8; j++) { var sp = new THREE.Mesh(new THREE.ConeGeometry(0.6, 2.4 + (j % 3), 6), spike); sp.position.set(j % 2 ? 21.2 : -21.2, 1.6, -18 + j * 5); world.group.add(sp); }
+      }
+    },
+    'Jungle Temple': {
+      desc: 'Mossy ruins and golden altars. Short lanes, lots of corners.',
+      tags: ['RUINS', 'CORNERS'], c1: '#6fd17a', c2: '#14301a',
+      items: mirror([
+        [-8, 7, 4, 1.2, 1.2, 'stone'], [6, 10, 1.2, 5, 2.4, 'stone'], [-14, -4, 2, 2, 2.8, 'pil'], [0, 4, 3, 3, 0.9, 'gold'],
+        [12, 3, 3, 1.2, 1.0, 'stone'], [-5, 16, 2, 2, 1.4, 'stone'], [16, -12, 1.4, 1.4, 3.0, 'pil']
+      ]),
+      spawnSets: stdSpawns(),
+      env: function () {
+        var hor = 0xc4e8c8;
+        scene.background = new THREE.Color(hor); scene.fog = new THREE.Fog(hor, 26, 90);
+        makeSky(0x4aa8d8, hor, false);
+        addGlow(30, 60, -40, 30, 0xfff4c0);
+        lights(0xeaffea, 0.6, 0xfff4d0, 0.95, [12, 26, 6], 0xcfffe0, 0x4a6a3a, 0.5);
+        buildArena(texMat(canvasTex(256, texGrass, 6, 6)), texMat(canvasTex(128, texStone, 10, 2), { color: 0x9ab890 }));
+        return { stone: texMat(canvasTex(128, texStone, 2, 1), { color: 0xb8c8a0 }), pil: texMat(canvasTex(128, texStone, 1, 2), { color: 0x8fae80 }), gold: lam(0xe3b341) };
+      },
+      decor: function () {
+        var trunk = lam(0x5a3c24), leaf = lam(0x2f7a38), leaf2 = lam(0x3f9a45);
+        var tp = [[-20, 8], [20, -8], [-20, -12], [20, 12], [-12, -20], [12, 20], [-3, 20], [3, -20]];
+        for (var i = 0; i < tp.length; i++) {
+          addDecorCyl(tp[i][0], 1.3, tp[i][1], 0.18, 0.28, 2.6, trunk, 7);
+          addDecorSphere(tp[i][0], 3.1, tp[i][1], 1.3, i % 2 ? leaf : leaf2);
+          addDecorSphere(tp[i][0] + 0.6, 2.6, tp[i][1] + 0.4, 0.9, leaf);
+        }
+      }
+    },
+    'Orbital Station': {
+      desc: 'Zero-drama space deck. Pods and tanks, a planet outside.',
+      tags: ['SCI-FI', 'OPEN'], c1: '#6ad6ff', c2: '#0b1226', edge: 0x38d0ff,
+      items: mirror([
+        [0, 8, 8, 1, 1.0, 'pod'], [-10, 4, 2, 2, 2.6, 'tank'], [9, -4, 3, 3, 1.0, 'pod'], [14, 12, 1.2, 6, 2.4, 'pod'],
+        [-4, 17, 4, 1, 1.2, 'pod'], [-16, -8, 2, 2, 1.4, 'tank'], [0, 0, 1.4, 1.4, 2.8, 'tank']
+      ]),
+      spawnSets: stdSpawns(),
+      env: function () {
+        var hor = 0x070b1c;
+        scene.background = new THREE.Color(hor); scene.fog = new THREE.Fog(hor, 40, 120);
+        makeSky(0x000208, 0x0a1230, true);
+        lights(0xaab8ff, 0.7, 0xffffff, 0.9, [-10, 22, 14], 0x6a88ff, 0x1a2236, 0.5);
+        var fl = function (g, s) { texPanel(g, s, '#d4dae6', '#38d0ff'); };
+        var wl = function (g, s) { texPanel(g, s, '#a9b3c4', '#38d0ff'); };
+        buildArena(texMat(canvasTex(256, fl, 4, 4)), texMat(canvasTex(128, wl, 10, 2)), 0x38d0ff);
+        return { pod: texMat(canvasTex(128, function (g, s) { texPanel(g, s, '#e6ebf3', '#ff8a3a'); }, 1, 1)), tank: lam(0xcfd8e6) };
+      },
+      decor: function () {
+        addDecorSphere(0, 30, -75, 24, lam(0x2f6fd0)); addDecorSphere(18, 34, -70, 6, lam(0xd8c8a0));
+        var strip = bas(0x38d0ff);
+        for (var i = -3; i <= 3; i++) { addDecor(i * 6, 3.6, -21.9, 0.3, 0.25, 0.1, strip); addDecor(i * 6, 3.6, 21.9, 0.3, 0.25, 0.1, strip); }
+        addDecor(0, 0.03, 0, 0.3, 0.02, 40, bas(0x0a4a68)); addDecor(0, 0.03, 0, 40, 0.02, 0.3, bas(0x0a4a68));
+      }
+    },
+    'Candy Park': {
+      desc: 'Sugar blocks and lollipop trees. Bright, bouncy and sneaky.',
+      tags: ['FUN', 'COVER'], c1: '#ff9ad0', c2: '#5a2a60',
+      items: mirror([
+        [-7, 8, 3, 3, 1.0, 'cn1'], [8, 10, 1.4, 6, 2.2, 'cn2'], [-14, -3, 2, 2, 2.6, 'cn3'], [1, 4, 4, 1.2, 1.2, 'cn2'],
+        [13, 2, 2.4, 2.4, 0.9, 'cn1'], [-4, 16, 5, 1.2, 1.4, 'cn3'], [16, -12, 2, 2, 2.2, 'cn1']
+      ]),
+      spawnSets: stdSpawns(),
+      env: function () {
+        var hor = 0xffe3f3;
+        scene.background = new THREE.Color(hor); scene.fog = new THREE.Fog(hor, 30, 100);
+        makeSky(0xff9ad8, hor, false);
+        addGlow(-30, 55, 50, 34, 0xfff6e0);
+        lights(0xfff0fa, 0.7, 0xfff6e8, 0.85, [-10, 24, 12], 0xffe0f4, 0xd090c0, 0.55);
+        var chk = function (g, s) { var n = 4, c = s / n; for (var i = 0; i < n; i++) for (var j = 0; j < n; j++) { g.fillStyle = (i + j) % 2 ? '#ffc6e2' : '#fff6fb'; g.fillRect(i * c, j * c, c, c); } };
+        var strp = function (g, s) { for (var i = 0; i < 8; i++) { g.fillStyle = i % 2 ? '#ff5fa2' : '#ffffff'; g.fillRect(i * s / 8, 0, s / 8, s); } };
+        buildArena(texMat(canvasTex(256, chk, 6, 6)), texMat(canvasTex(128, strp, 6, 1)));
+        function solid(c) { return function (g, s) { g.fillStyle = c; g.fillRect(0, 0, s, s); g.fillStyle = 'rgba(255,255,255,0.35)'; g.fillRect(0, 0, s, s * 0.14); g.fillRect(0, 0, s * 0.1, s); }; }
+        return { cn1: texMat(canvasTex(64, solid('#ff7ab8'), 1, 1)), cn2: texMat(canvasTex(64, solid('#6fe0c0'), 1, 1)), cn3: texMat(canvasTex(64, solid('#ffd45a'), 1, 1)) };
+      },
+      decor: function () {
+        var stick = lam(0xffffff), tops = [lam(0xff5fa2), lam(0x5fd0ff), lam(0xffd45a), lam(0xa96bff)];
+        var tp = [[-20, 8], [20, -8], [-20, -12], [20, 12], [-12, -20], [12, 20], [-3, 20], [3, -20]];
+        for (var i = 0; i < tp.length; i++) { addDecorCyl(tp[i][0], 1.2, tp[i][1], 0.1, 0.1, 2.4, stick, 6); addDecorSphere(tp[i][0], 2.8, tp[i][1], 0.9, tops[i % 4]); }
+      }
     }
   };
+
+  /* ================================================================
+     MAP REDESIGN (v15): every classic map now has its own footprint, vertical play
+     (ramps, raised walk-under platforms, towers) and spawn plan.
+  ================================================================ */
+  function ringTrees(list, trunkM, leafM, leafM2, h) {
+    for (var i = 0; i < list.length; i++) {
+      addDecorCyl(list[i][0], h / 2, list[i][1], 0.18, 0.28, h, trunkM, 7);
+      addDecorSphere(list[i][0], h + 0.5, list[i][1], 1.3, i % 2 ? leafM : leafM2);
+    }
+  }
+  Object.assign(MAPS['Desert Outpost'], {
+    desc: 'Big canyon arena. Climb the central mesa or hold the watch posts.', tags: ['MESA', 'CANYON'], half: 26,
+    items: mirror([
+      [0, 0, 10, 10, 3.4, 'wall'], [-14, 14, 2, 16, 3.0, 'pillar'], [-7, -12, 2.4, 2.4, 2.8, 'pillar'], [9, -18, 2, 2, 2.2, 'pillar'],
+      [-19, -14, 3, 1.2, 1.0, 'crate'], [5, 12, 2.5, 2.5, 1.0, 'crate'], [16, 4, 1.6, 1.6, 2.6, 'pillar'], [-9, -7, 2, 2, 1.0, 'crate']
+    ]),
+    ops: mirrorOps([['r', -13, -5, -2.5, 2.5, 0, 0, 3.4, 'wall'], ['p', 19, -6, 5, 5, 3.0, 0.5, 'wall'], ['r', 17.5, 20.5, -14.5, -8.5, 2, 0, 3.0, 'wall']]),
+    spawnSets: [[[0, 23], [0, -23]], [[-21, 19], [21, -19]]],
+    decor: function () {
+      var cactus = lam(0x4f8a45), band = lam(0xa94a2c), cloth = lam(0xc0392b), pole = lam(0x5a3d22);
+      var cp = [[-23, 18], [23, -18], [-24, -6], [24, 7], [-12, -24], [12, 24], [-22, -20], [22, 20], [3, 24], [-3, -24]];
+      for (var i = 0; i < cp.length; i++) {
+        addDecorCyl(cp[i][0], 0.8, cp[i][1], 0.22, 0.26, 1.6, cactus, 8);
+        addDecorCyl(cp[i][0] + 0.35, 1.0, cp[i][1], 0.12, 0.12, 0.6, cactus, 6);
+        addDecorSphere(cp[i][0], 1.62, cp[i][1], 0.22, cactus);
+      }
+      addDecor(0, 2.0, 26.6, 53, 0.25, 0.1, band); addDecor(0, 2.0, -26.6, 53, 0.25, 0.1, band);
+      [[-4.6, -4.6], [4.6, 4.6], [-4.6, 4.6], [4.6, -4.6]].forEach(function (q) {
+        addDecorCyl(q[0], 4.2, q[1], 0.06, 0.06, 1.6, pole, 5); addDecor(q[0] + 0.5, 4.5, q[1], 1.0, 0.6, 0.04, cloth);
+      });
+    }
+  });
+  Object.assign(MAPS['Cyber Lanes'], {
+    desc: 'Tight arena split in three lanes, with a neon catwalk over the middle.', tags: ['LANES', 'CATWALK'], half: 20,
+    items: mirror([[6, 0, 1, 24, 2.6, 'blk2'], [8, 15, 4, 1, 1.2, 'blk'], [11, -7, 2, 2, 1.2, 'blk'], [15, 8, 1, 4, 2.2, 'blk']]),
+    ops: mirrorOps([['p', 0, 0, 5, 14, 3.0, 0.5, 'blk'], ['r', -2, 2, -14.5, -7, 2, 0, 3.0, 'blk']]),
+    spawnSets: [[[0, 17], [0, -17]], [[-15, 17], [15, -17]]],
+    decor: function () {
+      var glowC = bas(0x00e5ff), glowM = bas(0xff2bd6);
+      for (var i = -2; i <= 2; i++) {
+        addDecor(i * 7, 3.6, -19.9, 0.25, 0.25, 0.1, i % 2 ? glowC : glowM); addDecor(i * 7, 3.6, 19.9, 0.25, 0.25, 0.1, i % 2 ? glowM : glowC);
+        addGlow(i * 7, 3.6, -19.5, 1.6, i % 2 ? 0x00e5ff : 0xff2bd6); addGlow(i * 7, 3.6, 19.5, 1.6, i % 2 ? 0xff2bd6 : 0x00e5ff);
+      }
+      for (var j = -1; j <= 1; j += 2) addDecor(j * 6, 0.03, 0, 0.3, 0.02, 36, bas(0x0a3a58));
+      addDecor(0, 3.07, 0, 0.3, 0.04, 14, glowM);
+      for (var k = -1; k <= 1; k += 2) addGlow(0, 3.3, k * 6.8, 2.2, 0xff2bd6);
+    }
+  });
+  Object.assign(MAPS['Neon Dojo'], {
+    desc: 'Compact temple arena. Raised stage in the middle, balconies on the wings.', tags: ['STAGE', 'BALCONY'], half: 18,
+    items: [[0, 0, 12, 12, 1.5, 'wood']].concat(mirror([
+      [5.2, 5.2, 1, 1, 4.2, 'red'], [5.2, -5.2, 1, 1, 4.2, 'red'], [-9, 10, 0.4, 6, 2.2, 'paper'], [8, 12, 6, 0.4, 2.2, 'paper'], [13, -5, 1.6, 1.6, 1.1, 'dark']
+    ])),
+    ops: [['r', -11.5, -6, -2, 2, 0, 0, 1.5, 'wood'], ['r', 6, 11.5, -2, 2, 1, 0, 1.5, 'wood'], ['r', -2, 2, -11.5, -6, 2, 0, 1.5, 'wood'], ['r', -2, 2, 6, 11.5, 3, 0, 1.5, 'wood']]
+      .concat(mirrorOps([['p', -15, 0, 4, 12, 3.0, 0.5, 'dark'], ['r', -16.5, -13.5, 6, 12.5, 3, 0, 3.0, 'dark']])),
+    spawnSets: [[[0, 15], [0, -15]], [[-12, 15], [12, -15]]],
+    decor: function (M) {
+      var red = M.red;
+      addDecor(0, 4.35, 5.2, 11.4, 0.3, 0.5, red); addDecor(0, 4.35, -5.2, 11.4, 0.3, 0.5, red);
+      addDecor(5.2, 4.35, 0, 0.5, 0.3, 11.4, red); addDecor(-5.2, 4.35, 0, 0.5, 0.3, 11.4, red);
+      var glow = bas(0xff7ab0), glow2 = bas(0xffd27a), dark = M.dark;
+      var lp = [[-17, -17], [17, -17], [-17, 17], [17, 17], [-17, 0], [17, 0], [0, -17], [0, 17]];
+      for (var i = 0; i < lp.length; i++) {
+        addDecorCyl(lp[i][0], 1.0, lp[i][1], 0.06, 0.06, 2.0, dark, 6);
+        addDecorSphere(lp[i][0], 2.2, lp[i][1], 0.3, i % 2 ? glow : glow2);
+        addGlow(lp[i][0], 2.2, lp[i][1], 2.2, i % 2 ? 0xff7ab0 : 0xffd27a);
+      }
+      addDecorCyl(0, 1.52, 0, 3.2, 3.2, 0.04, bas(0x8a1020), 24);
+    }
+  });
+  Object.assign(MAPS['Cargo Yard'], {
+    desc: 'Container maze under a giant crane gantry. Climb the ramps for the high lane.', tags: ['MAZE', 'GANTRY'], half: 25,
+    mats: function (M) { M.steel = lam(0x56606c); },
+    items: mirror([
+      [-14, -17, 7, 2.6, 2.7, 'cR'], [-14, -17, 7, 2.6, 2.7, 'cO', 2.7], [-4, -17, 7, 2.6, 2.7, 'cB'], [10, -9, 2.6, 7, 2.7, 'cG'],
+      [16, -6, 2.6, 7, 2.7, 'cR'], [0, 8, 2, 2, 1.0, 'crate'], [-20, 6, 2, 2, 1.0, 'crate']
+    ]),
+    ops: mirrorOps([['p', 0, 0, 16, 3.4, 5.0, 0.5, 'steel'], ['r', -22, -8, -1, 1, 0, 0, 5.0, 'steel'], ['r', -0.5, 5, -18.3, -15.7, 1, 0, 2.7, 'steel']]),
+    spawnSets: [[[0, 22], [0, -22]], [[-20, 20], [20, -20]]],
+    decor: function () {
+      var lamp = lam(0x30343a), bulb = bas(0xfff2c0), yel = bas(0xd9b43a);
+      var lp = [[-24, -10], [24, 10], [-24, 12], [24, -12]];
+      for (var i = 0; i < lp.length; i++) {
+        addDecorCyl(lp[i][0], 2.4, lp[i][1], 0.1, 0.12, 4.8, lamp, 6); addDecorSphere(lp[i][0], 4.9, lp[i][1], 0.25, bulb); addGlow(lp[i][0], 4.9, lp[i][1], 3, 0xffe0a0);
+      }
+      for (var j = -2; j <= 2; j++) addDecor(j * 9, 0.03, 0, 0.3, 0.02, 48, yel);
+      addDecor(0, 5.55, 0, 16, 0.12, 0.2, yel); addGlow(0, 5.7, 0, 3, 0xffe0a0);
+    }
+  });
+  Object.assign(MAPS['Ruined Court'], {
+    desc: 'Overgrown plaza with two broken balcony halls on opposite corners.', tags: ['RUINS', 'HALLS'],
+    items: mirror([
+      [0, 0, 3, 3, 0.7, 'rubble'], [6, 0, 1.2, 1.2, 3.6, 'pillar'], [4.2, 4.2, 1.2, 1.2, 3.6, 'pillar'], [0, 6, 1.2, 1.2, 3.6, 'pillar'], [4.2, -4.2, 1.2, 1.2, 3.6, 'pillar'],
+      [8, -12, 6, 1, 2.0, 'stone'], [18, -10, 1, 6, 2.4, 'stone'], [16, -4, 2.2, 2.2, 0.9, 'rubble'], [-6, 16, 1.4, 1.4, 1.0, 'rubble']
+    ]),
+    ops: mirrorOps([['p', -13, -13, 9, 9, 3.0, 0.6, 'stone'], ['r', -8.5, -2.5, -14.5, -11.5, 1, 0, 3.0, 'stone'], ['r', -15, -12, -8.5, -2.5, 3, 0, 3.0, 'stone']]),
+    spawnSets: [[[17, -16], [-17, 16]], [[0, 19], [0, -19]]],
+    decor: function () {
+      var moss = lam(0x4a7a3a), tree = lam(0x3d6b32), trunk = lam(0x5a3d22);
+      addDecor(-13, 3.05, -13, 9.2, 0.12, 9.2, moss); addDecor(13, 3.05, 13, 9.2, 0.12, 9.2, moss);
+      addDecor(0, 0.73, 0, 3.2, 0.1, 3.2, moss);
+      ringTrees([[-20, 18], [20, -18], [-20, -2], [20, 2], [3, -20], [-3, 20]], trunk, tree, tree, 2.2);
+    }
+  });
+  Object.assign(MAPS['Frost Forts'], {
+    desc: 'Two walled ice forts with rampart decks. A wide snowfield between them.', tags: ['FORTS', 'LONG RANGE'], half: 26,
+    items: mirror([
+      [-8, -14, 8, 1, 2.4, 'ice'], [8, -14, 8, 1, 2.4, 'ice'], [-12.5, -19, 1, 10, 2.4, 'ice'], [12.5, -19, 1, 10, 2.4, 'ice'],
+      [-9, 0, 3, 3, 1.4, 'snow'], [0, 0, 1.6, 1.6, 3.4, 'ice'], [-4, 5, 4, 0.8, 1.0, 'snow'], [14, 6, 2.4, 4, 1.2, 'snow'], [-18, -2, 2, 2, 1.0, 'snow']
+    ]),
+    ops: mirrorOps([['p', 0, -22.5, 14, 3, 3.2, 0.5, 'snow'], ['r', -1.5, 1.5, -21, -14.5, 3, 0, 3.2, 'ice']]),
+    spawnSets: [[[-8, -18], [8, 18]], [[0, -11], [0, 11]]],
+    decor: function () {
+      var pine = lam(0x2f5a45), trunk = lam(0x4a3524), snowcap = lam(0xffffff);
+      var tp = [[-24, 4], [24, -4], [-24, -9], [24, 9], [-17, 0], [17, 0], [-20, 11], [20, -11], [-3, 24 - 3], [3, -21]];
+      for (var i = 0; i < tp.length; i++) {
+        addDecorCyl(tp[i][0], 0.4, tp[i][1], 0.14, 0.18, 0.8, trunk, 6);
+        var c1 = new THREE.Mesh(new THREE.ConeGeometry(0.9, 1.8, 8), pine); c1.position.set(tp[i][0], 1.6, tp[i][1]); world.group.add(c1);
+        var c2 = new THREE.Mesh(new THREE.ConeGeometry(0.6, 1.2, 8), snowcap); c2.position.set(tp[i][0], 2.6, tp[i][1]); world.group.add(c2);
+      }
+      var ig = lam(0xeaf6ff);
+      addDecorSphere(-9, 1.4, 0, 1.5, ig); addDecorSphere(9, 1.4, 0, 1.5, ig);
+      addDecor(0, 1.0, -22.5, 14.2, 0.2, 3.2, ig); addDecor(0, 1.0, 22.5, 14.2, 0.2, 3.2, ig);
+      addGlow(0, 3.6, 0, 3, 0xbfe6ff);
+    }
+  });
+  Object.assign(MAPS['Lava Forge'], {
+    desc: 'A lava pit crossed by iron bridges. Fight on the bridges or in the heat below.', tags: ['BRIDGES', 'LAVA'],
+    mats: function (M) { M.lava = bas(0xff6a1a); },
+    items: mirror([
+      [0, 0, 12, 12, 1.0, 'lava'], [15, 15, 3, 3, 3.4, 'rock'], [15, -15, 3, 3, 3.4, 'rock'], [10, 6, 1, 5, 1.0, 'obs'], [6, -11, 5, 1, 1.0, 'obs']
+    ]),
+    ops: mirrorOps([['p', 0, 0, 3.4, 16, 3.0, 0.5, 'obs'], ['p', 0, 0, 16, 3.4, 3.04, 0.5, 'obs'], ['r', -1.5, 1.5, -15.5, -8, 2, 0, 3.0, 'obs'], ['r', -15.5, -8, -1.5, 1.5, 0, 0, 3.04, 'obs']]),
+    spawnSets: [[[-19, 0], [19, 0]], [[0, -19], [0, 19]]],
+    decor: function () {
+      var lava = bas(0xff5a14), spike = lam(0x3a2420);
+      addDecor(-20.6, 0.03, 0, 1.4, 0.02, 40, lava); addDecor(20.6, 0.03, 0, 1.4, 0.02, 40, lava);
+      addDecor(0, 1.03, 0, 11.6, 0.03, 11.6, bas(0xffa030));
+      for (var i = -2; i <= 2; i++) { addGlow(-20.6, 0.9, i * 7, 2.6, 0xff6a1a); addGlow(20.6, 0.9, i * 7, 2.6, 0xff6a1a); }
+      addGlow(0, 2.0, 0, 16, 0xff7a20);
+      [[15, 15], [15, -15], [-15, 15], [-15, -15]].forEach(function (q) { addDecorCyl(q[0], 3.8, q[1], 0.9, 1.1, 0.8, spike, 8); addGlow(q[0], 4.3, q[1], 2.6, 0xff6a1a); });
+      for (var j = 0; j < 6; j++) { var sp = new THREE.Mesh(new THREE.ConeGeometry(0.6, 2.4 + (j % 3), 6), spike); sp.position.set(j % 2 ? 21.4 : -21.4, 1.6, -15 + j * 6); world.group.add(sp); }
+    }
+  });
+  Object.assign(MAPS['Jungle Temple'], {
+    desc: 'Huge arena with a stepped ziggurat, rope bridges and a vine-pillar maze.', tags: ['ZIGGURAT', 'BRIDGES'], half: 26,
+    items: mirror([
+      [0, 0, 14, 14, 1.6, 'stone'], [0, 0, 8, 8, 3.2, 'stone'], [0, 0, 3, 3, 4.6, 'gold'],
+      [-11, -11, 1.4, 1.4, 3.0, 'pil'], [-6, -16, 1.4, 1.4, 3.0, 'pil'], [11, -16, 1.4, 1.4, 3.0, 'pil'], [-9, -14, 1.2, 6, 2.4, 'stone'], [8, -18, 6, 1.2, 2.4, 'stone'],
+      [-8, 10, 2.4, 2.4, 0.9, 'gold'], [13, 10, 1.4, 1.4, 3.0, 'pil'], [18, 14, 3, 1.2, 1.4, 'stone']
+    ]),
+    ops: [['r', -14, -7, -1.5, 1.5, 0, 0, 1.6, 'stone'], ['r', 7, 14, -1.5, 1.5, 1, 0, 1.6, 'stone'], ['r', -1.5, 1.5, -7, -4, 2, 1.6, 1.6, 'stone'], ['r', -1.5, 1.5, 4, 7, 3, 1.6, 1.6, 'stone']]
+      .concat(mirrorOps([['p', -17, 0, 3, 18, 3.0, 0.5, 'stone'], ['r', -18, -16, -15.5, -9, 2, 0, 3.0, 'stone']])),
+    spawnSets: [[[0, 23], [0, -23]], [[-22, 22], [22, -22]]],
+    decor: function () {
+      var trunk = lam(0x5a3c24), leaf = lam(0x2f7a38), leaf2 = lam(0x3f9a45);
+      ringTrees([[-24, 8], [24, -8], [-24, -12], [24, 12], [-12, -24], [12, 24], [-3, 24], [3, -24], [-24, 20], [24, -20]], trunk, leaf, leaf2, 2.6);
+      addDecor(0, 3.24, 0, 8.2, 0.1, 8.2, lam(0x4a7a3a)); addDecor(0, 1.64, 0, 14.2, 0.1, 14.2, lam(0x4a7a3a));
+      addGlow(0, 5.2, 0, 3.6, 0xffd860);
+    }
+  });
+  Object.assign(MAPS['Orbital Station'], {
+    desc: 'Compact space deck with a raised ring walkway around the reactor.', tags: ['RING', 'SCI-FI'], half: 20,
+    items: mirror([[14, 10, 3, 3, 1.2, 'pod'], [-12, 13, 5, 1, 1.0, 'pod'], [13, -13, 2, 2, 2.6, 'tank'], [0, 0, 3.4, 3.4, 2.2, 'tank'], [-17, -8, 1.2, 5, 2.4, 'pod'], [8, 16, 4, 1, 1.2, 'pod']]),
+    ops: mirrorOps([['p', 0, -8, 19, 3, 3.0, 0.5, 'pod'], ['p', -8, 0, 3, 13, 3.0, 0.5, 'pod'], ['r', -1.5, 1.5, -16, -9.5, 2, 0, 3.0, 'pod'], ['r', -16, -9.5, -1.5, 1.5, 0, 0, 3.0, 'pod']]),
+    spawnSets: [[[0, -18], [0, 18]], [[-17, -13], [17, 13]]],
+    decor: function () {
+      addDecorSphere(0, 30, -75, 24, lam(0x2f6fd0)); addDecorSphere(18, 34, -70, 6, lam(0xd8c8a0));
+      var strip = bas(0x38d0ff);
+      for (var i = -2; i <= 2; i++) { addDecor(i * 7, 3.6, -19.9, 0.3, 0.25, 0.1, strip); addDecor(i * 7, 3.6, 19.9, 0.3, 0.25, 0.1, strip); }
+      var ring = bas(0x0a4a68);
+      addDecor(0, 0.03, -8, 19, 0.02, 0.3, ring); addDecor(0, 0.03, 8, 19, 0.02, 0.3, ring); addDecor(-8, 0.03, 0, 0.3, 0.02, 16, ring); addDecor(8, 0.03, 0, 0.3, 0.02, 16, ring);
+      addGlow(0, 1.6, 0, 6, 0x38d0ff);
+    }
+  });
+  Object.assign(MAPS['Candy Park'], {
+    desc: 'Carousel in the middle, bouncy sugar hills on every side.', tags: ['CAROUSEL', 'HILLS'],
+    items: [[0, 0, 7, 7, 0.5, 'cn1']].concat(mirror([[-9, 8, 2.4, 2.4, 1.2, 'cn2'], [12, 10, 6, 1, 1.8, 'cn1'], [-5, -12, 1, 1, 3.0, 'cn3'], [8, -6, 2, 2, 1.0, 'cn3']])),
+    ops: [['p', 0, 0, 8, 8, 4.0, 0.3, 'cn3']].concat(mirrorOps([
+      ['r', -17, -13, -3, 3, 0, 0, 2.4, 'cn1'], ['r', -13, -9, -3, 3, 1, 0, 2.4, 'cn1'], ['r', -3, 3, -17, -13, 2, 0, 2.0, 'cn2'], ['r', -3, 3, -13, -9, 3, 0, 2.0, 'cn2']])),
+    spawnSets: [[[0, -20], [0, 20]], [[-19, 10], [19, -10]]],
+    decor: function () {
+      var stick = lam(0xffffff), tops = [lam(0xff5fa2), lam(0x5fd0ff), lam(0xffd45a), lam(0xa96bff)];
+      var tp = [[-20, 8], [20, -8], [-20, -12], [20, 12], [-12, -20], [12, 20], [-3, 20], [3, -20]];
+      for (var i = 0; i < tp.length; i++) { addDecorCyl(tp[i][0], 1.2, tp[i][1], 0.1, 0.1, 2.4, stick, 6); addDecorSphere(tp[i][0], 2.8, tp[i][1], 0.9, tops[i % 4]); }
+      var cone = new THREE.Mesh(new THREE.ConeGeometry(4.6, 1.6, 12), lam(0xff5fa2)); cone.position.set(0, 4.95, 0); world.group.add(cone);
+      addDecorSphere(0, 5.9, 0, 0.35, lam(0xffffff));
+    }
+  });
+
   /* ================================================================
      BIG-MAP BUILDERS
      Merged geometry (one mesh per material per 48 m chunk), buildings with roofs you can reach
@@ -1900,7 +2379,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     build: function (M) { buildIsle(M); }
   };
 
-  var MAP_NAMES = Object.keys(MAPS).filter(function (k) { return !MAPS[k].br; });
+  var MAP_NAMES = Object.keys(MAPS).filter(function (k) { return !MAPS[k].br || k === 'Isle'; });
 
   function clearWorld() {
     clearBuilds();
@@ -1939,11 +2418,13 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     NAV_N = Math.ceil((world.half + 0.4) * 2 / NAV_C - 1e-6);
     NAV_O = -NAV_N * NAV_C / 2;
     var M = def.env();
+    if (def.mats) def.mats(M);
     var items = def.items || [];
     for (var i = 0; i < items.length; i++) {
       var o = items[i];
       addSolid(o[0], o[1], o[2], o[3], o[4], M[o[5]], def.edge !== undefined ? { edge: def.edge, y0: o[6] || 0 } : { y0: o[6] || 0 });
     }
+    if (def.ops) addOps(M, def.ops, def.edge);
     if (def.build) def.build(M);
     if (def.decor) def.decor(M);
     world.spawnSets = def.spawnSets;
@@ -1965,6 +2446,19 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
       var hh = o[4];
       g.fillStyle = o[7] || (hh > 2 ? def.c1 : (hh > 1.1 ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.25)'));
       g.fillRect(X(o[0] - o[2] / 2), X(o[1] - o[3] / 2), Math.max(1, o[2] * k), Math.max(1, o[3] * k));
+    });
+    (def.ops || []).forEach(function (o) {
+      if (o[0] === 'p') {
+        g.fillStyle = 'rgba(255,255,255,0.38)'; g.fillRect(X(o[1] - o[3] / 2), X(o[2] - o[4] / 2), o[3] * k, o[4] * k);
+        g.strokeStyle = def.c1; g.lineWidth = 1.5; g.strokeRect(X(o[1] - o[3] / 2), X(o[2] - o[4] / 2), o[3] * k, o[4] * k);
+      } else {
+        var gr = g.createLinearGradient(X(o[1]), X(o[3]), X(o[2]), X(o[3]));
+        if (o[5] === 1) gr = g.createLinearGradient(X(o[2]), X(o[3]), X(o[1]), X(o[3]));
+        else if (o[5] === 2) gr = g.createLinearGradient(X(o[1]), X(o[3]), X(o[1]), X(o[4]));
+        else if (o[5] === 3) gr = g.createLinearGradient(X(o[1]), X(o[4]), X(o[1]), X(o[3]));
+        gr.addColorStop(0, 'rgba(255,255,255,0.05)'); gr.addColorStop(1, 'rgba(255,255,255,0.6)');
+        g.fillStyle = gr; g.fillRect(X(o[1]), X(o[3]), (o[2] - o[1]) * k, (o[4] - o[3]) * k);
+      }
     });
     var sp = def.spawnSets[0];
     g.fillStyle = '#4cc3ff'; g.beginPath(); g.arc(X(sp[0][0]), X(sp[0][1]), hf > 30 ? 4 : 6, 0, 7); g.fill();
@@ -2495,7 +2989,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   function enemyF() { return state.mode === 'ai' ? botF : (state.mode === 'room' ? remF : null); }
   function enemies() {
     var out = [];
-    if (state.mode === 'ffa') { for (var i = 0; i < ffaBots.length; i++) { if (ffaBots[i].alive && ffaBots[i].group.visible) out.push(ffaBots[i]); } return out; }
+    if (state.mode === 'ffa') { for (var i = 0; i < ffaBots.length; i++) { if (ffaBots[i].alive && ffaBots[i].group.visible && !(state.teams && ffaBots[i].team === 'a')) out.push(ffaBots[i]); } return out; }
     var f = enemyF();
     if (f && f.alive && f.group.visible) out.push(f);
     return out;
@@ -2876,6 +3370,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   function toast(msg, ms) {
     var t = $('toast');
     t.textContent = msg;
+    t.className = ''; void t.offsetWidth;
     t.className = 'show';
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { t.className = ''; }, ms || 2000);
@@ -2886,6 +3381,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     $('banBig').textContent = big;
     $('banBig').style.color = color || '#fff';
     $('banSub').textContent = sub || '';
+    b.className = ''; void b.offsetWidth;
     b.className = 'show';
     clearTimeout(bannerTimer);
     bannerTimer = setTimeout(function () { b.className = ''; }, ms || 1600);
@@ -3300,19 +3796,19 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   var ghost = null, ghostKey = '';
   var ghostMat = new THREE.MeshBasicMaterial({ color: 0x4dff88, transparent: true, opacity: 0.4, depthWrite: false });
 
-  function levelH(lv) { return lv * G; }
-  function specKey(sp) { return sp.ty + ':' + sp.cx + ',' + sp.cz + ',' + sp.lv + ',' + sp.d; }
+  function levelH(lv, o) { return lv * G + (o || 0); }
+  function specKey(sp) { return sp.ty + ':' + sp.cx + ',' + sp.cz + ',' + sp.lv + ',' + sp.d + ',' + (sp.o || 0); }
   function wallPos(sp) {
     return { x: sp.d === 0 ? (sp.cx + 0.5) * G : sp.cx * G, z: sp.d === 0 ? sp.cz * G : (sp.cz + 0.5) * G };
   }
   function pieceCenter(sp) {
-    var h = levelH(sp.lv);
+    var h = levelH(sp.lv, sp.o);
     if (sp.ty === 'W') { var w = wallPos(sp); return { x: w.x, y: h + G / 2, z: w.z }; }
     if (sp.ty === 'F') return { x: sp.cx * G, y: h, z: sp.cz * G };
     return { x: sp.cx * G, y: h + G / 2, z: sp.cz * G };
   }
   function makePieceMesh(sp, mat) {
-    var h = levelH(sp.lv), root, hit;
+    var h = levelH(sp.lv, sp.o), root, hit;
     if (sp.ty === 'W') {
       var w = wallPos(sp);
       hit = new THREE.Mesh(new THREE.BoxGeometry(sp.d === 0 ? 0.2 : G, G, sp.d === 0 ? G : 0.2), mat);
@@ -3334,7 +3830,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     return { root: root, hit: hit };
   }
   function pieceCollider(sp) {
-    var h = levelH(sp.lv);
+    var h = levelH(sp.lv, sp.o);
     if (sp.ty === 'W') {
       var w = wallPos(sp), hx = sp.d === 0 ? 0.1 : G / 2, hz = sp.d === 0 ? G / 2 : 0.1;
       return { minX: w.x - hx, maxX: w.x + hx, minZ: w.z - hz, maxZ: w.z + hz, top: h + G, bot: h };
@@ -3401,21 +3897,21 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     var fx = -Math.sin(yaw), fz = -Math.cos(yaw);
     var ax = Math.abs(fx) > Math.abs(fz);
     var sx = ax ? (fx > 0 ? 1 : -1) : 0, sz = ax ? 0 : (fz > 0 ? 1 : -1);
-    var cx = Math.round(px / G), cz = Math.round(pz / G), lv = Math.round(py / G);
+    var cx = Math.round(px / G), cz = Math.round(pz / G), bo = world.terr ? Math.round(terrH(px, pz) / 0.6) * 0.6 : 0, lv = Math.round((py - bo) / G);
     var dir = ax ? (sx > 0 ? 0 : 1) : (sz > 0 ? 2 : 3);
     if (piece === 'W') {
-      return { ty: 'W', cx: ax ? (sx > 0 ? cx : cx - 1) : cx, cz: ax ? cz : (sz > 0 ? cz : cz - 1), lv: lv, d: ax ? 0 : 1 };
+      return { ty: 'W', cx: ax ? (sx > 0 ? cx : cx - 1) : cx, cz: ax ? cz : (sz > 0 ? cz : cz - 1), lv: lv, d: ax ? 0 : 1, o: bo };
     }
     if (piece === 'F') {
-      if (pitch > 0.35) return { ty: 'F', cx: cx, cz: cz, lv: lv + 1, d: 0 };
-      return { ty: 'F', cx: cx + sx, cz: cz + sz, lv: lv, d: 0 };
+      if (pitch > 0.35) return { ty: 'F', cx: cx, cz: cz, lv: lv + 1, d: 0, o: bo };
+      return { ty: 'F', cx: cx + sx, cz: cz + sz, lv: lv, d: 0, o: bo };
     }
-    return { ty: 'R', cx: cx + sx, cz: cz + sz, lv: lv, d: dir };
+    return { ty: 'R', cx: cx + sx, cz: cz + sz, lv: lv, d: dir, o: bo };
   }
   function computeSpec() { return specFrom(me.x, me.y, me.z, me.yaw, me.pitch, me.piece); }
   function validSpec(sp) {
     if (sp.lv < 0 || sp.lv > (world.big ? 9 : 4)) return false;
-    var c = pieceCenter(sp), lim = world.big ? BOUND - 1.4 : 20.8;
+    var c = pieceCenter(sp), lim = world.big ? BOUND - 1.4 : world.half - 1.2;
     if (Math.abs(c.x) > lim || Math.abs(c.z) > lim) return false;
     var key = specKey(sp);
     for (var i = 0; i < builds.length; i++) { if (builds[i].key === key) return false; }
@@ -3542,7 +4038,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   ================================================================ */
   function trySlide() {
     var t = T();
-    if (me.dead || !inFight() || me.sliding || t < me.slideReadyAt) return;
+    if (me.dead || !inFight() || me.sliding || t < me.slideReadyAt || !me.grounded) return;
     var mx = input.mx, my = input.my, len = Math.sqrt(mx * mx + my * my);
     var fx = -Math.sin(me.yaw), fz = -Math.cos(me.yaw), rx = Math.cos(me.yaw), rz = -Math.sin(me.yaw);
     var wx, wz;
@@ -3552,7 +4048,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     me.sdx = wx / wl; me.sdz = wz / wl;
     me.sliding = true;
     me.slideStart = t;
-    me.slideEnd = t + (me.grounded ? 0.6 : 0.9);
+    me.slideEnd = t + 0.6;
     me.mult = 2.5;
     me.scoped = false;
     play('slide');
@@ -3563,10 +4059,9 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     if (me.landT > 0) me.landT = Math.max(0, me.landT - dt);
     if (input.slideReq) { input.slideReq = false; trySlide(); }
     var active = !me.dead && (state.phase === 'fight' || state.phase === 'roundEnd');
-    if (me.sliding && !me.grounded) me.slideEnd = Math.max(me.slideEnd, t + 0.25);
     if (me.sliding && t >= me.slideEnd) { me.sliding = false; me.slideReadyAt = t + 0.4; }
     var tgtMult = me.sliding ? 2.5 : 1;
-    me.mult = tgtMult > me.mult ? tgtMult : lerp(me.mult, tgtMult, 1 - Math.exp(-dt * 7));
+    me.mult = tgtMult > me.mult ? tgtMult : lerp(me.mult, tgtMult, 1 - Math.exp(-dt * ((me.sj && !me.grounded) ? 0.8 : (t < (me.sjHold || 0) ? 1.6 : 7))));
     var spd = BASE_SPEED;
     if (me.weapon.slow && input.fire && me.ammo > 0 && !me.reloading) spd *= me.weapon.slow;
     if (me.scoped) spd *= 0.6;
@@ -3579,10 +4074,11 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
         var fx = -Math.sin(me.yaw), fz = -Math.cos(me.yaw), rx = Math.cos(me.yaw), rz = -Math.sin(me.yaw);
         wx = (rx * input.mx + fx * input.my) * spd * me.mult;
         wz = (rz * input.mx + fz * input.my) * spd * me.mult;
+        if (me.sj && !me.grounded && Math.abs(input.mx) + Math.abs(input.my) < 0.15) { wx = me.sdx * spd * me.mult; wz = me.sdz * spd * me.mult; }
       }
     }
     me.moving = Math.abs(wx) + Math.abs(wz) > 0.5;
-    var k = 1 - Math.exp(-dt * (me.grounded ? 18 : 2.5));
+    var k = 1 - Math.exp(-dt * (me.grounded ? 18 : (me.sj ? 4 : 3.2)));
     me.vx = lerp(me.vx, wx, k);
     me.vz = lerp(me.vz, wz, k);
     var kd = Math.exp(-dt * (me.grounded ? 7 : 0.6));
@@ -3590,12 +4086,17 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     me.x += (me.vx + me.kx) * dt;
     me.z += (me.vz + me.kz) * dt;
     resolveXZ(me, 0.35);
-    if (input.jumpReq) { input.jumpReq = false; if (active && me.grounded) { me.vy = 5.4; me.grounded = false; if (me.sliding) me.slideEnd = Math.max(me.slideEnd, t + 0.9); } }
+    if (input.jumpReq) { input.jumpReq = false; me.jumpBuf = t + 0.14; }
+    if (me.grounded) me.groundT = t;
+    if (active && t < (me.jumpBuf || 0) && (me.grounded || t - (me.groundT || -9) < 0.1) && me.vy < 1) {
+      me.vy = 5.4; me.grounded = false; me.jumpBuf = 0; me.groundT = -9;
+      if (me.sliding) { me.sliding = false; me.sj = true; me.slideReadyAt = t + 0.3; me.mult = Math.max(me.mult, 2.5); me.sjHold = t + 1.2; }
+    }
     var prevY = me.y;
     var gh = groundAt(me.x, me.z, prevY, 0.35);
     me.vy -= GRAVITY * dt;
     me.y = prevY + me.vy * dt;
-    if (me.y <= gh) { me.y = gh; me.vy = 0; me.grounded = true; } else { me.grounded = false; }
+    if (me.y <= gh) { me.y = gh; me.vy = 0; if (!me.grounded && me.sj) me.sjHold = t + 0.35; me.grounded = true; me.sj = false; } else { me.grounded = false; }
     if (me.y > 12 && !world.big && !me.drop) { me.y = 12; me.vy = 0; }
     var eyeT = me.dead ? 0.18 : (me.sliding ? 0.4 : 1.0);
     me.eye = lerp(me.eye, eyeT, 1 - Math.exp(-dt * (me.sliding || me.dead ? 20 : 9)));
@@ -3792,8 +4293,8 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   }
   function enemiesOf(f) {
     var out = [], i;
-    if (!me.dead && !me.drop) out.push(me);
-    if (state.mode === 'ffa') { for (i = 0; i < ffaBots.length; i++) { if (ffaBots[i] !== f && ffaBots[i].alive && !ffaBots[i].dropping) out.push(ffaBots[i]); } }
+    if (!me.dead && !me.drop && !(state.teams && f.team === 'a')) out.push(me);
+    if (state.mode === 'ffa') { for (i = 0; i < ffaBots.length; i++) { if (ffaBots[i] !== f && ffaBots[i].alive && !ffaBots[i].dropping && !(state.teams && ffaBots[i].team === f.team)) out.push(ffaBots[i]); } }
     return out;
   }
   function recHist(e, t) {
@@ -3873,7 +4374,8 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   }
   function botResetRound(theirs) { botInit(botF, theirs, 1.5); }
 
-  function fname(e) { return e.isMe ? 'You' : e.name; }
+  function pName() { return ((state.name || '').trim() || 'YOU').toUpperCase().slice(0, 12); }
+  function fname(e) { return e.isMe ? (state.name ? state.name.slice(0, 14) : 'You') : (e.name + (state.teams && e.team === 'a' ? ' (ally)' : '')); }
   function botDie(f, killer) {
     f.alive = false;
     f.sliding = false;
@@ -3910,6 +4412,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     var top = 0;
     for (var i = 0; i < ffaBots.length; i++) { if (ffaBots[i].kills > top) top = ffaBots[i].kills; }
     state.score.h = me.kills; state.score.c = state.br ? brAlive() : top;
+    if (state.teams && state.tk) { state.score.h = state.tk.a; state.score.c = state.tk.b; }
     updateScoreHud();
   }
   function ffaWin(who) {
@@ -3927,12 +4430,15 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     victim.deaths += 1;
     if (!victim.isMe) { victim.alive = false; victim.sliding = false; victim.respawnAt = state.br ? 1e12 : t + 3.2; victim.deadAt = t; victim.dropping = false; if (victim.glider) victim.glider.visible = false; }
     if (killer && killer !== victim) killer.kills += 1;
+    if (state.teams && state.tk && killer && killer !== victim) { var kt = killer.isMe ? 'a' : killer.team, vt = victim.isMe ? 'a' : victim.team; if (kt !== vt) state.tk[kt] += 1; }
     feed(killer && killer !== victim ? fname(killer) + '  >  ' + fname(victim) : fname(victim) + (state.br ? ' was lost to the storm' : ' fell'));
     if (state.br) { if (victim.isMe) { state.brPlace = brAlive() + 1; setTimeout(function () { brEnd(false); }, 2400); } else brCheck(); }
     if (killer && killer.isMe) play('kill');
     if (!state.br) arcadeKill(killer, victim);
     ffaScoresSync();
-    if (!state.br && killer && killer.kills >= FFA_WIN) ffaWin(killer);
+    if (state.teams && state.tk) {
+      if (state.tk.a >= TEAM_WIN || state.tk.b >= TEAM_WIN) { var ta = state.tk.a >= TEAM_WIN; if (state.phase === 'fight') { state.ffaWinnerName = ta ? 'Your team wins' : 'Enemy team wins'; hostPhase('matchEnd', 9000, { winner: ta ? 'h' : 'c' }); } }
+    } else if (!state.br && killer && killer.kills >= FFA_WIN) ffaWin(killer);
   }
   function ffaSpawnPoint(forWho) {
     var nav = navRefresh(), best = null, bs = -1e9, others = [], k;
@@ -3985,8 +4491,8 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     toast('Respawned', 900);
   }
   function ffaBoardUpdate() {
-    var rows = [{ n: 'YOU', k: me.kills, me: true, dead: me.dead }];
-    ffaBots.forEach(function (f) { rows.push({ n: f.name, k: f.kills, me: false, dead: !f.alive }); });
+    var rows = [{ n: pName(), k: me.kills, me: true, dead: me.dead }];
+    ffaBots.forEach(function (f) { rows.push({ n: f.name + (state.teams && f.team === 'a' ? ' (ALLY)' : ''), k: f.kills, me: false, dead: !f.alive }); });
     rows.sort(function (a, b) { return b.k - a.k; });
     var html = '';
     rows.forEach(function (r) { html += '<div class="' + (r.me ? 'me ' : '') + (r.dead ? 'dead' : '') + '"><span>' + r.n + '</span><b>' + r.k + '</b></div>'; });
@@ -4350,14 +4856,24 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
      MULTIPLAYER RELAY (BroadcastChannel + public WebSocket relays)
   ================================================================ */
   var RELAYS = [
-    function (room, h) { return 'wss://demo.piesocket.com/v3/channel_' + (1 + h % 8) + '?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self=0'; },
-    function (room, h) { return 'wss://socketsbay.com/wss/v2/' + (1 + h % 90) + '/demo/'; }
+    function () { return { url: 'wss://broker.emqx.io:8084/mqtt', mqtt: true }; },
+    function () { return { url: 'wss://broker.hivemq.com:8884/mqtt', mqtt: true }; },
+    function () { return { url: 'wss://test.mosquitto.org:8081/', mqtt: true }; },
+    function (room, h) { return { url: 'wss://demo.piesocket.com/v3/channel_' + (1 + h % 8) + '?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self=0', mqtt: false }; },
+    function (room, h) { return { url: 'wss://socketsbay.com/wss/v2/' + (1 + h % 90) + '/demo/', mqtt: false }; }
   ];
+  /* tiny MQTT 3.1.1 client pieces (QoS 0) so any free public broker works as the relay */
+  function mqStr(str) { var b = Array.from(new TextEncoder().encode(str)); return [b.length >> 8, b.length & 255].concat(b); }
+  function mqLen(n) { var out = []; do { var d = n % 128; n = Math.floor(n / 128); if (n > 0) d |= 128; out.push(d); } while (n > 0); return out; }
+  function mqPkt(type, body) { return new Uint8Array([type].concat(mqLen(body.length), body)); }
+  function mqConnect(cid) { return mqPkt(0x10, [0, 4, 77, 81, 84, 84, 4, 2, 0, 60].concat(mqStr(cid))); }
+  function mqSubscribe(topic) { return mqPkt(0x82, [0, 1].concat(mqStr(topic), [0])); }
+  function mqPublish(topic, text) { return mqPkt(0x30, mqStr(topic).concat(Array.from(new TextEncoder().encode(text)))); }
   var Net = {
-    id: Math.random().toString(36).slice(2, 9), room: '', ws: null, bc: null, wsState: 'idle', seq: 0, seen: {}, seenList: [], relayIdx: 0, active: false,
+    id: Math.random().toString(36).slice(2, 9), room: '', ws: null, bc: null, mq: false, mqReady: false, pingT: 0, wsState: 'idle', seq: 0, seen: {}, seenList: [], relayIdx: 0, active: false,
     open: function (room) {
       this.close();
-      this.room = room; this.active = true; this.relayIdx = 0; this.wsState = 'connecting';
+      this.room = room; this.active = true; this.relayIdx = 0; this.wsState = 'connecting'; this.fails = []; this.cur = '';
       var self = this;
       try {
         this.bc = new BroadcastChannel('rivals-arena-' + room);
@@ -4370,18 +4886,41 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
       var self = this;
       if (!this.active) return;
       if (this.relayIdx >= RELAYS.length) { this.wsState = 'failed'; netStatus(); return; }
-      var url = RELAYS[this.relayIdx](this.room, this.hash(this.room));
+      var spec = RELAYS[this.relayIdx](this.room, this.hash(this.room));
       var ws = null, opened = false;
-      try { ws = new WebSocket(url); } catch (e) { this.relayIdx++; this.connectWS(); return; }
-      this.ws = ws;
-      var timer = setTimeout(function () { if (!opened && self.ws === ws) { try { ws.close(); } catch (e) { /* closing */ } } }, 5000);
-      ws.onopen = function () { opened = true; clearTimeout(timer); self.wsState = 'open'; netStatus(); };
-      ws.onmessage = function (e) { self.recv(e.data); };
+      this.cur = (spec.url.split('/')[2] || '').split(':')[0]; this.wsState = 'connecting'; netStatus();
+      try { ws = spec.mqtt ? new WebSocket(spec.url, 'mqtt') : new WebSocket(spec.url); } catch (e) { this.relayIdx++; this.connectWS(); return; }
+      ws.binaryType = 'arraybuffer';
+      this.ws = ws; this.mq = !!spec.mqtt; this.mqReady = false;
+      var topic = 'rvl1/' + this.room;
+      var timer = setTimeout(function () { if (!opened && self.ws === ws) { try { ws.close(); } catch (e) { /* closing */ } } }, 6000);
+      function goOpen() { opened = true; clearTimeout(timer); self.wsState = 'open'; self.mqReady = true; netStatus(); }
+      ws.onopen = function () {
+        if (spec.mqtt) { ws.send(mqConnect('rv' + self.id + Math.random().toString(36).slice(2, 6))); }
+        else goOpen();
+      };
+      ws.onmessage = function (e) {
+        if (!spec.mqtt) { self.recv(e.data); return; }
+        var u = new Uint8Array(e.data), i = 0;
+        while (i < u.length) {
+          var b0 = u[i++], mul = 1, rl = 0, by;
+          do { by = u[i++]; rl += (by & 127) * mul; mul *= 128; } while ((by & 128) && i < u.length);
+          var end = i + rl, ty = b0 >> 4;
+          if (ty === 2) { if (u[i + 1] === 0) { ws.send(mqSubscribe(topic)); } else { try { ws.close(); } catch (e3) { /* closing */ } } }
+          else if (ty === 9) { goOpen(); clearInterval(self.pingT); self.pingT = setInterval(function () { if (ws.readyState === 1) ws.send(new Uint8Array([0xC0, 0])); }, 20000); }
+          else if (ty === 3) {
+            var tl = (u[i] << 8) | u[i + 1], off = i + 2 + tl + (((b0 >> 1) & 3) ? 2 : 0);
+            try { self.recv(new TextDecoder().decode(u.subarray(off, end))); } catch (e4) { /* bad packet */ }
+          }
+          i = end;
+        }
+      };
       ws.onerror = function () { /* handled by onclose */ };
       ws.onclose = function () {
-        clearTimeout(timer);
+        clearTimeout(timer); clearInterval(self.pingT);
         if (self.ws !== ws || !self.active) return;
-        if (!opened) { self.relayIdx++; self.connectWS(); }
+        self.mqReady = false;
+        if (!opened) { self.fails.push(self.cur); self.relayIdx++; self.connectWS(); }
         else { self.wsState = 'closed'; netStatus(); setTimeout(function () { if (self.active) { self.wsState = 'connecting'; self.connectWS(); } }, 1500); }
       };
     },
@@ -4389,7 +4928,9 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
       if (!this.active) return;
       o.g = 'rvl1'; o.r = this.room; o.f = this.id; o.m = this.id + ':' + (++this.seq);
       if (this.bc) { try { this.bc.postMessage(o); } catch (e) { /* channel closed */ } }
-      if (this.ws && this.ws.readyState === 1) { try { this.ws.send(JSON.stringify(o)); } catch (e2) { /* socket busy */ } }
+      if (this.ws && this.ws.readyState === 1) {
+        try { if (this.mq) { if (this.mqReady) this.ws.send(mqPublish('rvl1/' + this.room, JSON.stringify(o))); } else this.ws.send(JSON.stringify(o)); } catch (e2) { /* socket busy */ }
+      }
     },
     recv: function (d) {
       if (typeof d === 'string') { try { d = JSON.parse(d); } catch (e) { return; } }
@@ -4402,6 +4943,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     },
     close: function () {
       this.active = false;
+      clearInterval(this.pingT);
       if (this.ws) { try { this.ws.onclose = null; this.ws.close(); } catch (e) { /* closing */ } }
       if (this.bc) { try { this.bc.close(); } catch (e2) { /* closing */ } }
       this.ws = null; this.bc = null; this.wsState = 'idle'; this.seen = {}; this.seenList = [];
@@ -4410,9 +4952,9 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
 
   function netStatus() {
     var dot = $('lNetDot'), txt = $('lNet');
-    if (Net.wsState === 'open') { dot.className = 'dot ok'; txt.textContent = 'Relay connected: cross-device play ready'; }
-    else if (Net.wsState === 'failed') { dot.className = 'dot bad'; txt.textContent = 'Relay unreachable from here: only tabs in this browser can join'; }
-    else { dot.className = 'dot wait'; txt.textContent = 'Connecting to relay'; }
+    if (Net.wsState === 'open') { dot.className = 'dot ok'; txt.textContent = 'Online via ' + Net.cur + ': cross-device play ready'; }
+    else if (Net.wsState === 'failed') { dot.className = 'dot bad'; txt.textContent = 'No server reachable (' + (Net.fails || []).join(', ') + '). Only tabs in this browser can join'; }
+    else { dot.className = 'dot wait'; txt.textContent = 'Trying ' + (Net.cur || 'servers') + ' (' + ((Net.relayIdx || 0) + 1) + '/' + RELAYS.length + ')'; }
   }
 
   /* ---- network message handling ---- */
@@ -4420,12 +4962,12 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     state.lastRx = T();
     if (m.t === 'hello') {
       if (state.mode === 'room' && state.isHost && state.phase === 'lobby') {
-        if (!state.peer || state.peer === m.f) { state.peer = m.f; Net.send({ t: 'welcome', to: m.f }); lobbyUpdate(); }
+        if (!state.peer || state.peer === m.f) { state.peer = m.f; state.peerName = String(m.nm || '').slice(0, 14); Net.send({ t: 'welcome', to: m.f, nm: pName() }); lobbyUpdate(); }
         else Net.send({ t: 'full', to: m.f });
       }
       return;
     }
-    if (m.t === 'welcome') { if (!state.isHost && !state.peer) { state.peer = m.f; lobbyUpdate(); } return; }
+    if (m.t === 'welcome') { if (!state.isHost && !state.peer) { state.peer = m.f; state.peerName = String(m.nm || '').slice(0, 14); lobbyUpdate(); } return; }
     if (m.t === 'full') { toast('That room is full', 2500); leaveRoom(); return; }
     if (state.mode !== 'room' || m.f !== state.peer) return;
     switch (m.t) {
@@ -4509,8 +5051,8 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
       helloTimer += dt;
       if (helloTimer > 1) {
         helloTimer = 0; helloTries++;
-        Net.send({ t: 'hello' });
-        if (helloTries === 15) { $('lOpp').textContent = 'No host found for this code'; $('lOppDot').className = 'dot bad'; }
+        Net.send({ t: 'hello', nm: pName() });
+        if (helloTries === 25) { $('lOpp').textContent = 'No host found for this code'; $('lOppDot').className = 'dot bad'; }
       }
     }
     if (state.peer && state.phase !== 'lobby' && state.phase !== 'matchEnd' && T() - state.lastRx > 9) oppLeft();
@@ -4526,6 +5068,14 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   ================================================================ */
   function nowMs() { return performance.now(); }
   var screens = ['scrMenu', 'scrModes', 'scrArcade', 'scrDiff', 'scrRoom', 'scrLobby', 'scrVote', 'scrLoad', 'scrEnd', 'scrPause', 'scrSettings'];
+  (function addDeco() {
+    ['scrMenu', 'scrModes', 'scrArcade', 'scrDiff', 'scrRoom', 'scrLobby', 'scrEnd'].forEach(function (id) {
+      var d = document.createElement('div');
+      d.className = 'deco';
+      d.innerHTML = '<div class="shard s1"></div><div class="shard s2"></div><div class="shard s3"></div><div class="ring"></div><div class="ring r2"></div><div class="ring r3"></div><div class="cross"></div>';
+      $(id).insertBefore(d, $(id).firstChild);
+    });
+  })();
   function show(id) { for (var i = 0; i < screens.length; i++) $(screens[i]).hidden = (screens[i] !== id); }
   function hideScreens() { for (var i = 0; i < screens.length; i++) $(screens[i]).hidden = true; }
   function setHud(on) {
@@ -4595,10 +5145,11 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   }
   function enterFight() {
     hideScreens();
+    applyTeams();
     fillLoadoutDefaults();
     setHud(true);
     me.drop = null; $('dropHud').hidden = true; $('glider').className = ''; $('windFx').className = '';
-    if (state.mode !== 'ffa' || !state.loot) { clearLoot(); zoneOff(); ffaBots.length = 0; for (var q0 = 0; q0 < 3; q0++) ffaBots.push(botPool[q0]); document.querySelector('#scoreBar .side.me span').textContent = 'YOU'; }
+    if (state.mode !== 'ffa' || !state.loot) { clearLoot(); zoneOff(); ffaBots.length = 0; for (var q0 = 0; q0 < 3; q0++) ffaBots.push(botPool[q0]); document.querySelector('#scoreBar .side.me span').textContent = pName(); }
     var ffa = state.mode === 'ffa';
     var set = world.spawnSets[state.sp % world.spawnSets.length];
     var mine = state.isHost ? set[0] : set[1], theirs = state.isHost ? set[1] : set[0];
@@ -4631,12 +5182,13 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
         botInit(f, q, 1.6);
         f.group.visible = true; f.group.position.set(f.x, f.y, f.z); f.lx = f.x; f.lz = f.z;
       });
-      $('sOppLbl').textContent = 'TOP';
+      $('sOppLbl').textContent = state.teams ? 'THEM' : 'TOP';
+      if (state.teams) document.querySelector('#scoreBar .side.me span').textContent = 'US';
       $('ffaBoard').hidden = false;
       hudCache.board = '';
       ffaScoresSync();
       arcadeStart();
-      banner(state.arcade ? ARC_NAMES[state.arcade] : 'FREE FOR ALL', 'FIRST TO ' + FFA_WIN + (state.arcade === 'gungame' ? ' LEVELS' : '') + (state.zeroBuild ? '   ZERO BUILD' : ''), '#ffffff', 1500);
+      banner(state.arcade ? ARC_NAMES[state.arcade] : (state.teams ? '2 VS 2' : 'FREE FOR ALL'), (state.teams ? 'TEAM FIGHT: FIRST TO ' + TEAM_WIN : 'FIRST TO ' + FFA_WIN) + (state.arcade === 'gungame' ? ' LEVELS' : '') + (state.zeroBuild ? '   ZERO BUILD' : ''), '#ffffff', 1500);
       play('go');
       return;
     }
@@ -4650,8 +5202,10 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     }
     if (state.mode === 'ai') botResetRound(theirs);
     else if (f) f.gunMat.color.setHex(WEAPONS['Assault Rifle'].color);
-    $('foeName').textContent = state.mode === 'ai' ? ('BOT ' + state.diff.toUpperCase()) : 'RIVAL';
-    $('sOppLbl').textContent = state.mode === 'ai' ? 'BOT' : 'RIVAL';
+    var pn = (state.peerName || 'RIVAL').toUpperCase().slice(0, 12);
+    $('foeName').textContent = state.mode === 'ai' ? ('BOT ' + state.diff.toUpperCase()) : pn;
+    $('sOppLbl').textContent = state.mode === 'ai' ? 'BOT' : pn;
+    document.querySelector('#scoreBar .side.me span').textContent = pName();
     updateScoreHud();
     banner('ROUND ' + state.round, 'FIRST TO ' + WIN_SCORE + (state.zeroBuild ? '   ZERO BUILD' : ''), '#ffffff', 1300);
     play('go');
@@ -4741,7 +5295,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
         hostPhase('fight', state.mode === 'ffa' ? FFA_TIME : FIGHT_TIME, { sp: state.sp, round: 1 });
         break;
       case 'fight':
-        if (state.mode === 'ffa') { ffaWin(ffaBest()); break; }
+        if (state.mode === 'ffa') { if (state.teams && state.tk) { var tw = state.tk.a >= state.tk.b; state.ffaWinnerName = tw ? 'Your team wins' : 'Enemy team wins'; hostPhase('matchEnd', 9000, { winner: tw ? 'h' : 'c' }); } else ffaWin(ffaBest()); break; }
         var ef = enemyF();
         var mine = me.hp, theirs = ef ? ef.hp : 0;
         var winner = mine > theirs ? 'h' : (theirs > mine ? 'c' : (Math.random() < 0.5 ? 'h' : 'c'));
@@ -4901,7 +5455,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     $('lCode').textContent = state.room;
     $('lRole').textContent = state.isHost ? 'HOST' : 'GUEST';
     var connected = !!state.peer;
-    $('lOpp').textContent = connected ? 'Opponent connected' : (state.isHost ? 'Waiting for opponent' : 'Searching for host');
+    $('lOpp').textContent = connected ? ((state.peerName || 'Opponent') + ' connected') : (state.isHost ? 'Waiting for opponent' : 'Searching for host');
     $('lOppDot').className = connected ? 'dot ok' : 'dot wait';
     var st = $('lStart');
     if (state.isHost) { st.hidden = false; st.disabled = !connected; }
@@ -4929,7 +5483,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   }
 
   function startAI(diff) {
-    initAudio(); state.arcade = null; GRAVITY = 16;
+    initAudio(); state.arcade = null; state.teams = false; GRAVITY = 16;
     state.mode = 'ai'; state.diff = diff; state.isHost = true; state.peer = null; state.room = '';
     state.loot = false; state.br = false;
     state.map = MAP_NAMES[0];
@@ -4993,19 +5547,39 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
       }
     }
   }
+  var TEAM_WIN = 15;
+  function startTeams(diff) {
+    initAudio();
+    state.mode = 'ffa'; state.diff = diff; state.isHost = true; state.peer = null; state.room = '';
+    state.loot = false; state.br = false; state.arcade = null; state.teams = true; GRAVITY = 16; FFA_WIN = 9999;
+    var maps = MAP_NAMES.filter(function (n) { return n !== 'Metro Heights' && n !== 'Isle'; });
+    state.map = maps[Math.floor(Math.random() * maps.length)];
+    state.score = { h: 0, c: 0 }; state.tk = { a: 0, b: 0 };
+    hostPhase('fight', 480000, { h: 0, c: 0, round: 1, map: state.map, sp: 0 });
+  }
+  function applyTeams() {
+    botPool.forEach(function (f) {
+      if (f.origCol === undefined) f.origCol = f.bodyMat.color.getHex();
+      f.team = null; f.bodyMat.color.setHex(f.origCol);
+    });
+    if (state.teams && state.mode === 'ffa') {
+      ffaBots.forEach(function (f, k) { f.team = k === 0 ? 'a' : 'b'; f.bodyMat.color.setHex(k === 0 ? 0x3a7bff : 0xe0483a); });
+      state.tk = { a: 0, b: 0 };
+    }
+  }
   function startArcade(diff, mode) {
     initAudio();
     state.mode = 'ffa'; state.diff = diff; state.isHost = true; state.peer = null; state.room = '';
-    state.loot = false; state.br = false; state.arcade = mode;
+    state.loot = false; state.br = false; state.teams = false; state.arcade = mode;
     GRAVITY = mode === 'lowgrav' ? 6 : 16;
     FFA_WIN = mode === 'gungame' ? ARC_LADDER.length : 12;
-    var maps = MAP_NAMES.filter(function (n) { return n !== 'Metro Heights'; });
+    var maps = MAP_NAMES.filter(function (n) { return n !== 'Metro Heights' && n !== 'Isle'; });
     state.map = maps[Math.floor(Math.random() * maps.length)];
     state.score = { h: 0, c: 0 };
     hostPhase('fight', 420000, { h: 0, c: 0, round: 1, map: state.map, sp: 0 });
   }
   function startFFA(diff, br) {
-    state.arcade = null; GRAVITY = 16;
+    state.arcade = null; state.teams = false; GRAVITY = 16;
     initAudio();
     state.mode = 'ffa'; state.diff = diff; state.isHost = true; state.peer = null; state.room = '';
     state.loot = true; state.br = !!br;
@@ -5015,7 +5589,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     hostPhase('fight', br ? 1500000 : 480000, { h: 0, c: 0, round: 1, map: state.map, sp: 0 });
   }
   function hostStartRoom() {
-    state.arcade = null; GRAVITY = 16;
+    state.arcade = null; state.teams = false; GRAVITY = 16;
     if (!(state.mode === 'room' && state.isHost && state.peer)) return;
     state.loot = false; state.br = false;
     state.score = { h: 0, c: 0 };
@@ -5025,7 +5599,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   function toMenu() {
     if (state.mode === 'room' && Net.active) { Net.send({ t: 'leave' }); }
     Net.close();
-    state.mode = 'menu'; state.phase = 'menu'; state.peer = null; state.paused = false; state.loot = false; state.br = false; state.arcade = null; GRAVITY = 16; clearOrbs();
+    state.mode = 'menu'; state.phase = 'menu'; state.peer = null; state.paused = false; state.loot = false; state.br = false; state.arcade = null; state.teams = false; GRAVITY = 16; clearOrbs();
     me.dead = false; input.fire = false;
     resetFighters();
     setHud(false);
@@ -5048,7 +5622,9 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
       ffaTags.push(el);
     }
   })();
-  function setText(id, v) { if (hudCache[id] !== v) { hudCache[id] = v; $(id).textContent = v; } }
+  var BUMP_IDS = { sMe: 1, sOpp: 1, ammoTxt: 1, sMid: 1 };
+  function bumpEl(el) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+  function setText(id, v) { if (hudCache[id] !== v) { var first = hudCache[id] === undefined; hudCache[id] = v; var el = $(id); el.textContent = v; if (!first && BUMP_IDS[id]) bumpEl(el); } }
   function updateScoreHud() {
     setText('sMe', String(myScore()));
     setText('sOpp', String(oppScore()));
@@ -5430,7 +6006,8 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   /* ---- bots: skydive, loot, roam ---- */
   function gliderMesh() {
     var g = new THREE.Group();
-    var dome = new THREE.Mesh(new THREE.SphereGeometry(1.7, 12, 6, 0, 6.2832, 0, 1.15), new THREE.MeshLambertMaterial({ color: 0xff6a4d, side: THREE.DoubleSide }));
+    var gcols = [0xff6a4d, 0x4dc3ff, 0xffd23c, 0x6be36b, 0xc27bff, 0xff7ac8];
+    var dome = new THREE.Mesh(new THREE.SphereGeometry(1.7, 12, 6, 0, 6.2832, 0, 1.15), new THREE.MeshLambertMaterial({ color: gcols[Math.floor(Math.random() * gcols.length)], side: THREE.DoubleSide }));
     dome.scale.y = 0.45; dome.position.y = 3.0;
     g.add(dome);
     var l1 = new THREE.Mesh(new THREE.BoxGeometry(0.03, 2.4, 0.03), new THREE.MeshBasicMaterial({ color: 0xdddddd })); l1.position.set(-0.45, 1.8, 0); l1.rotation.z = 0.3; g.add(l1);
@@ -5450,6 +6027,8 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   function botDropStep(f, dt, t) {
     var b = f.ai, dx = f.dtx - f.x, dz = f.dtz - f.z, d = Math.sqrt(dx * dx + dz * dz) || 0.01;
     if (!f.glide && (f.y < 46 || d < 14)) { f.glide = true; if (f.glider) f.glider.visible = true; }
+    if (f.glide && f.glider && f.glider.scale.x < 1.5) f.glider.scale.set(1.7, 1.7, 1.7);
+    if (Math.random() < dt * 9) burst(f.x, f.y + 0.8, f.z, f.glide ? 0xffffff : 0xffe0b0, 1, 0.2, f.glide ? 0.3 : 0.45, 1.1, 0.4, 0);
     var spd = f.glide ? 11 : 15, fall = f.glide ? 5.2 : 26;
     if (!f.glide && d < 20 && f.y > 70) spd *= 0.4;
     var want = Math.min(spd, d * 1.4);
@@ -5663,6 +6242,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
       miniG.strokeStyle = '#8fb0ff'; miniG.lineWidth = 2; miniG.beginPath(); miniG.arc(X(zone.cx), X(zone.cz), zone.r * k, 0, 6.2832); miniG.stroke();
       if (zone.st === 'wait') { miniG.strokeStyle = '#ffffff'; miniG.lineWidth = 1.5; miniG.beginPath(); miniG.arc(X(zone.tc[0]), X(zone.tc[1]), zone.toR * k, 0, 6.2832); miniG.stroke(); }
     }
+    for (var di = 0; di < ffaBots.length; di++) { var db = ffaBots[di]; if (db.alive && db.dropping) { miniG.fillStyle = '#ff5a4d'; miniG.fillRect(X(db.x) - 2, X(db.z) - 2, 4, 4); } }
     miniG.fillStyle = '#ffd25a';
     for (var i = 0; i < chests.length; i++) { if (!chests[i].opened) { miniG.fillRect(X(chests[i].x) - 1.5, X(chests[i].z) - 1.5, 3, 3); } }
     var mx = X(me.x), mz = X(me.z);
@@ -5724,7 +6304,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     var ms = lootSpawnXZ();
     startMyDrop(ms[0], ms[1]);
     $('sOppLbl').textContent = br ? 'ALIVE' : 'TOP';
-    document.querySelector('#scoreBar .side.me span').textContent = br ? 'KILLS' : 'YOU';
+    document.querySelector('#scoreBar .side.me span').textContent = br ? 'KILLS' : pName();
     $('ffaBoard').hidden = br;
     hudCache.board = '';
     state.brPlace = 0; state.brWon = false;
@@ -5970,6 +6550,16 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     keys[k] = false;
     if (k === 'f' || k === 'enter') input.fire = false;
   });
+  /* mouse (desktop): click to capture, move to look, left click shoot, right click scope/alt */
+  document.addEventListener('pointerdown', function (e) {
+    if (e.pointerType !== 'mouse' || !inFight() || (e.target.closest && e.target.closest('button'))) return;
+    if (!document.pointerLockElement && document.body.requestPointerLock) { try { document.body.requestPointerLock(); } catch (er) { /* lock refused */ } return; }
+    if (e.button === 0) { input.fire = true; input.fireEdgeAt = T(); } else if (e.button === 2) input.altReq = true;
+  });
+  document.addEventListener('pointerup', function (e) { if (e.pointerType === 'mouse' && e.button === 0) input.fire = false; });
+  document.addEventListener('mousemove', function (e) { if (document.pointerLockElement && inFight() && !me.drop) applyLook(e.movementX, e.movementY); });
+  document.addEventListener('contextmenu', function (e) { if (document.pointerLockElement) e.preventDefault(); });
+  window.addEventListener('wheel', function (e) { if (document.pointerLockElement && inFight()) switchSlot(clamp(me.slot + (e.deltaY > 0 ? 1 : -1), 0, me.slots.length - 1)); }, { passive: true });
   function applyKeyboard() {
     if (stick.id !== null) return;
     var mx = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
@@ -6041,6 +6631,9 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   Array.prototype.forEach.call($('segDot').children, function (b) {
     b.addEventListener('click', function () { settings.xh.dot = parseInt(b.getAttribute('data-v'), 10); saveSettings(); syncSettingsUI(); });
   });
+  state.name = safeGet('rv_name', '');
+  $('setName').value = state.name;
+  $('setName').addEventListener('input', function () { state.name = $('setName').value.replace(/[^A-Za-z0-9 _-]/g, '').slice(0, 12); safeSet('rv_name', state.name); });
   $('setBack').addEventListener('click', function () {
     saveSettings();
     if (state.settingsFrom === 'pause') show('scrPause'); else show('scrMenu');
@@ -6067,13 +6660,14 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   $('rBack').addEventListener('click', function () { show('scrMenu'); });
   $('mPlay').addEventListener('click', function () { initAudio(); show('scrModes'); });
   $('mdBack').addEventListener('click', function () { show('scrMenu'); });
+  $('mTeams').addEventListener('click', function () { initAudio(); state.ffa = true; state.brSel = false; state.arcSel = 'teams'; $('dEyebrow').textContent = '2 VS 2. You and an AI ally'; show('scrDiff'); });
   $('mArcade').addEventListener('click', function () { initAudio(); show('scrArcade'); });
   $('aBack').addEventListener('click', function () { show('scrModes'); });
   document.querySelectorAll('[data-arc]').forEach(function (b) {
     b.addEventListener('click', function () { state.ffa = true; state.brSel = false; state.arcSel = b.getAttribute('data-arc'); $('dEyebrow').textContent = ARC_NAMES[state.arcSel] + '. You and 3 bots'; show('scrDiff'); });
   });
   document.querySelectorAll('[data-diff]').forEach(function (b) {
-    b.addEventListener('click', function () { if (state.ffa && state.arcSel) { var am = state.arcSel; state.arcSel = null; startArcade(b.getAttribute('data-diff'), am); } else if (state.ffa) startFFA(b.getAttribute('data-diff'), state.brSel); else startAI(b.getAttribute('data-diff')); });
+    b.addEventListener('click', function () { if (state.ffa && state.arcSel) { var am = state.arcSel; state.arcSel = null; if (am === 'teams') startTeams(b.getAttribute('data-diff')); else startArcade(b.getAttribute('data-diff'), am); } else if (state.ffa) startFFA(b.getAttribute('data-diff'), state.brSel); else startAI(b.getAttribute('data-diff')); });
   });
   $('rCreate').addEventListener('click', function () { openRoom(genCode(), true); });
   $('rCode').addEventListener('input', function (e) {
@@ -6121,12 +6715,10 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   window.RIVALS_DEBUG = {
     chests: chests, lootItems: lootItems, zone: zone, botPool: botPool, openChest: openChest, pickupMe: pickupMe, useAction: useAction, startMyDrop: startMyDrop, dropStep: dropStep, brAlive: brAlive, updateLoot: updateLoot, spawnItem: spawnItem, startBotDrop: startBotDrop, botDropStep: botDropStep, updateZone: updateZone, lootTargetDbg: function () { return lootTarget; },
     resolveXZ: resolveXZ, cityLayout: cityLayout, isleLayouts: isleLayouts, rayWorld: rayWorld, segRampT: segRampT, colsNear: colsNear, terrH: terrH, navPathDbg: function () { return navPath; },
-    quickBuild: quickBuild, dropCurrent: dropCurrent, swingMelee: swingMelee, toMenu: toMenu, orbs: orbs, updateOrbs: updateOrbs,
+    quickBuild: quickBuild, navRefresh: navRefresh, enemiesOf: enemiesOf, dropCurrent: dropCurrent, swingMelee: swingMelee, toMenu: toMenu, orbs: orbs, updateOrbs: updateOrbs, rem: rem,
     state: state, me: me, bot: bot, botF: botF, remF: remF, WEAPONS: WEAPONS, MAPS: MAPS, world: world, input: input,
     resolveMapVotes: resolveMapVotes, castRay: castRay, damageMe: damageMe, damageEnemy: damageEnemy, hitscanShot: hitscanShot,
     equip: equip, switchSlot: switchSlot, builds: builds, createPiece: createPiece, damageBuild: damageBuild, setBuild: setBuild, selectPiece: selectPiece, tryPlace: tryPlace, groundAt: groundAt, buildSlots: buildSlots, worldToScreen: worldToScreen, Net: Net, losClear: losClear, setMap: setMap, botTryBuild: botTryBuild, specFrom: specFrom, validSpec: validSpec, weaponIcon: weaponIcon, rockets: rockets, navPath: navPath, grenades: grenades, updateBot: function (dt, t) { updateBot(botF, dt, t); }, updateBots: updateBots, ffaBots: ffaBots, ffaKill: ffaKill, startFFA: startFFA, enemies: enemies, fighterHurt: fighterHurt, botResetRound: botResetRound, hostPhase: hostPhase, settings: settings, circleRect: circleRect
   };
 })();
 </script>
-
-</body></html>
