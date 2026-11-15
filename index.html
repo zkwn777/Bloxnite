@@ -382,6 +382,52 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
 }
 @media (max-width: 760px) { .deco { opacity: .5; } }
 #verTag { position: fixed; right: calc(env(safe-area-inset-right, 0px) + 8px); bottom: calc(env(safe-area-inset-bottom, 0px) + 4px); z-index: 200; pointer-events: none; font-family: var(--display); font-size: 14px; letter-spacing: .12em; color: rgba(255,255,255,.55); text-shadow: 0 1px 2px #000; }
+
+/* ================= v17: visual tile menus ================= */
+.stg::before { background: radial-gradient(ellipse at 50% 45%, rgba(8,10,14,.5), rgba(8,10,14,.92)) !important; }
+.stg .deco { width: 100%; }
+.stg .deco .ring, .stg .deco .cross { display: none; }
+.stage { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: clamp(10px, 2.4vh, 22px); padding: calc(env(safe-area-inset-top, 0px) + 18px) calc(env(safe-area-inset-right, 0px) + 34px) calc(env(safe-area-inset-bottom, 0px) + 18px) calc(env(safe-area-inset-left, 0px) + 34px); }
+.stage .head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.stage .brand .title { font-size: clamp(54px, 9vw, 104px); }
+.stage .hint { text-align: center; }
+.tiles { display: grid; gap: clamp(8px, 1.6vw, 16px); }
+.tiles.main { grid-template-columns: 2.3fr 1fr 1fr; }
+.tiles.five { grid-template-columns: repeat(5, 1fr); }
+.tiles.four { grid-template-columns: repeat(4, 1fr); }
+.tiles.three { grid-template-columns: repeat(3, 1fr); }
+.tiles.two { grid-template-columns: 1fr 1fr; max-width: 860px; margin: 0 auto; width: 100%; }
+.tile { --c1: #8b95a4; --c2: #2a3340; position: relative; border: 0; color: #fff; text-align: left; padding: 12px 16px 14px; height: clamp(180px, 46vh, 360px); display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; overflow: hidden; touch-action: manipulation;
+  background: linear-gradient(165deg, var(--c1) 0%, var(--c2) 100%);
+  clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px));
+  transition: transform .2s cubic-bezier(.2, .8, .2, 1), filter .2s; }
+.tiles.four .tile, .tiles.three .tile, .tiles.five .tile { height: clamp(170px, 44vh, 330px); }
+.tile::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(135deg, rgba(255,255,255,.07) 0 2px, transparent 2px 14px); opacity: .6; pointer-events: none; }
+.tile::after { content: ""; position: absolute; top: 0; bottom: 0; width: 38%; left: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent); transform: translateX(-140%) skewX(-20deg); pointer-events: none; }
+.tile:hover::after, .tile:active::after { animation: sweep .8s ease-out; }
+.tile:hover { transform: translateY(-8px) scale(1.015); filter: brightness(1.12); }
+.tile:active { transform: translateY(-2px) scale(.97); }
+.tile .art { position: absolute; left: 50%; top: 9%; width: min(62%, 34vh); height: auto; transform: translateX(-50%); color: rgba(255,255,255,.95); filter: drop-shadow(0 6px 10px rgba(0,0,0,.4)); animation: artFloat 4.2s ease-in-out infinite; transition: scale .25s; }
+.tile:hover .art { scale: 1.1; }
+.tile.hero .art { width: min(40%, 40vh); }
+.tile .tl { position: relative; font-family: var(--display); font-weight: 700; font-size: clamp(26px, 3.6vw, 42px); letter-spacing: .05em; text-transform: uppercase; line-height: 1; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
+.tiles.four .tl, .tiles.five .tl, .tiles.three .tl { font-size: clamp(22px, 2.9vw, 36px); overflow-wrap: anywhere; }
+.tile.hero .tl { font-size: clamp(40px, 6vw, 68px); }
+.tile .ts { position: relative; font-size: 14px; letter-spacing: .06em; opacity: .88; }
+.t-amber { --c1: #ffb23e; --c2: #9a3f08; } .t-blue { --c1: #4cc3ff; --c2: #123f78; } .t-red { --c1: #ff6a5a; --c2: #6e0f1c; } .t-green { --c1: #5fd48a; --c2: #0f5a38; }
+.t-purple { --c1: #b58cff; --c2: #40237f; } .t-teal { --c1: #35e0d0; --c2: #0b4f58; } .t-slate { --c1: #8fa0b8; --c2: #232c3a; }
+.screen:not([hidden]) .tiles .tile { animation: tileIn .55s cubic-bezier(.2, .9, .2, 1) both; }
+.tiles .tile:nth-child(1) { animation-delay: .08s; } .tiles .tile:nth-child(2) { animation-delay: .15s; } .tiles .tile:nth-child(3) { animation-delay: .22s; } .tiles .tile:nth-child(4) { animation-delay: .29s; } .tiles .tile:nth-child(5) { animation-delay: .36s; }
+.tiles .tile:nth-child(2) .art { animation-delay: -1s; } .tiles .tile:nth-child(3) .art { animation-delay: -2s; } .tiles .tile:nth-child(4) .art { animation-delay: -3s; }
+.screen:not([hidden]) .stage .brand { animation: rowIn .5s both; }
+.screen:not([hidden]) .stage .head { animation: rowIn .45s both; }
+@keyframes tileIn { from { opacity: 0; transform: translateY(40px) scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes artFloat { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -8px); } }
+.joinTile { justify-content: flex-end; gap: 8px; }
+.joinTile .art { top: 4%; width: min(34%, 22vh); }
+.joinTile .inp { position: relative; font-size: 34px; padding: 2px 8px 2px 18px; background: rgba(0,0,0,.35); }
+.joinTile .btn { position: relative; }
+@media (max-width: 900px) { .tiles.five { grid-template-columns: repeat(3, 1fr); } .tiles.five .tile { height: clamp(140px, 30vh, 240px); } .tile .ts { display: none; } }
 </style>
 
 <div id="app">
@@ -448,79 +494,71 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
 
   <div id="banner"><div class="big" id="banBig"></div><div class="sub" id="banSub"></div></div>
   <div id="toast"></div>
-  <div id="verTag">v16 &middot; 15 Nov 2026</div>
+  <div id="verTag">v17 &middot; 15 Nov 2026</div>
 
   <!-- MAIN MENU -->
-  <section id="scrMenu" class="screen" hidden>
-    <div class="rail">
-      <div>
-        <div class="eyebrow">First to 5 eliminations</div>
-        <div class="title">Rivals<br>Arena</div>
+  <section id="scrMenu" class="screen stg" hidden>
+    <div class="stage">
+      <div class="brand"><div class="eyebrow">First to 5 eliminations</div><div class="title">Rivals<br>Arena</div></div>
+      <div class="tiles main">
+        <button class="tile t-amber hero" id="mPlay" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="60" cy="60" r="38"/><circle cx="60" cy="60" r="22" opacity=".55"/><path d="M60 6v18M60 96v18M6 60h18M96 60h18"/><path d="M52 47l22 13-22 13z" fill="currentColor"/></svg><span class="tl">Play</span><span class="ts">Duel, battle royale, arcade</span></button>
+        <button class="tile t-blue" id="mRoom" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="42" cy="42" r="14"/><path d="M16 98c0-18 11-28 26-28s26 10 26 28"/><circle cx="82" cy="48" r="11" opacity=".7"/><path d="M72 76c14-3 30 5 32 22" opacity=".7"/><path d="M96 14v14M89 21h14"/></svg><span class="tl">Friends</span><span class="ts">Custom room</span></button>
+        <button class="tile t-slate" id="mSettings" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="60" cy="60" r="34" stroke-width="12" stroke-dasharray="10.68 10.68"/><circle cx="60" cy="60" r="26"/><circle cx="60" cy="60" r="11"/></svg><span class="tl">Settings</span><span class="ts">Controls and sights</span></button>
       </div>
-      <div class="rule"></div>
-      <div class="mlist">
-        <button class="mrow" id="mPlay" type="button"><span><span class="mt">Play</span><small>Duel, free for all, battle royale, arcade</small></span><span class="arr">&rsaquo;</span></button>
-        <button class="mrow" id="mRoom" type="button"><span><span class="mt">Custom room</span><small>Share a 5-character code</small></span><span class="arr">&rsaquo;</span></button>
-        <button class="mrow" id="mSettings" type="button"><span><span class="mt">Settings</span><small>Sensitivity, scope zoom, crosshair</small></span><span class="arr">&rsaquo;</span></button>
-      </div>
-      <div class="hint">LEFT THUMB MOVES. DRAG THE RIGHT SIDE TO LOOK.<br>BUILD WALLS, FLOORS AND RAMPS DURING A ROUND.</div>
+      <div class="hint">LEFT THUMB MOVES. DRAG THE RIGHT SIDE TO LOOK. BUILD WALLS, FLOORS AND RAMPS DURING A ROUND.</div>
     </div>
   </section>
 
   <!-- MODES -->
-  <section id="scrModes" class="screen" hidden>
-    <div class="rail">
-      <div><div class="eyebrow">Pick a game mode</div><div class="h1">Play</div></div>
-      <div class="mlist">
-        <button class="mrow" id="mAI" type="button"><span><span class="mt">Play vs AI</span><small>Solo duel against a bot</small></span><span class="arr">&rsaquo;</span></button>
-        <button class="mrow" id="mFFA" type="button"><span><span class="mt">Free for all</span><small>Skydive into a huge city with 3 bots. Loot chests, snipe from roofs</small></span><span class="arr">&rsaquo;</span></button>
-        <button class="mrow" id="mBR" type="button"><span><span class="mt">Battle royale</span><small>You and 20 bots on a huge island. Last one standing wins</small></span><span class="arr">&rsaquo;</span></button>
-        <button class="mrow" id="mTeams" type="button"><span><span class="mt">2 vs 2</span><small>You and an AI ally against two AI. First team to 15</small></span><span class="arr">&rsaquo;</span></button>
-        <button class="mrow" id="mArcade" type="button"><span><span class="mt">Arcade modes</span><small>Gun Game, Instagib, Low Gravity, Headshots Only with power-ups</small></span><span class="arr">&rsaquo;</span></button>
+  <section id="scrModes" class="screen stg" hidden>
+    <div class="stage">
+      <div class="head"><div><div class="eyebrow">Pick a game mode</div><div class="h1">Play</div></div><button class="btn ghost" id="mdBack" type="button">&lsaquo; Back</button></div>
+      <div class="tiles five">
+        <button class="tile t-green" id="mAI" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="26" y="34" width="68" height="54" rx="12"/><circle cx="46" cy="60" r="7" fill="currentColor"/><circle cx="74" cy="60" r="7" fill="currentColor"/><path d="M46 78h28M60 34V18M14 56v14M106 56v14"/><circle cx="60" cy="13" r="5"/></svg><span class="tl">Vs AI</span><span class="ts">Solo duel</span></button>
+        <button class="tile t-purple" id="mFFA" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M34 28a26 18 0 0 1 52 0z"/><path d="M34 28l24 22M86 28L62 50"/><circle cx="60" cy="54" r="4" fill="currentColor"/><path d="M14 106V76h18v30M32 106V68h20v38M52 106V82h16v24M68 106V70h20v36M88 106V84h18v22M8 106h104"/></svg><span class="tl">Free for all</span><span class="ts">City skydive, 3 bots</span></button>
+        <button class="tile t-red" id="mBR" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="60" cy="60" r="48" stroke-dasharray="6 6" opacity=".7"/><circle cx="60" cy="60" r="28"/><path d="M60 42l11 24-11-6-11 6z" fill="currentColor"/><path d="M60 6v8M60 106v8M6 60h8M106 60h8"/></svg><span class="tl">Battle royale</span><span class="ts">20 bots, last one standing</span></button>
+        <button class="tile t-blue" id="mTeams" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="22" cy="40" r="9"/><path d="M8 78c0-12 6-18 14-18s14 6 14 18"/><circle cx="48" cy="40" r="9"/><path d="M34 78c0-12 6-18 14-18s14 6 14 18"/><circle cx="74" cy="40" r="9" fill="currentColor" opacity=".7"/><path d="M60 78c0-12 6-18 14-18s14 6 14 18" opacity=".7"/><circle cx="98" cy="40" r="9" fill="currentColor" opacity=".7"/><path d="M84 78c0-12 6-18 14-18s14 6 14 18" opacity=".7"/><path d="M10 100h100" opacity=".5"/></svg><span class="tl">2 vs 2</span><span class="ts">You and an AI ally</span></button>
+        <button class="tile t-amber" id="mArcade" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="12" y="38" width="96" height="48" rx="24"/><path d="M38 50v24M26 62h24"/><circle cx="80" cy="56" r="4.5" fill="currentColor"/><circle cx="92" cy="68" r="4.5" fill="currentColor"/></svg><span class="tl">Arcade</span><span class="ts">Wild modes and power-ups</span></button>
       </div>
-      <div><button class="btn ghost" id="mdBack" type="button">Back</button></div>
     </div>
   </section>
 
   <!-- ARCADE -->
-  <section id="scrArcade" class="screen" hidden>
-    <div class="rail">
-      <div><div class="eyebrow">You and 3 bots. Fast respawns, power-up orbs</div><div class="h1">Arcade</div></div>
-      <div class="mlist">
-        <button class="mrow" data-arc="gungame" type="button"><span><span class="mt">Gun Game</span><small>Every kill upgrades your weapon. Finish the ladder with the Katana</small></span><span class="arr">&rsaquo;</span></button>
-        <button class="mrow" data-arc="insta" type="button"><span><span class="mt">Instagib</span><small>Every hit kills. Energy rifle, infinite ammo</small></span><span class="arr">&rsaquo;</span></button>
-        <button class="mrow" data-arc="lowgrav" type="button"><span><span class="mt">Low gravity</span><small>Huge jumps and long slides. Rocket jump for fun</small></span><span class="arr">&rsaquo;</span></button>
-        <button class="mrow" data-arc="head" type="button"><span><span class="mt">Headshots only</span><small>Body shots do almost nothing. Aim high</small></span><span class="arr">&rsaquo;</span></button>
+  <section id="scrArcade" class="screen stg" hidden>
+    <div class="stage">
+      <div class="head"><div><div class="eyebrow">You and 3 bots. Fast respawns, power-up orbs</div><div class="h1">Arcade</div></div><button class="btn ghost" id="aBack" type="button">&lsaquo; Back</button></div>
+      <div class="tiles four">
+        <button class="tile t-amber" data-arc="gungame" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 102h24V82h24V62h24V42h24"/><path d="M96 10l4.5 10 11 1.2-8 7.6 2.2 10.8-9.7-5.4-9.7 5.4 2.2-10.8-8-7.6 11-1.2z" fill="currentColor"/></svg><span class="tl">Gun game</span><span class="ts">Every kill upgrades your gun</span></button>
+        <button class="tile t-teal" data-arc="insta" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M70 6L28 68h26l-8 46 46-66H64z" fill="currentColor" opacity=".92"/></svg><span class="tl">Instagib</span><span class="ts">One hit kills</span></button>
+        <button class="tile t-purple" data-arc="lowgrav" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="60" cy="72" r="24"/><path d="M36 72a24 9 0 0 0 48 0" opacity=".6"/><path d="M60 8v30M48 20l12-12 12 12"/><path d="M20 34v22M12 44l8-8 8 8M100 28v26M92 38l8-8 8 8" opacity=".6"/></svg><span class="tl">Low gravity</span><span class="ts">Huge jumps, long slides</span></button>
+        <button class="tile t-red" data-arc="head" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="60" cy="54" r="28"/><path d="M42 82v14h36V82"/><circle cx="60" cy="50" r="11" opacity=".8"/><circle cx="60" cy="50" r="3" fill="currentColor"/><path d="M60 8v20M60 72v-4M16 50h22M82 50h22"/></svg><span class="tl">Headshots</span><span class="ts">Aim high or do nothing</span></button>
       </div>
-      <div><button class="btn ghost" id="aBack" type="button">Back</button></div>
     </div>
   </section>
 
   <!-- DIFFICULTY -->
-  <section id="scrDiff" class="screen" hidden>
-    <div class="rail">
-      <div><div class="eyebrow" id="dEyebrow">Play vs AI</div><div class="h1">Difficulty</div></div>
-      <div class="mlist">
-        <button class="mrow" data-diff="Easy" type="button"><span><span class="mt">Easy</span><small>Slow and jumpy. Misses a lot, shoots every couple of seconds.</small></span><span class="arr">&rsaquo;</span></button>
-        <button class="mrow" data-diff="Medium" type="button"><span><span class="mt">Medium</span><small>Runs at your speed, takes cover, reloads out of sight.</small></span><span class="arr">&rsaquo;</span></button>
-        <button class="mrow" data-diff="Hard" type="button"><span><span class="mt">Hard</span><small>Aims for real, slides, jumps and builds. Strafe or it will hit you.</small></span><span class="arr">&rsaquo;</span></button>
+  <section id="scrDiff" class="screen stg" hidden>
+    <div class="stage">
+      <div class="head"><div><div class="eyebrow" id="dEyebrow">Play vs AI</div><div class="h1">Difficulty</div></div><button class="btn ghost" id="dBack" type="button">&lsaquo; Back</button></div>
+      <div class="tiles three">
+        <button class="tile t-green" data-diff="Easy" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M30 92l30-18 30 18"/></svg><span class="tl">Easy</span><span class="ts">Slow and misses a lot</span></button>
+        <button class="tile t-amber" data-diff="Medium" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M30 92l30-18 30 18"/><path d="M30 68l30-18 30 18"/></svg><span class="tl">Medium</span><span class="ts">Takes cover, aims fair</span></button>
+        <button class="tile t-red" data-diff="Hard" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M30 92l30-18 30 18"/><path d="M30 68l30-18 30 18"/><path d="M30 44l30-18 30 18"/></svg><span class="tl">Hard</span><span class="ts">Aims, slides and builds</span></button>
       </div>
-      <div class="setrow" style="border:0;padding:0"><span>Building</span><div class="seg" id="segBuild"><button type="button" data-v="1" class="on">Build</button><button type="button" data-v="0">Zero build</button></div></div>
-      <div><button class="btn ghost" id="dBack" type="button">Back</button></div>
+      <div class="setrow" style="border:0;padding:0;justify-content:center;gap:18px"><span>Building</span><div class="seg" id="segBuild"><button type="button" data-v="1" class="on">Build</button><button type="button" data-v="0">Zero build</button></div></div>
     </div>
   </section>
 
   <!-- ROOM -->
-  <section id="scrRoom" class="screen" hidden>
-    <div class="rail">
-      <div><div class="eyebrow">Multiplayer</div><div class="h1">Custom room</div></div>
-      <button class="mrow" id="rCreate" type="button" style="border-top:1px solid var(--line)"><span><span class="mt">Create room</span><small>You get a code to send to a friend</small></span><span class="arr">&rsaquo;</span></button>
-      <div class="flex flex-col gap-2">
-        <div class="eyebrow" style="color:var(--mute)">Join with a code</div>
-        <input id="rCode" class="inp" maxlength="5" placeholder="AB4X9" autocomplete="off" autocapitalize="characters" spellcheck="false">
-        <button class="btn pri" id="rJoin" type="button">Join</button>
+  <section id="scrRoom" class="screen stg" hidden>
+    <div class="stage">
+      <div class="head"><div><div class="eyebrow">Multiplayer</div><div class="h1">Custom room</div></div><button class="btn ghost" id="rBack" type="button">&lsaquo; Back</button></div>
+      <div class="tiles two">
+        <button class="tile t-green" id="rCreate" type="button"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="60" cy="60" r="40"/><path d="M60 38v44M38 60h44"/></svg><span class="tl">Create room</span><span class="ts">Get a code for a friend</span></button>
+        <div class="tile t-blue joinTile"><svg class="art" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="14" y="36" width="92" height="48" rx="9"/><path d="M32 60h9M52 60h9M72 60h9M92 60h3"/></svg><span class="tl">Join with code</span>
+          <input id="rCode" class="inp" maxlength="5" placeholder="AB4X9" autocomplete="off" autocapitalize="characters" spellcheck="false">
+          <button class="btn pri" id="rJoin" type="button">Join</button></div>
       </div>
-      <div><button class="btn ghost" id="rBack" type="button">Back</button></div>
     </div>
   </section>
 
