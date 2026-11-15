@@ -539,7 +539,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
 
   <div id="banner"><div class="big" id="banBig"></div><div class="sub" id="banSub"></div></div>
   <div id="toast"></div>
-  <div id="verTag">v20 &middot; 15 Nov 2026</div>
+  <div id="verTag">v21 &middot; 15 Nov 2026</div>
 
   <!-- MAIN MENU -->
   <section id="scrMenu" class="screen stg" hidden>
@@ -684,6 +684,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
         <div class="setrow"><span>Shoot button size</span><input id="setFs" type="range" min="0.8" max="1.5" step="0.05"><output id="outFs"></output></div>
         <div class="sect">View</div>
         <div class="setrow"><span>Field of view</span><input id="setFov" type="range" min="60" max="100" step="1"><output id="outFov"></output></div>
+        <div class="setrow"><span>Aim assist</span><input id="setAa" type="range" min="0" max="1" step="0.05"><output id="outAa"></output></div>
         <div class="setrow"><span>Scope zoom strength</span><input id="setZoom" type="range" min="1.5" max="6" step="0.1"><output id="outZoom"></output></div>
         <div class="sect">Crosshair</div>
         <div class="setrow" style="align-items:flex-start">
@@ -3072,11 +3073,11 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     mult: 1, eye: 1.0, healing: null, lastShotT: 0, kick: 0, swing: 0, slots: [], slot: 0, equipT: 0, build: false, piece: 'W', mats: 200, buildNext: 0, blockUntil: 0, blockReadyAt: 0, scoped: false, grounded: true, moving: false
   };
   var input = { mx: 0, my: 0, fire: false, fireEdgeAt: -1, slideReq: false, jumpReq: false, reloadReq: false, altReq: false, keys: {} };
-  var settings = { sens: 4, fov: 72, zoom: 2.8, fs: 1, xh: { style: 'cross', color: '#ffffff', size: 8, gap: 5, thick: 2, op: 1, dot: 1 } };
+  var settings = { sens: 4, fov: 72, zoom: 2.8, fs: 1, aa: 0.35, xh: { style: 'cross', color: '#ffffff', size: 8, gap: 5, thick: 2, op: 1, dot: 1 } };
   (function loadSettings() {
     var o = {};
     try { o = JSON.parse(safeGet('rv_settings', '{}')) || {}; } catch (e) { o = {}; }
-    ['sens', 'fov', 'zoom', 'fs'].forEach(function (k) { if (typeof o[k] === 'number' && isFinite(o[k])) settings[k] = o[k]; });
+    ['sens', 'fov', 'zoom', 'fs', 'aa'].forEach(function (k) { if (typeof o[k] === 'number' && isFinite(o[k])) settings[k] = o[k]; });
     if (o.xh && typeof o.xh === 'object') {
       ['size', 'gap', 'thick', 'op', 'dot'].forEach(function (k) { if (typeof o.xh[k] === 'number' && isFinite(o.xh[k])) settings.xh[k] = o.xh[k]; });
       if (['cross', 'dot', 'circle', 'none'].indexOf(o.xh.style) >= 0) settings.xh.style = o.xh.style;
@@ -6557,6 +6558,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     if (!state.paused) {
       updatePlayer(dt, t);
       updateWeapon(dt, t);
+      aimAssist(dt, t);
       updateBots(dt, t);
       if (state.loot) updateLoot(dt, t);
       updateRemote(dt);
@@ -6591,6 +6593,41 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     var s = lookScale() * (me.scoped ? camera.fov / BASE_FOV : 1);
     me.yaw -= dx * s;
     me.pitch = clamp(me.pitch - dy * s, -1.45, 1.45);
+    if (dx * dx + dy * dy > 0.5) me.lookAt = T();
+  }
+
+  /* Gentle aim assist: eases the view toward an enemy you are already nearly aiming at and can see.
+     Narrow cone, slow pull, and it backs off while you are actively swiping, so it never feels like a lock-on. */
+  function wrapPi(a) { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; }
+  function aimAssist(dt, t) {
+    var k = settings.aa;
+    if (!(k > 0) || !inFight() || me.dead || me.build || me.drop || state.paused) return;
+    var w = me.weapon;
+    if (!w || w.mode === 'melee' || w.mode === 'heal' || w.mode === 'grenade' || w.mode === 'flame') return;
+    var ens = enemies();
+    if (!ens.length) return;
+    var ex = me.x, ey = me.y + me.eye, ez = me.z, fw = fwdVec(me.yaw, me.pitch);
+    var zoomK = me.scoped ? camera.fov / BASE_FOV : 1;
+    var cone = (0.05 + 0.07 * k) * Math.max(0.35, zoomK);
+    var best = null, bestA = cone, bx = 0, by = 0, bz = 0, bd = 1;
+    for (var i = 0; i < ens.length; i++) {
+      var c = enemyChest(ens[i]);
+      var dx = c.x - ex, dy = c.y + 0.22 - ey, dz = c.z - ez, d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      if (d < 1.5 || d > 70) continue;
+      var dot = (dx * fw[0] + dy * fw[1] + dz * fw[2]) / d;
+      var ang = Math.acos(clamp(dot, -1, 1));
+      if (ang >= bestA) continue;
+      if (!losClear(ex, ey, ez, c.x, c.y + 0.22, c.z)) continue;
+      best = ens[i]; bestA = ang; bx = dx; by = dy; bz = dz; bd = d;
+    }
+    if (!best) return;
+    var rate = (1.6 + 3.4 * k) * (0.4 + 0.6 * (1 - bestA / cone));
+    if (input.fire || me.scoped) rate *= 1.6;
+    if (me.lookAt && t - me.lookAt < 0.12) rate *= 0.3;
+    var f = Math.min(1, rate * dt);
+    var dyaw = wrapPi(Math.atan2(-bx, -bz) - me.yaw), dpit = Math.asin(clamp(by / bd, -1, 1)) - me.pitch;
+    me.yaw += dyaw * f;
+    me.pitch = clamp(me.pitch + dpit * f, -1.45, 1.45);
   }
 
   var mz = $('moveZone'), lz = $('lookZone'), sb = $('stickBase'), sk = $('stickKnob');
@@ -6736,6 +6773,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
     setR('setSens', 'outSens', settings.sens, settings.sens.toFixed(1));
     setR('setFs', 'outFs', settings.fs, Math.round(settings.fs * 100) + '%');
     setR('setFov', 'outFov', settings.fov, String(settings.fov));
+    setR('setAa', 'outAa', settings.aa, settings.aa <= 0 ? 'Off' : Math.round(settings.aa * 100) + '%');
     setR('setZoom', 'outZoom', settings.zoom, Math.round(settings.zoom / 2.8 * 100) + '%');
     setR('setXs', 'outXs', xh.size, String(xh.size));
     setR('setXg', 'outXg', xh.gap, String(xh.gap));
@@ -6764,6 +6802,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   bindRange('setSens', 'outSens', 'sens', function (v) { return v.toFixed(1); });
   bindRange('setFs', 'outFs', 'fs', function (v) { return Math.round(v * 100) + '%'; }, applyFireScale);
   bindRange('setFov', 'outFov', 'fov', function (v) { return String(v); }, applyFov);
+  bindRange('setAa', 'outAa', 'aa', function (v) { return v <= 0 ? 'Off' : Math.round(v * 100) + '%'; });
   bindRange('setZoom', 'outZoom', 'zoom', function (v) { return Math.round(v / 2.8 * 100) + '%'; }, applyFov);
   bindRange('setXs', 'outXs', 'size', function (v) { return String(v); }, applyCrosshair, true);
   bindRange('setXg', 'outXg', 'gap', function (v) { return String(v); }, applyCrosshair, true);
@@ -6864,7 +6903,7 @@ input[type=range] { width: min(240px, 38vw); accent-color: #f2a73b; }
   window.RIVALS_DEBUG = {
     chests: chests, lootItems: lootItems, zone: zone, botPool: botPool, openChest: openChest, pickupMe: pickupMe, useAction: useAction, startMyDrop: startMyDrop, dropStep: dropStep, brAlive: brAlive, updateLoot: updateLoot, spawnItem: spawnItem, startBotDrop: startBotDrop, botDropStep: botDropStep, updateZone: updateZone, lootTargetDbg: function () { return lootTarget; },
     resolveXZ: resolveXZ, cityLayout: cityLayout, isleLayouts: isleLayouts, rayWorld: rayWorld, segRampT: segRampT, colsNear: colsNear, terrH: terrH, navPathDbg: function () { return navPath; },
-    navRefresh: navRefresh, explodeGrenade: explodeGrenade, enemiesOf: enemiesOf, dropCurrent: dropCurrent, swingMelee: swingMelee, toMenu: toMenu, orbs: orbs, updateOrbs: updateOrbs, rem: rem,
+    navRefresh: navRefresh, buildGrid: buildGrid, enemies: enemies, aimAssist: aimAssist, settings: settings, explodeGrenade: explodeGrenade, enemiesOf: enemiesOf, dropCurrent: dropCurrent, swingMelee: swingMelee, toMenu: toMenu, orbs: orbs, updateOrbs: updateOrbs, rem: rem,
     state: state, me: me, bot: bot, botF: botF, remF: remF, WEAPONS: WEAPONS, MAPS: MAPS, world: world, input: input,
     resolveMapVotes: resolveMapVotes, castRay: castRay, damageMe: damageMe, damageEnemy: damageEnemy, hitscanShot: hitscanShot,
     equip: equip, switchSlot: switchSlot, builds: builds, createPiece: createPiece, damageBuild: damageBuild, setBuild: setBuild, selectPiece: selectPiece, tryPlace: tryPlace, groundAt: groundAt, buildSlots: buildSlots, worldToScreen: worldToScreen, Net: Net, losClear: losClear, setMap: setMap, botTryBuild: botTryBuild, specFrom: specFrom, validSpec: validSpec, weaponIcon: weaponIcon, rockets: rockets, navPath: navPath, grenades: grenades, updateBot: function (dt, t) { updateBot(botF, dt, t); }, updateBots: updateBots, ffaBots: ffaBots, ffaKill: ffaKill, startFFA: startFFA, enemies: enemies, fighterHurt: fighterHurt, botResetRound: botResetRound, hostPhase: hostPhase, settings: settings, circleRect: circleRect
