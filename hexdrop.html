@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Hex Drop</title>
+<meta name="theme-color" content="#ff5ca8">
+<style>
+:root{--k:1;--pink:#ff4f9a;--pur:#7b3cff;--cy:#27d3ff;--yel:#ffd23f;--ink:#2a1650;--card:rgba(255,255,255,.92)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;touch-action:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#7b3cff;color:var(--ink);font-family:"Arial Rounded MT Bold","Nunito","Trebuchet MS",system-ui,sans-serif}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block}
+.scr{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:max(16px,env(safe-area-inset-top)) 20px max(16px,env(safe-area-inset-bottom));text-align:center;
+ background:radial-gradient(900px 500px at 50% 0%,rgba(255,255,255,.35),transparent 60%),linear-gradient(160deg,#ff6fb0,#8b4dff 55%,#3a7bff)}
+.scr.on{display:flex;animation:fadeIn .35s both}@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.scr.over{background:rgba(42,22,80,.55)}
+.logo{font-size:clamp(54px,11vw,128px);line-height:.9;margin:0;color:#fff;letter-spacing:.02em;text-shadow:0 6px 0 #4b1fb8,0 12px 24px rgba(0,0,0,.25);transform:rotate(-3deg);animation:bob 2.4s ease-in-out infinite}
+.logo span{color:var(--yel)}
+@keyframes bob{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(-2deg) translateY(-8px)}}
+.sub{color:#fff;font-size:18px;letter-spacing:.06em;text-shadow:0 2px 0 rgba(0,0,0,.2)}
+.btn{appearance:none;border:0;font:inherit;font-size:clamp(22px,3.4vw,34px);color:#fff;background:linear-gradient(180deg,#34e08a,#12b868);padding:14px 56px;border-radius:999px;box-shadow:0 7px 0 #0b8248,0 14px 22px rgba(0,0,0,.25);cursor:pointer;transition:transform .1s;letter-spacing:.04em}
+.btn:active{transform:translateY(5px);box-shadow:0 2px 0 #0b8248}.btn.alt{background:linear-gradient(180deg,#ffd23f,#ffb300);color:#5a3a00;box-shadow:0 7px 0 #c28100,0 14px 22px rgba(0,0,0,.25)}.btn.sm{font-size:18px;padding:10px 26px}
+.card{background:var(--card);border-radius:22px;padding:14px 18px;box-shadow:0 8px 0 rgba(0,0,0,.12);display:flex;flex-direction:column;gap:10px;align-items:center}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center}
+.sw{width:42px;height:42px;border-radius:50%;border:4px solid #fff;box-shadow:0 3px 0 rgba(0,0,0,.2);cursor:pointer;transition:transform .12s}.sw.on{transform:scale(1.25);border-color:var(--ink)}
+.seg button{font:inherit;font-size:16px;border:0;background:#e9e1ff;color:var(--ink);padding:8px 16px;border-radius:999px;margin:0 3px;cursor:pointer}.seg button.on{background:var(--pur);color:#fff}
+input[type=text]{font:inherit;font-size:18px;text-align:center;border:3px solid #d9ccff;border-radius:999px;padding:6px 14px;width:190px;color:var(--ink);-webkit-user-select:text;user-select:text;touch-action:auto}
+label{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#6d58a8}
+.stat{display:flex;gap:18px;color:#fff;font-size:16px;text-shadow:0 2px 0 rgba(0,0,0,.2)}.stat b{font-size:22px;color:var(--yel)}
+#endT{font-size:clamp(50px,10vw,110px);margin:0;color:#fff;text-shadow:0 6px 0 #4b1fb8;animation:pop .6s both}
+@keyframes pop{0%{transform:scale(.3) rotate(-10deg);opacity:0}70%{transform:scale(1.15) rotate(3deg)}100%{transform:scale(1);opacity:1}}
+#endP{font-size:28px;color:var(--yel);text-shadow:0 3px 0 rgba(0,0,0,.25)}
+/* HUD */
+#hud{position:fixed;inset:0;z-index:10;display:none;pointer-events:none}#hud.on{display:block}
+#top{position:absolute;top:max(10px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);display:flex;gap:10px}
+.pill{background:rgba(42,22,80,.7);color:#fff;border-radius:999px;padding:8px 18px;font-size:20px;box-shadow:0 4px 0 rgba(0,0,0,.2)}.pill b{color:var(--yel)}
+#feed{position:absolute;right:max(14px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+#feed div{background:rgba(255,255,255,.88);border-radius:999px;padding:5px 14px;font-size:15px;animation:slide .3s both}
+@keyframes slide{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+#banner{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);font-size:clamp(60px,14vw,170px);color:#fff;text-shadow:0 8px 0 #4b1fb8,0 14px 28px rgba(0,0,0,.3);opacity:0;white-space:nowrap}
+#banner.on{animation:ban 1s both}@keyframes ban{0%{opacity:0;transform:translate(-50%,-50%) scale(2.2)}25%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(.85)}}
+#sub{position:absolute;left:50%;top:50%;transform:translateX(-50%);font-size:24px;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.3);opacity:0}#sub.on{animation:ban2 2.4s both}@keyframes ban2{0%{opacity:0;transform:translate(-50%,10px)}15%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+#you{position:absolute;color:#fff;font-size:15px;background:var(--pink);padding:2px 10px;border-radius:999px;transform:translate(-50%,-100%);box-shadow:0 3px 0 rgba(0,0,0,.2);display:none}
+#moveZone{position:fixed;left:0;top:0;width:50%;bottom:0;z-index:11;display:none}#lookZone{position:fixed;right:0;top:0;width:50%;bottom:0;z-index:9;display:none}
+.play #moveZone,.play #lookZone{display:block}
+#stickBase{position:fixed;display:none;width:calc(150px*var(--k));height:calc(150px*var(--k));border-radius:50%;border:3px solid rgba(255,255,255,.7);background:rgba(255,255,255,.2);z-index:12;pointer-events:none}
+#stickKnob{position:absolute;left:50%;top:50%;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;background:#fff;box-shadow:0 3px 0 rgba(0,0,0,.2)}
+#stickHint{position:fixed;z-index:6;width:calc(140px*var(--k));height:calc(140px*var(--k));left:calc(env(safe-area-inset-left,0px) + 56px);bottom:calc(env(safe-area-inset-bottom,0px) + 48px);border-radius:50%;border:3px solid rgba(255,255,255,.45);background:rgba(255,255,255,.1);display:none;pointer-events:none}
+.play:not(.noTouch) #stickHint{display:block}
+.cbtn{position:fixed;z-index:20;display:none;align-items:center;justify-content:center;flex-direction:column;border-radius:50%;border:4px solid #fff;color:#fff;font:inherit;letter-spacing:.06em;touch-action:none;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.play:not(.noTouch) .cbtn{display:flex}.cbtn.on{filter:brightness(1.25);transform:translateY(4px)}
+#bJump{width:calc(112px*var(--k));height:calc(112px*var(--k));right:calc(env(safe-area-inset-right,0px) + 36px);bottom:calc(env(safe-area-inset-bottom,0px) + 40px);background:linear-gradient(180deg,#34e08a,#12b868);font-size:calc(22px*var(--k))}
+#bDive{width:calc(92px*var(--k));height:calc(92px*var(--k));right:calc(env(safe-area-inset-right,0px) + 170px*var(--k) + 18px);bottom:calc(env(safe-area-inset-bottom,0px) + 140px*var(--k) + 8px);background:linear-gradient(180deg,#ff8a3d,#ff4f2a);font-size:calc(20px*var(--k))}
+#bPause{position:absolute;left:max(12px,env(safe-area-inset-left));top:max(10px,env(safe-area-inset-top));width:46px;height:46px;pointer-events:auto;z-index:30;background:rgba(42,22,80,.7);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px}
+.noTouch .cbtn{display:none!important}
+#vTag{position:fixed;right:8px;bottom:4px;z-index:40;font-size:10px;color:rgba(255,255,255,.7);pointer-events:none}
+@media (max-width:760px){:root{--k:.72}}
+</style></head>
+<body>
+<canvas id="gl"></canvas>
+<div class="scr on" id="scrMenu">
+  <h1 class="logo">HEX<span>DROP</span></h1>
+  <div class="sub">Keep moving. The floor vanishes. Last bean standing wins!</div>
+  <div class="card">
+    <label>Your bean</label>
+    <div class="row" id="swatches"></div>
+    <input type="text" id="nameIn" maxlength="10" value="Bean" aria-label="name">
+    <label>Difficulty</label>
+    <div class="seg" id="diffSeg"><button data-d="0">Easy</button><button data-d="1">Normal</button><button data-d="2">Hard</button></div>
+  </div>
+  <button class="btn" id="bPlay">PLAY!</button>
+  <div class="stat"><span>Crowns <b id="stW">0</b></span><span>Best <b id="stB">-</b></span><span>Played <b id="stP">0</b></span></div>
+</div>
+<div class="scr over" id="scrEnd"><h2 id="endT">Winner!</h2><div id="endP"></div><div class="row"><button class="btn" id="bAgain">Play again</button><button class="btn alt" id="bMenu">Menu</button></div></div>
+<div class="scr over" id="scrPause"><h2 id="endT2" style="font-size:56px;margin:0;color:#fff;text-shadow:0 5px 0 #4b1fb8">Paused</h2>
+  <div class="card"><label>Camera speed</label><input type="range" id="sens" min="0.4" max="2.2" step="0.05" style="width:220px;touch-action:pan-x"><label>Volume</label><input type="range" id="vol" min="0" max="1" step="0.05" style="width:220px;touch-action:pan-x"></div>
+  <div class="row"><button class="btn" id="bResume">Resume</button><button class="btn alt sm" id="bLeave">Leave</button></div></div>
+<div id="hud">
+  <div id="top"><span class="pill">Left <b id="aliveN">16</b></span><span class="pill" id="timer">0:00</span></div>
+  <div id="feed"></div><div id="banner"></div><div id="sub"></div><div id="you">YOU</div><div id="bPause">II</div>
+</div>
+<div id="moveZone"></div><div id="lookZone"></div><div id="stickBase"><div id="stickKnob"></div></div><div id="stickHint"></div>
+<button class="cbtn" id="bJump" type="button">JUMP</button><button class="cbtn" id="bDive" type="button">DIVE</button>
+<div id="vTag">v1 · 17 Nov 2026</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+'use strict';
+var $ = function (id) { return document.getElementById(id); };
+function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+function lerp(a, b, t) { return a + (b - a) * t; }
+function rr(a, b) { return a + Math.random() * (b - a); }
+function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+function angDiff(a, b) { var d = a - b; while (d > Math.PI) d -= 6.283185; while (d < -Math.PI) d += 6.283185; return d; }
+var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+document.body.classList.add(isTouch ? 'touchUi' : 'noTouch');
+
+/* ---------- save ---------- */
+var save = { name: 'Bean', color: 0, diff: 1, crowns: 0, best: 0, played: 0, sens: 1, vol: 0.7 };
+try { var sv = JSON.parse(localStorage.getItem('hd_save') || '{}'); for (var k in sv) if (k in save) save[k] = sv[k]; } catch (e) {}
+function persist() { try { localStorage.setItem('hd_save', JSON.stringify(save)); } catch (e) {} }
+
+/* ---------- audio ---------- */
+var AC = null, master = null;
+function initAudio() { if (AC) return; try { AC = new (window.AudioContext || window.webkitAudioContext)(); master = AC.createGain(); master.gain.value = save.vol; master.connect(AC.destination); } catch (e) { AC = null; } }
+function tone(f, d, type, v, slide) { if (!AC) return; var o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime; o.type = type || 'sine'; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f * slide), t + d); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.001, t + d); o.connect(g); g.connect(master); o.start(t); o.stop(t + d + 0.02); }
+function sfx(n, v) {
+  v = v === undefined ? 1 : v;
+  if (n === 'jump') tone(420, 0.16, 'sine', 0.22 * v, 2); else if (n === 'land') tone(160, 0.08, 'sine', 0.14 * v, 0.6);
+  else if (n === 'dive') tone(300, 0.22, 'sawtooth', 0.12 * v, 0.4); else if (n === 'bump') tone(220, 0.12, 'square', 0.14 * v, 0.5);
+  else if (n === 'tick') tone(900, 0.04, 'square', 0.05 * v); else if (n === 'fall') tone(600, 0.7, 'sine', 0.2 * v, 0.15);
+  else if (n === 'beep') tone(660, 0.18, 'sine', 0.25); else if (n === 'go') { tone(990, 0.4, 'sine', 0.3); tone(1320, 0.4, 'sine', 0.2); }
+  else if (n === 'win') { [523, 659, 784, 1047].forEach(function (f, i) { setTimeout(function () { tone(f, 0.3, 'triangle', 0.25); }, i * 140); }); }
+  else if (n === 'ui') tone(700, 0.07, 'triangle', 0.15); else if (n === 'rumble') tone(70, 0.8, 'sawtooth', 0.2, 0.6);
+}
+
+/* ---------- three ---------- */
+var canvas = $('gl'), renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); renderer.shadowMap.enabled = true;
+var scene = new THREE.Scene(); scene.background = new THREE.Color(0x9fdcff); scene.fog = new THREE.Fog(0xbfe9ff, 60, 220);
+var camera = new THREE.PerspectiveCamera(60, 1, 0.1, 600); scene.add(camera);
+function resize() { var w = window.innerWidth, h = window.innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+window.addEventListener('resize', resize); resize();
+scene.add(new THREE.HemisphereLight(0xffffff, 0xbba8ff, 0.85));
+var sun = new THREE.DirectionalLight(0xffffff, 0.8); sun.position.set(20, 50, 15); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
+var sc = sun.shadow.camera; sc.left = -30; sc.right = 30; sc.top = 30; sc.bottom = -30; sc.near = 5; sc.far = 120; scene.add(sun); scene.add(sun.target);
+
+/* ---------- arena ---------- */
+var S = 2.4, RADS = [10, 10, 9, 9], RAD = 10, LAYER_Y = [0, -8, -16, -24], KILL_Y = -38, SQ3 = Math.sqrt(3), NL = 4;
+var layers = [], tileGeo = new THREE.CylinderGeometry(S * 0.93, S * 0.93, 0.7, 6), decor = [], dummy = new THREE.Object3D();
+var PAL = [[0xff4f9a, 0xff86bd], [0x27d3ff, 0x7be6ff], [0xffd23f, 0xffe58a], [0x34e08a, 0x8af2bd]];
+var tileMat = new THREE.MeshLambertMaterial({ color: 0xffffff }), WARN = new THREE.Color(0xffb35a);
+function hexToXZ(q, r) { return [S * SQ3 * (q + r / 2), S * 1.5 * r]; }
+function xzToHex(x, z) {
+  var qf = (SQ3 / 3 * x - z / 3) / S, rf = (2 / 3 * z) / S, sf = -qf - rf, q = Math.round(qf), r = Math.round(rf), s = Math.round(sf);
+  var dq = Math.abs(q - qf), dr = Math.abs(r - rf), ds = Math.abs(s - sf);
+  if (dq > dr && dq > ds) q = -r - s; else if (dr > ds) r = -q - s;
+  return [q, r];
+}
+function clearArena() { layers.forEach(function (L) { scene.remove(L.inst); }); layers = []; }
+function setTileXform(L, t, x, y, z, rx, rz, sc) {
+  dummy.position.set(x, y, z); dummy.rotation.set(rx, 0, rz); dummy.scale.set(sc, sc, sc); dummy.updateMatrix(); L.inst.setMatrixAt(t.idx, dummy.matrix); L.mdirty = true;
+}
+function buildArena() {
+  clearArena();
+  for (var li = 0; li < NL; li++) {
+    var L = { y: LAYER_Y[li], map: {}, list: [], mdirty: false, cdirty: false }, RL = RADS[li];
+    for (var q = -RL; q <= RL; q++) for (var r = -RL; r <= RL; r++) {
+      if (Math.abs(q + r) > RL) continue;
+      if (li > 0 && Math.random() < 0.07) continue;
+      var xz = hexToXZ(q, r), alt = (Math.abs(q * 2 + r) % 3), col = PAL[li][alt === 0 ? 1 : 0];
+      var t = { q: q, r: r, x: xz[0], z: xz[1], li: li, idx: L.list.length, col: new THREE.Color(col), state: 0, t: 0, delay: 0, y: L.y - 0.35, vy: 0, rx: 0, rz: 0 };
+      L.map[q + ',' + r] = t; L.list.push(t);
+    }
+    L.inst = new THREE.InstancedMesh(tileGeo, tileMat, L.list.length); L.inst.frustumCulled = false; L.inst.receiveShadow = true;
+    L.list.forEach(function (t) { setTileXform(L, t, t.x, t.y, t.z, 0, 0, 1); L.inst.setColorAt(t.idx, t.col); });
+    L.inst.instanceMatrix.needsUpdate = true; if (L.inst.instanceColor) L.inst.instanceColor.needsUpdate = true; scene.add(L.inst); layers.push(L);
+  }
+}
+function tileAt(li, x, z) { var h = xzToHex(x, z), t = layers[li].map[h[0] + ',' + h[1]]; return t && t.state < 2 ? t : null; }
+var TOUCH_DELAY = [1.4, 1.1, 0.85];
+function warnTile(t, delay) { t.state = 1; t.t = 0; t.delay = delay; var L = layers[t.li]; L.inst.setColorAt(t.idx, WARN); L.cdirty = true; }
+function touchTile(t) { if (t.state === 0) { warnTile(t, TOUCH_DELAY[save.diff] * rr(0.9, 1.1)); sfx('tick', 0.4); } }
+function dropTile(t, delay) { if (t.state === 0) warnTile(t, delay); }
+function updateTiles(dt) {
+  for (var li = 0; li < layers.length; li++) {
+    var L = layers[li], list = L.list;
+    for (var i = 0; i < list.length; i++) {
+      var t = list[i]; if (t.state === 0 || t.state === 3) continue;
+      t.t += dt;
+      if (t.state === 1) { var sh = Math.sin(t.t * 60) * 0.03 * Math.min(1, t.t * 3); setTileXform(L, t, t.x + sh, t.y, t.z - sh, 0, 0, 1); if (t.t >= t.delay) { t.state = 2; t.t = 0; t.vy = 0; } }
+      else if (t.state === 2) { t.vy -= 30 * dt; t.y += t.vy * dt; t.rx += dt * 2; t.rz += dt * 1.3; var sc2 = Math.max(0.01, 1 - t.t * 0.9); setTileXform(L, t, t.x, t.y, t.z, t.rx, t.rz, sc2); if (t.t > 1.1) { t.state = 3; setTileXform(L, t, t.x, -999, t.z, 0, 0, 0.001); } }
+    }
+    if (L.mdirty) { L.inst.instanceMatrix.needsUpdate = true; L.mdirty = false; }
+    if (L.cdirty) { if (L.inst.instanceColor) L.inst.instanceColor.needsUpdate = true; L.cdirty = false; }
+  }
+}
+
+/* decor + goo floor */
+(function () {
+  var goo = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.MeshLambertMaterial({ color: 0xff5ca8 })); goo.rotation.x = -Math.PI / 2; goo.position.y = KILL_Y - 4; scene.add(goo);
+  var cols = [0xffd23f, 0x27d3ff, 0xff4f9a, 0x7b3cff, 0x34e08a];
+  for (var i = 0; i < 46; i++) {
+    var a = Math.random() * 6.283, d = rr(70, 190), y = rr(-40, 30), s = rr(4, 16), kind = Math.random();
+    var geo = kind < 0.4 ? new THREE.SphereGeometry(s, 12, 8) : kind < 0.75 ? new THREE.CylinderGeometry(s * 0.5, s * 0.5, s * 3, 10) : new THREE.BoxGeometry(s, s, s);
+    var m = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color: pick(cols) })); m.position.set(Math.cos(a) * d, y, Math.sin(a) * d); scene.add(m); decor.push({ m: m, ph: Math.random() * 6, y: y, sp: rr(0.3, 0.9) });
+  }
+})();
+
+/* ---------- beans ---------- */
+var BCOL = [0xff4f9a, 0x27d3ff, 0xffd23f, 0x34e08a, 0xff8a3d, 0xa56bff, 0xff5a5a, 0x4a7bff];
+var NAMES = ['Wobbles', 'Jellybop', 'Nugget', 'Pickles', 'Bumble', 'Waffle', 'Zippy', 'Mochi', 'Biscuit', 'Doodle', 'Squish', 'Pogo', 'Tater', 'Gizmo', 'Marsh', 'Beanie', 'Fuzz', 'Noodle'];
+var beans = [], P = null;
+var geoS = new THREE.SphereGeometry(0.5, 16, 12), geoE = new THREE.SphereGeometry(0.1, 8, 6), geoCone = new THREE.ConeGeometry(0.25, 0.5, 8);
+var whiteM = new THREE.MeshLambertMaterial({ color: 0xffffff }), blackM = new THREE.MeshBasicMaterial({ color: 0x222222 });
+function buildBeanMesh(col) {
+  var g = new THREE.Group(), m = new THREE.MeshLambertMaterial({ color: col });
+  var body = new THREE.Mesh(geoS, m); body.scale.set(1.0, 1.25, 0.95); body.position.y = 0.72; body.castShadow = true; g.add(body);
+  var belly = new THREE.Mesh(geoS, whiteM); belly.scale.set(0.55, 0.6, 0.3); belly.position.set(0, 0.62, -0.38); g.add(belly);
+  var eL = new THREE.Mesh(geoE, whiteM), eR = new THREE.Mesh(geoE, whiteM); eL.scale.set(1.5, 1.8, 1); eR.scale.set(1.5, 1.8, 1); eL.position.set(-0.16, 1.05, -0.44); eR.position.set(0.16, 1.05, -0.44); g.add(eL); g.add(eR);
+  var pL = new THREE.Mesh(geoE, blackM), pR = new THREE.Mesh(geoE, blackM); pL.scale.set(0.6, 0.8, 0.5); pR.scale.set(0.6, 0.8, 0.5); pL.position.set(-0.16, 1.05, -0.52); pR.position.set(0.16, 1.05, -0.52); g.add(pL); g.add(pR);
+  var aL = new THREE.Group(), aR = new THREE.Group(); aL.position.set(-0.5, 0.85, 0); aR.position.set(0.5, 0.85, 0);
+  var a1 = new THREE.Mesh(geoS, m); a1.scale.set(0.3, 0.7, 0.3); a1.position.y = -0.25; var a2 = new THREE.Mesh(geoS, m); a2.scale.set(0.3, 0.7, 0.3); a2.position.y = -0.25; aL.add(a1); aR.add(a2); g.add(aL); g.add(aR);
+  var fL = new THREE.Group(), fR = new THREE.Group(); fL.position.set(-0.22, 0.3, 0); fR.position.set(0.22, 0.3, 0);
+  var f1 = new THREE.Mesh(geoS, m); f1.scale.set(0.36, 0.5, 0.42); f1.position.set(0, -0.12, -0.04); var f2 = new THREE.Mesh(geoS, m); f2.scale.set(0.36, 0.5, 0.42); f2.position.set(0, -0.12, -0.04); fL.add(f1); fR.add(f2); g.add(fL); g.add(fR);
+  g.userData = { body: body, aL: aL, aR: aR, fL: fL, fR: fR };
+  return g;
+}
+function makeBean(name, col, isPlayer) {
+  var b = { name: name, col: col, player: isPlayer, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, yaw: 0, alive: true, grounded: false, coyote: 0, state: 'run', stun: 0, diveT: 0, diveCd: 0, mesh: buildBeanMesh(col), walk: 0, place: 0, jumpBuf: 0,
+    ai: { dir: rr(0, 6.28), next: 0, speed: rr(0.85, 1.0), jumpT: 0, mistake: 0 }, wob: 0, landAnim: 0, dead: 0, lastLayer: 0 };
+  scene.add(b.mesh); beans.push(b); return b;
+}
+function clearBeans() { beans.forEach(function (b) { scene.remove(b.mesh); }); beans = []; P = null; }
+
+/* ---------- input ---------- */
+var inp = { fx: 0, fy: 0, jump: false, dive: false, lookDX: 0, lookDY: 0 }, keys = {};
+function bindBtn(id, down, up) {
+  var el = $(id); if (!el) return;
+  el.addEventListener('pointerdown', function (e) { e.preventDefault(); e.stopPropagation(); el.classList.add('on'); try { el.setPointerCapture(e.pointerId); } catch (x) {} down && down(); });
+  var u = function (e) { el.classList.remove('on'); up && up(); }; el.addEventListener('pointerup', u); el.addEventListener('pointercancel', u);
+}
+bindBtn('bJump', function () { inp.jump = true; }, function () { inp.jump = false; });
+bindBtn('bDive', function () { inp.dive = true; }, function () { });
+(function () {
+  var mz = $('moveZone'), base = $('stickBase'), knob = $('stickKnob'), id = null, ox = 0, oy = 0, R = 62 * (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--k')) || 1);
+  mz.addEventListener('pointerdown', function (e) { if (id !== null) return; id = e.pointerId; ox = e.clientX; oy = e.clientY; try { mz.setPointerCapture(id); } catch (x) {} base.style.display = 'block'; var s = base.offsetWidth || 150; base.style.left = (ox - s / 2) + 'px'; base.style.top = (oy - s / 2) + 'px'; knob.style.transform = 'translate(0,0)'; });
+  mz.addEventListener('pointermove', function (e) {
+    if (e.pointerId !== id) return; var dx = e.clientX - ox, dy = e.clientY - oy, l = Math.sqrt(dx * dx + dy * dy), n = l / R;
+    if (l > R) { dx = dx / l * R; dy = dy / l * R; l = R; }
+    knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+    if (n < 0.12) { inp.fx = 0; inp.fy = 0; } else { inp.fx = dx / R; inp.fy = -dy / R; }
+  });
+  var up = function (e) { if (e.pointerId !== id) return; id = null; inp.fx = 0; inp.fy = 0; base.style.display = 'none'; };
+  mz.addEventListener('pointerup', up); mz.addEventListener('pointercancel', up);
+  var lz = $('lookZone'), lid = null, lx = 0, ly = 0;
+  lz.addEventListener('pointerdown', function (e) { if (lid !== null) return; lid = e.pointerId; lx = e.clientX; ly = e.clientY; try { lz.setPointerCapture(lid); } catch (x) {} });
+  lz.addEventListener('pointermove', function (e) { if (e.pointerId !== lid) return; inp.lookDX += e.clientX - lx; inp.lookDY += e.clientY - ly; lx = e.clientX; ly = e.clientY; });
+  var lu = function (e) { if (e.pointerId === lid) lid = null; }; lz.addEventListener('pointerup', lu); lz.addEventListener('pointercancel', lu);
+  var md = false, mx = 0, my = 0;
+  canvas.addEventListener('mousedown', function (e) { md = true; mx = e.clientX; my = e.clientY; }); window.addEventListener('mouseup', function () { md = false; });
+  window.addEventListener('mousemove', function (e) { if (md && !isTouch) { inp.lookDX += e.clientX - mx; inp.lookDY += e.clientY - my; mx = e.clientX; my = e.clientY; } });
+})();
+window.addEventListener('keydown', function (e) {
+  var k = e.key.toLowerCase(); keys[k] = true;
+  if (k === ' ') { inp.jump = true; e.preventDefault(); } if (k === 'shift' || k === 'e' || k === 'f') inp.dive = true; if (k === 'escape') pause();
+});
+window.addEventListener('keyup', function (e) { var k = e.key.toLowerCase(); keys[k] = false; if (k === ' ') inp.jump = false; });
+function moveVec() {
+  var fx = inp.fx, fy = inp.fy;
+  if (keys['a'] || keys['arrowleft']) fx -= 1; if (keys['d'] || keys['arrowright']) fx += 1; if (keys['w'] || keys['arrowup']) fy += 1; if (keys['s'] || keys['arrowdown']) fy -= 1;
+  var l = Math.sqrt(fx * fx + fy * fy); if (l > 1) { fx /= l; fy /= l; } return [fx, fy];
+}
+
+/* ---------- game state ---------- */
+var G = { playing: false, paused: false, t: 0, phase: 'idle', cd: 0, camYaw: 0, camPitch: 0.5, camDist: 9, specIdx: 0, endAt: 0, stage: 0, shrink: 0, shrinkR: 99, over: false };
+var camPos = [0, 8, 14];
+var SPAWN_R = 19;
+function startMatch() {
+  initAudio(); clearBeans(); buildArena();
+  var n = 16, order = []; for (var i = 0; i < n; i++) order.push(i);
+  var names = NAMES.slice().sort(function () { return Math.random() - 0.5; });
+  var cols = BCOL.slice(); var used = 0;
+  for (i = 0; i < n; i++) {
+    var isP = i === 0, b = makeBean(isP ? (save.name || 'Bean') : names[i], isP ? BCOL[save.color] : BCOL[(used++ + 1 + save.color) % BCOL.length], isP);
+    var a = i / n * 6.283 + 0.2, rad = rr(SPAWN_R - 3, SPAWN_R + 1); b.x = Math.cos(a) * rad; b.z = Math.sin(a) * rad; b.y = 0; b.yaw = Math.atan2(-b.x, -b.z); b.grounded = true;
+    var def = [{ sp: 0.62, mis: 0.35 }, { sp: 0.72, mis: 0.16 }, { sp: 0.82, mis: 0.05 }][save.diff]; b.ai.speed = def.sp * rr(0.94, 1.04); b.ai.mistake = def.mis * rr(0.6, 1.4);
+    if (isP) P = b;
+  }
+  G.playing = true; G.paused = false; G.t = 0; G.phase = 'count'; G.cd = 3.99; G.camYaw = P.yaw; G.camPitch = 0.5; G.over = false; G.endAt = 0; G.stage = 0; G.shrink = 0; G.shrinkR = RADS[3] + 1; G.lastCd = 4;
+  save.played++; persist(); showScr(null); $('hud').classList.add('on'); document.body.classList.add('play'); $('feed').innerHTML = '';
+  banner('GET READY', 1.2);
+}
+function aliveCount() { var n = 0; beans.forEach(function (b) { if (b.alive) n++; }); return n; }
+function banner(t, d) { var el = $('banner'); el.textContent = t; el.classList.remove('on'); void el.offsetWidth; el.style.animationDuration = (d || 1) + 's'; el.classList.add('on'); }
+function subtitle(t) { var el = $('sub'); el.textContent = t; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); }
+function feed(t) { var d = document.createElement('div'); d.textContent = t; $('feed').appendChild(d); while ($('feed').children.length > 4) $('feed').removeChild($('feed').firstChild); setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 4000); }
+
+/* ---------- bean physics ---------- */
+function groundHit(b, oy) {
+  /* swept: highest layer top that we crossed or stand on */
+  for (var li = 0; li < layers.length; li++) {
+    var top = layers[li].y;
+    if (oy >= top - 0.08 && b.y <= top + 0.02 && b.vy <= 0.01) { var t = tileAt(li, b.x, b.z); if (t) return { y: top, t: t }; }
+  }
+  return null;
+}
+function eliminate(b) {
+  b.alive = false; b.place = aliveCountBefore(b); b.dead = 0;
+  feed(b.name + (b.player ? ' (you)' : '') + ' fell!'); sfx('fall', b.player ? 1 : 0.35);
+  if (b.player) { G.endAt = G.t + 2.2; G.result = { win: b.place === 1, place: b.place }; if (b.place === 1) { save.crowns++; G.over = true; } }
+  checkWin();
+}
+function aliveCountBefore(b) { var n = 0; beans.forEach(function (o) { if (o.alive || o === b) n++; }); return n; }
+function checkWin() {
+  var a = beans.filter(function (b) { return b.alive; });
+  if (a.length === 1 && !G.over) {
+    G.over = true; var w = a[0]; w.place = 1; w.winT = 0;
+    if (w.player) { G.result = { win: true, place: 1 }; G.endAt = G.t + 3.2; save.crowns++; sfx('win'); banner('YOU WIN!', 2.5); } else { if (!G.endAt) G.endAt = G.t + 2; banner(w.name + ' wins', 2); }
+    G.phase = 'done';
+  } else if (a.length === 0 && !G.over) { G.over = true; G.endAt = G.t + 0.5; }
+}
+function stepBean(b, dt, wx, wz, wantJump, wantDive, speed) {
+  if (b.state === 'stun') { b.stun -= dt; wx = 0; wz = 0; wantJump = false; wantDive = false; if (b.stun <= 0) b.state = 'run'; }
+  if (b.diveCd > 0) b.diveCd -= dt;
+  var oy = b.y;
+  /* horizontal */
+  if (b.state === 'dive') {
+    b.diveT += dt; var f = b.grounded ? Math.exp(-dt * 3.2) : Math.exp(-dt * 0.4); b.vx *= f; b.vz *= f;
+    if (b.grounded && b.diveT > 0.85) { b.state = 'run'; b.diveCd = 0.4; }
+  } else {
+    var tvx = wx * speed, tvz = wz * speed, k = 1 - Math.exp(-dt * (b.grounded ? (b.state === 'stun' ? 3 : 16) : 5));
+    b.vx += (tvx - b.vx) * k; b.vz += (tvz - b.vz) * k;
+  }
+  if (wantDive && b.state === 'run' && b.diveCd <= 0) {
+    var dl = Math.sqrt(wx * wx + wz * wz), dx = dl > 0.1 ? wx / dl : -Math.sin(b.yaw), dz = dl > 0.1 ? wz / dl : -Math.cos(b.yaw);
+    b.state = 'dive'; b.diveT = 0; b.vx = dx * 11.5; b.vz = dz * 11.5; b.vy = 5.2; b.grounded = false; b.coyote = 0; b.yaw = Math.atan2(-dx, -dz); sfx('dive', b.player ? 1 : 0.3);
+  }
+  /* jump */
+  b.coyote = b.grounded ? 0.12 : b.coyote - dt; b.jumpBuf = wantJump ? 0.12 : b.jumpBuf - dt;
+  if (b.jumpBuf > 0 && b.coyote > 0 && b.state !== 'dive') { b.vy = 9.6; b.grounded = false; b.coyote = 0; b.jumpBuf = 0; b.landAnim = -1; sfx('jump', b.player ? 1 : 0.2); }
+  b.vy -= 26 * dt; b.x += b.vx * dt; b.z += b.vz * dt; b.y += b.vy * dt;
+  var h = groundHit(b, oy);
+  if (h) {
+    if (!b.grounded && b.vy < -4) { b.landAnim = 1; if (b.player) sfx('land', 0.8); }
+    b.y = h.y; b.vy = 0; b.grounded = true; touchTile(h.t); b.lastLayer = h.t.li;
+  } else if (b.grounded) {
+    /* still supported? */
+    var still = false; for (var li = 0; li < layers.length; li++) if (Math.abs(b.y - layers[li].y) < 0.05 && tileAt(li, b.x, b.z)) { still = true; break; }
+    if (!still) { b.grounded = false; }
+    else { var tt = null; for (li = 0; li < layers.length; li++) if (Math.abs(b.y - layers[li].y) < 0.05) tt = tileAt(li, b.x, b.z); if (tt) touchTile(tt); }
+  }
+  /* facing */
+  var sp = Math.sqrt(b.vx * b.vx + b.vz * b.vz);
+  if (b.state !== 'dive' && sp > 0.8) b.yaw += clamp(angDiff(Math.atan2(-b.vx, -b.vz), b.yaw), -14 * dt, 14 * dt);
+  b.walk += sp * dt * 1.5;
+  if (b.y < KILL_Y && b.alive) eliminate(b);
+}
+
+/* ---------- bot AI ---------- */
+function botControl(b, dt) {
+  var a = b.ai; a.next -= dt;
+  if (a.next <= 0) {
+    a.next = rr(0.18, 0.34);
+    var best = -1e9, bd = a.dir, li = clamp(Math.round(-b.y / 8), 0, layers.length - 1);
+    for (var i = 0; i < 14; i++) {
+      var ang = a.dir + (i - 6.5) * 0.42 + rr(-0.1, 0.1), sc2 = 0;
+      for (var s = 1; s <= 6; s++) {
+        var px = b.x - Math.sin(ang) * s * 1.6, pz = b.z - Math.cos(ang) * s * 1.6, t = tileAt(li, px, pz);
+        if (t && t.state === 0) sc2 += 1.2 / (s * 0.7); else if (t) sc2 -= 0.9 / s; else { var lower = li + 1 < layers.length && tileAt(li + 1, px, pz); sc2 += lower ? -0.75 / s : -1.4 / s; }
+        var lx = px + Math.cos(ang) * 1.3, lz = pz - Math.sin(ang) * 1.3, rx = px - Math.cos(ang) * 1.3, rz = pz + Math.sin(ang) * 1.3, t1 = tileAt(li, lx, lz), t2 = tileAt(li, rx, rz);
+        if (t1 && t1.state === 0) sc2 += 0.25 / s; if (t2 && t2.state === 0) sc2 += 0.25 / s;
+      }
+      sc2 -= Math.abs(angDiff(ang, a.dir)) * 0.1 + Math.random() * a.mistake * 1.6;
+      for (var j = 0; j < beans.length; j++) { var o = beans[j]; if (o === b || !o.alive) continue; var ox = o.x - b.x, oz = o.z - b.z, od = ox * ox + oz * oz; if (od < 25) { var oa = Math.atan2(-ox, -oz); sc2 -= (1 - Math.abs(angDiff(ang, oa)) / 3.14) * (1 - Math.sqrt(od) / 5) * 0.5; } }
+      if (sc2 > best) { best = sc2; bd = ang; }
+    }
+    a.dir = bd; a.bestScore = best;
+    if (best < -0.4 && b.grounded && Math.random() < 0.8) a.jumpT = 0.08;
+    if (b.grounded && Math.random() < 0.05 * (0.6 + a.mistake * 3) * 0.3) a.jumpT = 0.08;
+    if (save.diff === 2 && b.grounded && b.diveCd <= 0 && (a.diveWait = (a.diveWait || 0) - 0.25) <= 0 && Math.random() < 0.05) { for (j = 0; j < beans.length; j++) { o = beans[j]; if (o === b || !o.alive) continue; var ddx = o.x - b.x, ddz = o.z - b.z; if (Math.hypot(ddx, ddz) < 3.2) { var da = Math.atan2(-ddx, -ddz), ex = b.x + ddx * 2.2, ez = b.z + ddz * 2.2; if (tileAt(li, ex, ez) && tileAt(li, b.x - Math.sin(da) * 5, b.z - Math.cos(da) * 5)) { a.dir = da; a.diveT = 0.05; a.diveWait = 6; } break; } } }
+  }
+  var jump = a.jumpT > 0; a.jumpT -= dt; var dv = (a.diveT || 0) > 0; a.diveT = (a.diveT || 0) - dt;
+  return [-Math.sin(a.dir), -Math.cos(a.dir), jump, dv];
+}
+
+/* ---------- collisions between beans ---------- */
+function bumpBeans() {
+  for (var i = 0; i < beans.length; i++) {
+    var a = beans[i]; if (!a.alive) continue;
+    for (var j = i + 1; j < beans.length; j++) {
+      var b = beans[j]; if (!b.alive) continue;
+      var dx = b.x - a.x, dz = b.z - a.z, dy = Math.abs(b.y - a.y); if (dy > 1.2) continue;
+      var d2 = dx * dx + dz * dz; if (d2 > 0.85 * 0.85 || d2 < 1e-6) continue;
+      var d = Math.sqrt(d2), nx = dx / d, nz = dz / d, ov = 0.85 - d;
+      a.x -= nx * ov / 2; a.z -= nz * ov / 2; b.x += nx * ov / 2; b.z += nz * ov / 2;
+      var rv = (b.vx - a.vx) * nx + (b.vz - a.vz) * nz;
+      if (rv < 0) { var imp = -rv * 0.9; a.vx -= nx * imp; a.vz -= nz * imp; b.vx += nx * imp; b.vz += nz * imp; }
+      var sa = Math.hypot(a.vx, a.vz), sb = Math.hypot(b.vx, b.vz);
+      if (a.state === 'dive' && a.diveT < 0.5 && sa > 6 && b.state !== 'dive') { b.state = 'stun'; b.stun = 0.9; b.vx += nx * 8; b.vz += nz * 8; b.vy = 4; b.grounded = false; b.wob = 1; sfx('bump', (a.player || b.player) ? 1 : 0.3); }
+      else if (b.state === 'dive' && b.diveT < 0.5 && sb > 6 && a.state !== 'dive') { a.state = 'stun'; a.stun = 0.9; a.vx -= nx * 8; a.vz -= nz * 8; a.vy = 4; a.grounded = false; a.wob = 1; sfx('bump', (a.player || b.player) ? 1 : 0.3); }
+      else if (Math.abs(rv) > 3) { a.wob = 0.6; b.wob = 0.6; sfx('bump', (a.player || b.player) ? 0.6 : 0.15); }
+    }
+  }
+}
+
+/* ---------- animation ---------- */
+function animBean(b, dt) {
+  var m = b.mesh, u = m.userData;
+  m.position.set(b.x, b.y, b.z); m.rotation.y = b.yaw; m.rotation.x = 0; m.rotation.z = 0;
+  if (!b.alive) { b.dead += dt; var f = Math.min(1, b.dead * 2); u.aL.rotation.x = Math.sin(b.dead * 18) * 1.2 - 2.6; u.aR.rotation.x = -Math.sin(b.dead * 18) * 1.2 - 2.6; u.fL.rotation.x = Math.sin(b.dead * 14) * 0.8; u.fR.rotation.x = -Math.sin(b.dead * 14) * 0.8; m.rotation.z = b.dead * 2; m.rotation.x = b.dead * 1.4; if (b.dead > 2) m.visible = false; return; }
+  b.wob = Math.max(0, b.wob - dt * 2); b.landAnim += (0 - b.landAnim) * (1 - Math.exp(-dt * 10));
+  var sp = Math.sqrt(b.vx * b.vx + b.vz * b.vz), run = b.grounded ? clamp(sp / 7, 0, 1) : 0, sw = Math.sin(b.walk * 2.2);
+  u.fL.rotation.x = sw * 0.9 * run; u.fR.rotation.x = -sw * 0.9 * run; u.aL.rotation.x = -sw * 0.9 * run; u.aR.rotation.x = sw * 0.9 * run;
+  var sy = 1 + (b.grounded ? -Math.abs(sw) * 0.05 * run : clamp(b.vy * 0.015, -0.12, 0.2)) - b.landAnim * 0.12;
+  u.body.scale.set(1.0 / Math.sqrt(sy), 1.25 * sy, 0.95 / Math.sqrt(sy));
+  if (!b.grounded && b.state === 'run') { u.aL.rotation.z = -1.1; u.aR.rotation.z = 1.1; u.aL.rotation.x = -0.3; u.aR.rotation.x = -0.3; } else { u.aL.rotation.z = 0; u.aR.rotation.z = 0; }
+  if (b.state === 'dive') { m.rotation.x = -1.35; u.aL.rotation.x = -2.8; u.aR.rotation.x = -2.8; u.aL.rotation.z = 0.2; u.aR.rotation.z = -0.2; m.position.y = b.y + 0.35; }
+  if (b.state === 'stun') { m.rotation.z = Math.sin(G.t * 22) * 0.35; m.rotation.x = -0.3; u.aL.rotation.x = Math.sin(G.t * 20) * 1.2; u.aR.rotation.x = -Math.sin(G.t * 20) * 1.2; }
+  if (b.wob > 0) m.rotation.z += Math.sin(G.t * 30) * 0.18 * b.wob;
+  if (G.over && b.alive) { var wt = (b.winT = (b.winT || 0) + dt); m.position.y = b.y + Math.abs(Math.sin(wt * 7)) * 0.5; u.aL.rotation.x = -2.8 + Math.sin(wt * 14) * 0.5; u.aR.rotation.x = -2.8 - Math.sin(wt * 14) * 0.5; m.rotation.y += wt * 4; }
+}
+
+/* ---------- main update ---------- */
+function update(dt) {
+  G.t += dt;
+  /* decor */
+  for (var i = 0; i < decor.length; i++) { var d = decor[i]; d.m.position.y = d.y + Math.sin(G.t * d.sp + d.ph) * 3; d.m.rotation.y += dt * 0.1; }
+  if (G.phase === 'count') {
+    G.cd -= dt; var c = Math.ceil(G.cd); if (c !== G.lastCd) { G.lastCd = c; if (c >= 1 && c <= 3) { banner(String(c), 0.9); sfx('beep'); } }
+    if (G.cd <= 0) { G.phase = 'run'; G.t = 0; banner('GO!', 0.9); sfx('go'); }
+    beans.forEach(function (b) { b.y = 0; b.vy = 0; b.grounded = true; });
+  }
+  var look = inp; G.camYaw -= look.lookDX * 0.0055 * save.sens; G.camPitch = clamp(G.camPitch + look.lookDY * 0.004 * save.sens, 0.12, 1.2); look.lookDX = look.lookDY = 0;
+  var sub = dt > 1 / 45 ? 2 : 1, sdt = dt / sub;
+  for (var s = 0; s < sub; s++) {
+    for (var bi = 0; bi < beans.length; bi++) {
+      var b = beans[bi]; if (!b.alive) { b.vy -= 26 * sdt; b.y += b.vy * sdt; b.x += b.vx * sdt * 0.3; b.z += b.vz * sdt * 0.3; continue; }
+      if (G.phase === 'count') continue;
+      if (b.player) {
+        var mv = moveVec(), sy = Math.sin(G.camYaw), cy = Math.cos(G.camYaw);
+        var wx = (-sy) * mv[1] + cy * mv[0], wz = (-cy) * mv[1] + (-sy) * mv[0], dv = inp.dive; inp.dive = false;
+        stepBean(b, sdt, wx, wz, inp.jump, dv, 6.6);
+      } else { var ctl = botControl(b, sdt); stepBean(b, sdt, ctl[0], ctl[1], ctl[2], ctl[3], 6.6 * b.ai.speed); }
+    }
+    bumpBeans();
+  }
+  updateTiles(dt);
+  /* sudden death */
+  if (G.phase === 'run') {
+    if (G.stage === 0 && G.t > 80) { G.stage = 1; banner('TOP LAYER CRUMBLES!', 1.6); sfx('rumble'); layers[0].list.forEach(function (t) { dropTile(t, rr(0.2, 7)); }); }
+    if (G.stage === 1 && G.t > 115) { G.stage = 2; banner('LAYER 2 CRUMBLES!', 1.6); sfx('rumble'); layers[1].list.forEach(function (t) { dropTile(t, rr(0.2, 7)); }); }
+    if (G.stage === 2 && G.t > 150) { G.stage = 3; banner('LAYER 3 CRUMBLES!', 1.6); sfx('rumble'); layers[2].list.forEach(function (t) { dropTile(t, rr(0.2, 7)); }); }
+    if (G.stage === 3 && G.t > 180) { G.stage = 4; banner('LAST LAYER SHRINKS!', 1.6); sfx('rumble'); }
+    if (G.stage === 4) { G.shrink += dt; var rad = Math.max(0, RADS[3] + 1 - G.shrink / 3); layers[3].list.forEach(function (t) { var dd = Math.max(Math.abs(t.q), Math.abs(t.r), Math.abs(-t.q - t.r)); if (dd > rad) dropTile(t, rr(0.1, 0.9)); }); }
+  }
+  beans.forEach(function (b) { animBean(b, dt); });
+  /* result */
+  if (G.endAt && G.t >= G.endAt && G.playing) endMatch();
+  /* camera */
+  var tgt = P;
+  if (!P.alive) { var al = beans.filter(function (b) { return b.alive; }); if (al.length) tgt = al[G.specIdx % al.length]; }
+  var cx = tgt.x + Math.sin(G.camYaw) * Math.cos(G.camPitch) * G.camDist, cz = tgt.z + Math.cos(G.camYaw) * Math.cos(G.camPitch) * G.camDist, cyy = Math.max(tgt.y, P.alive ? P.y : tgt.y) + 1.4 + Math.sin(G.camPitch) * G.camDist;
+  var tyy = P.alive ? P.y : tgt.y; cyy = tyy + 1.4 + Math.sin(G.camPitch) * G.camDist;
+  var k = 1 - Math.exp(-dt * 9); camPos[0] = lerp(camPos[0], cx, k); camPos[1] = lerp(camPos[1], cyy, 1 - Math.exp(-dt * 5)); camPos[2] = lerp(camPos[2], cz, k);
+  camera.position.set(camPos[0], camPos[1], camPos[2]); camera.lookAt(tgt.x, tyy + 1.0, tgt.z);
+  sun.position.set(tgt.x + 20, tyy + 50, tgt.z + 15); sun.target.position.set(tgt.x, tyy, tgt.z); sun.target.updateMatrixWorld();
+  /* HUD */
+  $('aliveN').textContent = aliveCount(); var tm = Math.floor(G.t), ts = G.phase === 'count' ? '0:00' : Math.floor(tm / 60) + ':' + (tm % 60 < 10 ? '0' : '') + (tm % 60); $('timer').textContent = ts;
+  /* "you" tag */
+  var you = $('you'); if (P.alive) { var v = new THREE.Vector3(P.x, P.y + 2.0, P.z); v.project(camera); var onS = v.z < 1; you.style.display = onS ? 'block' : 'none'; you.style.left = ((v.x * 0.5 + 0.5) * window.innerWidth) + 'px'; you.style.top = ((-v.y * 0.5 + 0.5) * window.innerHeight) + 'px'; } else you.style.display = 'none';
+}
+function endMatch() {
+  G.playing = false; var r = G.result || { win: false, place: aliveCount() };
+  if (!save.best || r.place < save.best) save.best = r.place; persist();
+  $('hud').classList.remove('on'); document.body.classList.remove('play');
+  $('endT').textContent = r.win ? 'You win!' : (r.place <= 3 ? 'So close!' : 'Eliminated'); $('endP').textContent = 'Place #' + r.place + ' of 16' + (r.win ? '  👑' : '');
+  showScr('scrEnd'); refreshMenu();
+}
+
+/* ---------- UI ---------- */
+function showScr(id) { ['scrMenu', 'scrEnd', 'scrPause'].forEach(function (s) { $(s).classList.toggle('on', s === id); }); }
+function refreshMenu() {
+  $('stW').textContent = save.crowns; $('stB').textContent = save.best ? '#' + save.best : '-'; $('stP').textContent = save.played;
+  Array.prototype.forEach.call($('diffSeg').children, function (b) { b.classList.toggle('on', +b.dataset.d === save.diff); });
+  Array.prototype.forEach.call($('swatches').children, function (s, i) { s.classList.toggle('on', i === save.color); });
+}
+BCOL.forEach(function (c, i) { var s = document.createElement('div'); s.className = 'sw'; s.style.background = '#' + ('000000' + c.toString(16)).slice(-6); s.onclick = function () { save.color = i; sfx('ui'); persist(); refreshMenu(); }; $('swatches').appendChild(s); });
+$('diffSeg').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; save.diff = +b.dataset.d; sfx('ui'); persist(); refreshMenu(); });
+$('nameIn').value = save.name; $('nameIn').addEventListener('input', function () { save.name = $('nameIn').value.slice(0, 10) || 'Bean'; persist(); });
+$('bPlay').onclick = function () { initAudio(); startMatch(); }; $('bAgain').onclick = function () { initAudio(); startMatch(); };
+$('bMenu').onclick = function () { showScr('scrMenu'); }; $('bLeave').onclick = function () { G.playing = false; G.paused = false; $('hud').classList.remove('on'); document.body.classList.remove('play'); showScr('scrMenu'); };
+function pause() { if (!G.playing || G.paused) { if (G.paused) resume(); return; } G.paused = true; $('sens').value = save.sens; $('vol').value = save.vol; showScr('scrPause'); }
+function resume() { G.paused = false; showScr(null); }
+$('bResume').onclick = resume; $('sens').oninput = function () { save.sens = +$('sens').value; persist(); }; $('vol').oninput = function () { save.vol = +$('vol').value; if (master) master.gain.value = save.vol; persist(); };
+$('bPause').addEventListener('pointerdown', function (e) { e.stopPropagation(); pause(); });
+refreshMenu();
+
+/* idle menu camera + loop */
+buildArena(); P = { x: 0, y: 0, z: 0, alive: true };
+var last = performance.now();
+function frame(t) {
+  requestAnimationFrame(frame);
+  var dt = Math.min(0.05, (t - last) / 1000); last = t;
+  if (G.playing && !G.paused) update(dt);
+  else if (!G.playing) { var a = t * 0.0002; camera.position.set(Math.cos(a) * 46, 22, Math.sin(a) * 46); camera.lookAt(0, -3, 0); for (var i = 0; i < decor.length; i++) { var d = decor[i]; d.m.position.y = d.y + Math.sin(t * 0.001 * d.sp + d.ph) * 3; } }
+  renderer.render(scene, camera);
+}
+requestAnimationFrame(frame);
+window.HEXDROP = { G: G, beans: function () { return beans; }, layers: function () { return layers; }, start: startMatch, update: update, inp: inp, save: save, tileAt: tileAt, xzToHex: xzToHex, hexToXZ: hexToXZ, P: function () { return P; } };
+})();
+
+</script>
+</body></html>
