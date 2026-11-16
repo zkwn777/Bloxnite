@@ -5,7 +5,7 @@
 <title>Warfront Royale</title>
 <meta name="theme-color" content="#0a0e11">
 <style>
-:root{--bg:#0a0e11;--panel:#12181d;--panel2:#18212a;--line:#26323d;--tx:#e8eef2;--mut:#8a9aa6;--acc:#f0a830;--acc2:#ffcf6a;--red:#e5533d;--grn:#4fc27a;--blu:#4aa3ff;--gas:#b36bff}
+:root{--k:1;--bg:#0a0e11;--panel:#12181d;--panel2:#18212a;--line:#26323d;--tx:#e8eef2;--mut:#8a9aa6;--acc:#f0a830;--acc2:#ffcf6a;--red:#e5533d;--grn:#4fc27a;--blu:#4aa3ff;--gas:#b36bff}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;touch-action:none}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:"Arial Narrow","Roboto Condensed",system-ui,-apple-system,Segoe UI,sans-serif;letter-spacing:.02em}
 #gl{position:fixed;inset:0;width:100%;height:100%;display:block;background:#0a0e11}
@@ -68,11 +68,11 @@ h1 span{color:var(--acc)}
 /* HUD */
 #hud{position:fixed;inset:0;z-index:10;display:none;pointer-events:none}#hud.on{display:block}
 #hud *{pointer-events:none}
-#moveZone{position:fixed;left:0;top:18%;width:42%;bottom:0;z-index:11;display:none;touch-action:none}
-#lookZone{position:fixed;right:0;top:0;width:58%;bottom:0;z-index:9;display:none;touch-action:none}
+#moveZone{position:fixed;left:0;top:0;width:50%;bottom:0;z-index:11;display:none;touch-action:none}
+#lookZone{position:fixed;right:0;top:0;width:50%;bottom:0;z-index:9;display:none;touch-action:none}
 .play #moveZone,.play #lookZone{display:block}
-#stickBase{position:fixed;display:none;width:140px;height:140px;border-radius:50%;border:2px solid rgba(255,255,255,.28);background:rgba(255,255,255,.06);z-index:12;pointer-events:none}
-#stickKnob{position:absolute;left:50px;top:50px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.5)}
+#stickBase{position:fixed;display:none;width:calc(150px*var(--k));height:calc(150px*var(--k));border-radius:50%;border:2px solid rgba(255,255,255,.28);background:rgba(255,255,255,.06);z-index:12;pointer-events:none}
+#stickKnob{position:absolute;left:50%;top:50%;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;background:rgba(255,255,255,.7);border:2px solid #fff}
 #compass{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:min(46vw,380px);height:28px;background:linear-gradient(90deg,transparent,rgba(0,0,0,.45) 20%,rgba(0,0,0,.45) 80%,transparent)}
 #top2{position:absolute;top:42px;left:50%;transform:translateX(-50%);display:flex;gap:10px;font-weight:900;letter-spacing:.14em;font-size:13px;text-shadow:0 1px 3px #000}
 #top2 span{background:rgba(0,0,0,.5);padding:4px 10px;border:1px solid rgba(255,255,255,.12)}#top2 b{color:var(--acc)}
@@ -106,17 +106,25 @@ h1 span{color:var(--acc)}
 #flashOv{position:absolute;inset:0;background:#fff;opacity:0}
 #scope{position:absolute;inset:0;display:none;background:radial-gradient(circle at center,transparent 0,transparent 33vh,#000 33.4vh)}
 #scope::before,#scope::after{content:"";position:absolute;background:rgba(0,0,0,.85)}#scope::before{left:50%;top:calc(50% - 33vh);width:2px;height:66vh}#scope::after{top:50%;left:calc(50% - 33vh);height:2px;width:66vh}
-.tb{position:fixed;z-index:15;display:none;align-items:center;justify-content:center;border-radius:50%;border:2px solid rgba(255,255,255,.4);background:rgba(20,26,32,.5);color:#fff;font-weight:900;font-size:12px;letter-spacing:.08em;text-transform:uppercase;touch-action:none}
-.tb.on{background:rgba(240,168,48,.55);border-color:var(--acc)}
-.play .tb{display:flex}.play #bUse{display:none}.play #bUse.show{display:flex;background:rgba(240,168,48,.7)}.play #bPlate{display:none}.play #bPlate.show{display:flex}.play #bStreak{display:none}
-.noTouch .tb,.noTouch #bPause{display:none!important}
-#bFire{right:34px;bottom:44px;width:96px;height:96px;font-size:14px;background:rgba(229,83,61,.4)}
-#bAds{right:150px;bottom:130px;width:68px;height:68px}#bJump{right:34px;bottom:156px;width:68px;height:68px}#bCrouch{right:34px;bottom:236px;width:58px;height:58px}
-#bReload{right:150px;bottom:44px;width:56px;height:56px}#bSwap{right:224px;bottom:44px;width:56px;height:56px}
-#bFrag{right:112px;bottom:236px;width:54px;height:54px}#bTac{right:178px;bottom:210px;width:50px;height:50px}
-#bUse{right:240px;bottom:130px;width:74px;height:74px}#bPlate{right:300px;bottom:44px;width:58px;height:58px}
+.cbtn{position:fixed;z-index:20;pointer-events:auto;border-radius:9999px;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;font-weight:900;letter-spacing:.1em;font-size:calc(14px*var(--k));color:#fff;background:rgba(11,14,19,.55);border:2px solid rgba(255,255,255,.4);touch-action:none;line-height:1;text-transform:uppercase}
+.cbtn svg{width:38%;height:38%;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.cbtn span{pointer-events:none}.cbtn.on{background:rgba(255,255,255,.28)}
+.play:not(.noTouch) .cbtn{display:flex}.play .cbtn.ctx{display:none}.play:not(.noTouch) .cbtn.ctx.show{display:flex}
+#bJump{width:calc(98px*var(--k));height:calc(98px*var(--k));right:calc(env(safe-area-inset-right,0px) + 34px);bottom:calc(env(safe-area-inset-bottom,0px) + 34px)}
+#bFire{width:calc(112px*var(--k));height:calc(112px*var(--k));right:calc(env(safe-area-inset-right,0px) + 150px*var(--k) + 6px);bottom:calc(env(safe-area-inset-bottom,0px) + 118px*var(--k) + 6px);border-color:rgba(255,90,77,.9);background:rgba(255,90,77,.26);font-size:calc(17px*var(--k))}
+#bFire.on{background:rgba(255,90,77,.7)}
+#bSlide{width:calc(80px*var(--k));height:calc(80px*var(--k));right:calc(env(safe-area-inset-right,0px) + 150px*var(--k) + 14px);bottom:calc(env(safe-area-inset-bottom,0px) + 22px)}
+#bReload{width:calc(72px*var(--k));height:calc(72px*var(--k));right:calc(env(safe-area-inset-right,0px) + 46px);bottom:calc(env(safe-area-inset-bottom,0px) + 150px*var(--k) + 10px)}
+#bAds{width:calc(72px*var(--k));height:calc(72px*var(--k));right:calc(env(safe-area-inset-right,0px) + 270px*var(--k) + 10px);bottom:calc(env(safe-area-inset-bottom,0px) + 126px*var(--k) + 10px)}
+#bSwap{width:calc(62px*var(--k));height:calc(62px*var(--k));right:calc(env(safe-area-inset-right,0px) + 270px*var(--k) + 10px);bottom:calc(env(safe-area-inset-bottom,0px) + 26px)}
+#bFrag{width:calc(62px*var(--k));height:calc(62px*var(--k));right:calc(env(safe-area-inset-right,0px) + 52px);bottom:calc(env(safe-area-inset-bottom,0px) + 150px*var(--k) + 98px*var(--k))}
+#bUse{width:calc(76px*var(--k));height:calc(76px*var(--k));right:calc(env(safe-area-inset-right,0px) + 270px*var(--k) + 100px);bottom:calc(env(safe-area-inset-bottom,0px) + 126px*var(--k) + 70px*var(--k));background:rgba(240,168,48,.7);color:#14100a;border-color:#ffd9a0}
+#bPlate{width:calc(62px*var(--k));height:calc(62px*var(--k));right:calc(env(safe-area-inset-right,0px) + 270px*var(--k) + 100px);bottom:calc(env(safe-area-inset-bottom,0px) + 26px);border-color:var(--blu)}
+#stickHint{position:fixed;z-index:6;width:calc(140px*var(--k));height:calc(140px*var(--k));left:calc(env(safe-area-inset-left,0px) + 56px);bottom:calc(env(safe-area-inset-bottom,0px) + 48px);border-radius:50%;border:2px solid rgba(255,255,255,.22);background:rgba(255,255,255,.04);display:none;pointer-events:none}
+.play:not(.noTouch) #stickHint{display:block}
+.noTouch .cbtn,.noTouch #bPause{display:none!important}
 #vTag{position:fixed;right:8px;bottom:4px;z-index:40;font-size:10px;color:#6c7c88;letter-spacing:.12em;pointer-events:none}
-@media (max-width:760px){.cols{grid-template-columns:1fr}.right{width:100%}#scrMenu{flex-direction:column}}
+@media (max-width:760px){:root{--k:.7}.cols{grid-template-columns:1fr}.right{width:100%}#scrMenu{flex-direction:column}}
 </style></head>
 <body>
 <canvas id="gl"></canvas>
@@ -180,10 +188,17 @@ h1 span{color:var(--acc)}
   </div>
 </div>
 <div id="moveZone"></div><div id="lookZone"></div><div id="stickBase"><div id="stickKnob"></div></div>
-<div class="tb" id="bFire">Fire</div><div class="tb" id="bAds">ADS</div><div class="tb" id="bJump">Jump</div><div class="tb" id="bCrouch">Crouch</div>
-<div class="tb" id="bReload">Reload</div><div class="tb" id="bSwap">Swap</div><div class="tb" id="bFrag">Frag</div><div class="tb" id="bTac">Flash</div>
-<div class="tb" id="bUse">Use</div><div class="tb" id="bPlate">Shield</div><div class="tb" id="bStreak"></div>
-<div id="vTag">v5 · 16 Nov 2026</div>
+<div id="stickHint"></div>
+<button id="bJump" class="cbtn" type="button"><svg viewBox="0 0 24 24"><path d="M5 14l7-7 7 7M5 20l7-7 7 7"/></svg><span>JUMP</span></button>
+<button id="bFire" class="cbtn" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="1.2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span>SHOOT</span></button>
+<button id="bSlide" class="cbtn" type="button"><svg viewBox="0 0 24 24"><path d="M3 15h14M13 10l6 5-6 5"/></svg><span>SLIDE</span></button>
+<button id="bReload" class="cbtn" type="button"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/></svg><span>RELOAD</span></button>
+<button id="bAds" class="cbtn" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg><span>SCOPE</span></button>
+<button id="bSwap" class="cbtn" type="button"><svg viewBox="0 0 24 24"><path d="M4 8h13M13 4l4 4-4 4M20 16H7M11 12l-4 4 4 4"/></svg><span>SWAP</span></button>
+<button id="bFrag" class="cbtn" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="14" r="6"/><path d="M12 8V4h4"/></svg><span>FRAG</span></button>
+<button id="bUse" class="cbtn ctx" type="button"><svg viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></svg><span>PICK UP</span></button>
+<button id="bPlate" class="cbtn ctx" type="button"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/></svg><span>SHIELD</span></button>
+<div id="vTag">v6 · 16 Nov 2026</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* ===== WARFRONT: core (utils, audio, save, renderer, input) ===== */
@@ -306,7 +321,7 @@ function addLook(dx, dy) { inp.lookDX += dx; inp.lookDY += dy; }
 (function touchSetup() {
   var mz = $('moveZone'), lz = $('lookZone'), sb = $('stickBase'), sk = $('stickKnob');
   var stick = { id: null, x0: 0, y0: 0 }, look = { id: null, lx: 0, ly: 0 };
-  var R = 62;
+  var R = 62 * (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--k')) || 1);
   mz.addEventListener('pointerdown', function (e) {
     W.initAudio();
     if (stick.id !== null) return;
@@ -320,9 +335,8 @@ function addLook(dx, dy) { inp.lookDX += dx; inp.lookDY += dy; }
     var dx = e.clientX - stick.x0, dy = e.clientY - stick.y0, l = Math.sqrt(dx * dx + dy * dy);
     if (l > R) { dx = dx / l * R; dy = dy / l * R; l = R; }
     sk.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
-    var n = l / R; var dz = n < 0.14 ? 0 : (n - 0.14) / 0.86;
-    inp.fx = l > 0 ? dx / l * dz : 0; inp.fy = l > 0 ? -dy / l * dz : 0;
-    inp.touchSprint = n > 0.93 && inp.fy > 0.5;
+    var n = l / R;
+    if (n < 0.12) { inp.fx = 0; inp.fy = 0; } else { inp.fx = dx / R; inp.fy = -dy / R; }
   });
   function stickEnd(e) {
     if (e.pointerId !== stick.id) return;
@@ -355,16 +369,19 @@ W.bindBtn = function (id, down, up) {
   function end(e) { if (e.pointerId !== pid) return; pid = null; el.classList.remove('on'); if (up) up(e); }
   el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
 };
-W.bindBtn('bFire', function () { inp.fire = true; }, function () { inp.fire = false; });
+(function () {
+  var fb = $('bFire'), fl = { id: null, x: 0, y: 0 };
+  W.bindBtn('bFire', function () { inp.fire = true; }, function () { inp.fire = false; fl.id = null; });
+  fb.addEventListener('pointerdown', function (e) { fl.id = e.pointerId; fl.x = e.clientX; fl.y = e.clientY; });
+  fb.addEventListener('pointermove', function (e) { if (e.pointerId !== fl.id) return; addLook(e.clientX - fl.x, e.clientY - fl.y); fl.x = e.clientX; fl.y = e.clientY; });
+})();
 W.bindBtn('bAds', function () { inp.adsToggle = true; });
 W.bindBtn('bJump', function () { inp.jump = true; }, function () { inp.jump = false; });
-W.bindBtn('bCrouch', function () { inp.crouch = true; });
+W.bindBtn('bSlide', function () { inp.crouch = true; });
 W.bindBtn('bReload', function () { inp.reload = true; });
 W.bindBtn('bSwap', function () { inp.swap = true; });
 W.bindBtn('bFrag', function () { inp.frag = true; });
-W.bindBtn('bTac', function () { inp.tac = true; });
 W.bindBtn('bUse', function () { inp.use = true; }, function () { inp.use = false; });
-W.bindBtn('bStreak', function () { inp.streak = true; });
 W.bindBtn('bPlate', function () { inp.plate = true; });
 
 window.addEventListener('keydown', function (e) {
@@ -411,7 +428,7 @@ W.moveVec = function () {
   var l = Math.sqrt(fx * fx + fy * fy); if (l > 1) { fx /= l; fy /= l; }
   return [fx, fy];
 };
-W.wantSprint = function () { return inp.touchSprint || keys['shift']; };
+W.wantSprint = function () { return false; };
 W.state = { playing: false, paused: false, mode: 'menu' };
 })();
 /* ===== WARFRONT: weapons, attachments, classes ===== */
@@ -946,7 +963,7 @@ function physStep(a, dt, wx, wz) {
   var nz = a.z + dz;
   if (dz !== 0) { if (!W.blockedAt(a.x, nz, a.y, h, R)) a.z = nz; else a.vz = 0; }
   /* vertical */
-  a.vy -= 22 * dt; var ny = a.y + a.vy * dt;
+  a.vy -= 16 * dt; var ny = a.y + a.vy * dt;
   if (a.vy > 0) {
     var ce = W.ceilingAt(a.x, a.z, a.y + h - 0.12, ny + h + 0.05, R * 0.9);
     if (ce) { a.vy = 0; ny = a.y; }
@@ -976,11 +993,11 @@ function tryMantle(a, fx, fz) {
 A.spawnPlayer = function (cls, x, z, yaw) {
   if (!A.P) { A.P = A.make('a', true, { primary: cls.primary, pAtt: cls.pAtt, secondary: cls.secondary, sAtt: cls.sAtt }); A.P.cls = cls; }
   var P = A.P; P.guns = [W.makeGunState(cls.primary, cls.pAtt), W.makeGunState(cls.secondary, cls.sAtt)]; P.cls = cls;
-  A.place(P, x, z, yaw); P.armor = 0; P.adsP = 0; P.recAcc = 0; P.bobT = 0; P.swapT = 0; P.sprint = false; P.lastFire = -9; P.fovCur = W.baseFov; P.hitT = 0; P.spawnT = now();
+  A.place(P, x, z, yaw); P.armor = 0; P.adsP = 0; P.recAcc = 0; P.bobT = 0; P.swapT = 0; P.sprint = false; P.sliding = false; P.mult = 1; P.sj = false; P.slideReadyAt = 0; P.lastFire = -9; P.fovCur = W.baseFov; P.hitT = 0; P.spawnT = now();
   W.buildViewmodel(P);
   return P;
 };
-var PS = { walk: 4.3, sprint: 6.6, crouch: 2.3, ads: 0.62 };
+var PS = { walk: 5.5 };
 function updatePlayer(P, dt) {
   var set = W.save.set, sens = 0.0022 * (set.sens || 1) * (P.adsP > 0.5 ? clamp(1 / Math.sqrt(P.zoomNow || 1), 0.3, 1) * (set.ads || 0.8) / 0.8 : 1);
   var lx = inp.lookDX, ly = inp.lookDY; inp.lookDX = inp.lookDY = 0;
@@ -992,29 +1009,36 @@ function updatePlayer(P, dt) {
   var g = P.guns[P.gi], d = g.def, t = now();
   /* toggles */
   if (inp.adsToggle) { inp.adsToggle = false; P.adsHold = !P.adsHold; }
-  var wantAds = (inp.ads || P.adsHold) && !P.sprint && !g.reloading && P.slide <= 0;
-  if (!wantAds && P.adsHold && (g.reloading || P.sprint)) P.adsHold = false;
+  var wantAds = (inp.ads || P.adsHold) && !g.reloading && !P.sliding;
+  if (!wantAds && P.adsHold && g.reloading) P.adsHold = false;
   P.adsP = clamp(P.adsP + (wantAds ? 1 : -1.3) * dt / Math.max(0.08, d.adsT), 0, 1);
-  if (inp.crouch) { inp.crouch = false; if (P.sprint && P.slide <= 0 && P.grounded && P.spd > 5) { P.slide = 0.75; P.slideDir = [Math.sin(P.yaw) * -1, Math.cos(P.yaw) * -1]; W.sfx('whoosh', 0.5, 0.8); } else P.crouch = !P.crouch; }
-  if (W.keys['c'] === false && false) P.crouch = false;
   var mv = W.moveVec(), fx = mv[0], fy = mv[1], sy = Math.sin(P.yaw), cy = Math.cos(P.yaw);
-  var wx = (-sy) * fy + cy * fx, wz = (-cy) * fy + (-sy) * fx;
-  var moving = (fx !== 0 || fy !== 0);
-  P.sprint = W.wantSprint() && fy > 0.3 && !P.crouch && P.adsP < 0.3 && !g.reloading ? true : false;
-  if (P.sprint && inp.fire) P.sprint = false;
-  var sp = P.crouch ? PS.crouch : (P.sprint ? PS.sprint : PS.walk);
-  sp *= d.mob * (1 - 0.38 * P.adsP);
-  var tvx = wx * sp, tvz = wz * sp;
-  if (P.slide > 0) { P.slide -= dt; var k = 1 + P.slide * 4.2; tvx = P.slideDir[0] * 5.4 * k * 0.6; tvz = P.slideDir[1] * 5.4 * k * 0.6; P.crouch = false; if (P.slide <= 0) P.crouch = true; }
-  var acc = P.grounded ? 14 : 3.5; if (!moving && P.slide <= 0) acc = 18;
-  var ka = 1 - Math.exp(-acc * dt); P.vx += (tvx - P.vx) * ka; P.vz += (tvz - P.vz) * ka;
+  var wx = (-sy) * fy + cy * fx, wz = (-cy) * fy + (-sy) * fx, moving = (fx !== 0 || fy !== 0);
+  /* slide (tap SLIDE): short fast burst, jump out of it to keep the speed */
+  if (inp.crouch) {
+    inp.crouch = false;
+    if (!P.sliding && t >= (P.slideReadyAt || 0) && P.grounded && !P.mantle) {
+      var sl = Math.sqrt(wx * wx + wz * wz); P.sdx = sl > 0.15 ? wx / sl : -sy; P.sdz = sl > 0.15 ? wz / sl : -cy;
+      P.sliding = true; P.slideEnd = t + 0.6; P.adsHold = false; W.sfx('whoosh', 0.5, 0.8);
+    }
+  }
+  if (P.sliding && t >= P.slideEnd) { P.sliding = false; P.slideReadyAt = t + 0.4; }
+  P.slide = P.sliding ? 1 : 0; P.sprint = false; P.crouch = false;
+  var tgtMult = P.sliding ? 2.5 : 1;
+  P.mult = tgtMult > (P.mult || 1) ? tgtMult : lerp(P.mult || 1, tgtMult, 1 - Math.exp(-dt * ((P.sj && !P.grounded) ? 0.8 : (t < (P.sjHold || 0) ? 1.6 : 7))));
+  var spd = PS.walk * d.mob * (1 - 0.18 * P.adsP) * (g.reloading ? 0.92 : 1);
+  var tvx, tvz;
+  if (P.sliding) { tvx = P.sdx * spd * P.mult; tvz = P.sdz * spd * P.mult; }
+  else { tvx = wx * spd * P.mult; tvz = wz * spd * P.mult; if (P.sj && !P.grounded && !moving) { tvx = P.sdx * spd * P.mult; tvz = P.sdz * spd * P.mult; } }
+  var ka = 1 - Math.exp(-dt * (P.grounded ? 18 : (P.sj ? 4 : 3.2))); P.vx += (tvx - P.vx) * ka; P.vz += (tvz - P.vz) * ka;
   P.spd = Math.sqrt(P.vx * P.vx + P.vz * P.vz);
-  /* body height */
-  var th = (P.crouch || P.slide > 0) ? H_CROUCH : H_STAND;
+  /* body height (shorter while sliding) */
+  var th = P.sliding ? H_CROUCH : H_STAND;
   if (th > P.h && W.ceilingAt(P.x, P.z, P.y + P.h - 0.05, P.y + th + 0.05, R * 0.8)) th = P.h;
   P.h = lerp(P.h, th, 1 - Math.exp(-14 * dt)); if (Math.abs(P.h - th) < 0.01) P.h = th;
-  var teh = (P.slide > 0) ? 0.78 : (P.crouch ? 1.12 : 1.62); P.eyeH = lerp(P.eyeH, Math.min(teh, P.h - 0.12), 1 - Math.exp(-12 * dt));
+  var teh = P.sliding ? 0.8 : 1.62; P.eyeH = lerp(P.eyeH, Math.min(teh, P.h - 0.12), 1 - Math.exp(-(P.sliding ? 20 : 9) * dt));
   /* jump / mantle */
+  var wasG = P.grounded;
   if (P.mantle) {
     var m = P.mantle; m.t += dt; var u = clamp(m.t / m.d, 0, 1), e = u * u * (3 - 2 * u);
     P.x = lerp(m.fx, m.tx, e); P.z = lerp(m.fz, m.tz, e); P.y = lerp(m.fy, m.ty, Math.min(1, u * 1.3)); P.vy = 0; P.vx = P.vz = 0;
@@ -1023,9 +1047,13 @@ function updatePlayer(P, dt) {
     if (inp.jump) {
       var fxn = -sy, fzn = -cy;
       if (moving || !P.grounded) { var wl = Math.sqrt(wx * wx + wz * wz) || 1; if (tryMantle(P, moving ? wx / wl : fxn, moving ? wz / wl : fzn)) inp.jump = W.keys[' '] ? true : false; }
-      if (!P.mantle && P.grounded && P.spawnT < t - 0.1) { P.vy = 7.3; P.grounded = false; P.crouch = false; W.sfx('whoosh', 0.2, 1.3); if (!W.keys[' ']) inp.jump = false; }
+      if (!P.mantle && P.grounded && P.spawnT < t - 0.1) {
+        P.vy = 6.4; P.grounded = false; W.sfx('whoosh', 0.2, 1.3); if (!W.keys[' ']) inp.jump = false;
+        if (P.sliding) { P.sliding = false; P.slide = 0; P.sj = true; P.slideReadyAt = t + 0.3; P.mult = Math.max(P.mult, 2.5); P.sjHold = t + 1.2; }
+      }
     }
     physStep(P, dt, P.vx, P.vz);
+    if (P.grounded && !wasG && P.sj) { P.sj = false; P.sjHold = t + 0.35; }
   }
   P.bobT += dt * P.spd * (P.grounded ? 1 : 0.1);
   /* gun logic */
@@ -1334,7 +1362,7 @@ function updateBot(a, dt) {
     else { b.vis = false; if (b.target && (t - b.seen > 2.5 || !b.target.alive)) b.target = null; }
   }
   var tgt = b.target && b.target.alive ? b.target : null, visible = tgt && b.vis && (t - b.seen < 0.5);
-  var wx = 0, wz = 0, sp = 4.0 * d.mob;
+  var wx = 0, wz = 0, sp = 4.6 * d.mob;
   if (!b.alert && b.role === 'guard') { a.vx *= 0.8; a.vz *= 0.8; }
   else if (visible) {
     var dx2 = tgt.x - a.x, dz2 = tgt.z - a.z, dist = Math.sqrt(dx2 * dx2 + dz2 * dz2) || 1;
@@ -1674,7 +1702,7 @@ function scatterLoot() {
       }
       if (!ok) continue;
       if (r < 0.34) addLoot('gun', x, z, p.y, randGun()); else if (r < 0.52) addLoot('plate', x, z, p.y, {}); else if (r < 0.7) addLoot('ammo', x, z, p.y, {});
-      else if (r < 0.8) addLoot('frag', x, z, p.y, {}); else if (r < 0.86) addLoot('flash', x, z, p.y, {}); else addLoot('cash', x, z, p.y, { v: ri(50, 400) });
+      else if (r < 0.8) addLoot('frag', x, z, p.y, {}); else if (r < 0.86) addLoot('ammo', x, z, p.y, {}); else addLoot('cash', x, z, p.y, { v: ri(50, 400) });
     }
   });
 }
